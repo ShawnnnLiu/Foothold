@@ -1,1 +1,9 @@
 .claude/settings.local.json
+data/raw/
+data/build/
+backend/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
