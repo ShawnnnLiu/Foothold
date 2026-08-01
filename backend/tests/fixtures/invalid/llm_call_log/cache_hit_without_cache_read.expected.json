@@ -1,0 +1,5 @@
+{
+  "error_substrings": [
+    "cache_hit True does not match cache_read_tokens 0"
+  ]
+}

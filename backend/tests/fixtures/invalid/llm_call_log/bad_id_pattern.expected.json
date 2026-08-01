@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "llm_call_log_id",
+    "String should match pattern"
+  ]
+}

@@ -7,7 +7,14 @@ BACKEND_ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = BACKEND_ROOT / "scripts" / "generate_schemas.py"
 SCHEMAS_DIR = BACKEND_ROOT / "schemas"
 
-EXPECTED_CONTRACTS = {"corpus_document", "course", "offering", "prereq_expr", "requirement_group"}
+EXPECTED_CONTRACTS = {
+    "corpus_document",
+    "course",
+    "llm_call_log",
+    "offering",
+    "prereq_expr",
+    "requirement_group",
+}
 
 
 def run_script(*args: str) -> subprocess.CompletedProcess[str]:

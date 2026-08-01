@@ -1,0 +1,180 @@
+{
+  "$defs": {
+    "LlmNode": {
+      "description": "The closed set of callers allowed to write to the call log.\n\nAstrolabe has exactly two LLM nodes, both request-time.",
+      "enum": [
+        "transcript_parser",
+        "petition_writer"
+      ],
+      "title": "LlmNode",
+      "type": "string"
+    },
+    "LlmReasonCode": {
+      "enum": [
+        "auth_failed",
+        "rate_limited",
+        "call_failed",
+        "retry_limit_exceeded",
+        "refusal",
+        "truncated",
+        "malformed_output",
+        "schema_rejected",
+        "repair_limit_exceeded"
+      ],
+      "title": "LlmReasonCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "attempt": {
+      "maximum": 2,
+      "minimum": 0,
+      "title": "Attempt",
+      "type": "integer"
+    },
+    "cache_creation_tokens": {
+      "minimum": 0,
+      "title": "Cache Creation Tokens",
+      "type": "integer"
+    },
+    "cache_hit": {
+      "title": "Cache Hit",
+      "type": "boolean"
+    },
+    "cache_read_tokens": {
+      "minimum": 0,
+      "title": "Cache Read Tokens",
+      "type": "integer"
+    },
+    "cost_estimate_usd": {
+      "minimum": 0,
+      "title": "Cost Estimate Usd",
+      "type": "number"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "input_tokens": {
+      "minimum": 0,
+      "title": "Input Tokens",
+      "type": "integer"
+    },
+    "latency_ms": {
+      "minimum": 0,
+      "title": "Latency Ms",
+      "type": "integer"
+    },
+    "llm_call_log_id": {
+      "pattern": "^llm_call_[0-9a-f]{16}$",
+      "title": "Llm Call Log Id",
+      "type": "string"
+    },
+    "model_name": {
+      "minLength": 1,
+      "title": "Model Name",
+      "type": "string"
+    },
+    "node": {
+      "$ref": "#/$defs/LlmNode"
+    },
+    "output_tokens": {
+      "minimum": 0,
+      "title": "Output Tokens",
+      "type": "integer"
+    },
+    "prompt_hash": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Prompt Hash"
+    },
+    "prompt_version": {
+      "minLength": 1,
+      "title": "Prompt Version",
+      "type": "string"
+    },
+    "reason_code": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LlmReasonCode"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "refusal": {
+      "title": "Refusal",
+      "type": "boolean"
+    },
+    "response_hash": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Response Hash"
+    },
+    "run_id": {
+      "minLength": 1,
+      "title": "Run Id",
+      "type": "string"
+    },
+    "sdk_retry": {
+      "maximum": 2,
+      "minimum": 0,
+      "title": "Sdk Retry",
+      "type": "integer"
+    },
+    "truncated": {
+      "title": "Truncated",
+      "type": "boolean"
+    },
+    "validation_outcome": {
+      "enum": [
+        "pass",
+        "fail"
+      ],
+      "title": "Validation Outcome",
+      "type": "string"
+    }
+  },
+  "required": [
+    "llm_call_log_id",
+    "run_id",
+    "node",
+    "prompt_version",
+    "model_name",
+    "attempt",
+    "sdk_retry",
+    "input_tokens",
+    "output_tokens",
+    "cache_creation_tokens",
+    "cache_read_tokens",
+    "cost_estimate_usd",
+    "latency_ms",
+    "validation_outcome",
+    "cache_hit",
+    "truncated",
+    "refusal",
+    "created_at"
+  ],
+  "title": "LlmCallLogRecord",
+  "type": "object"
+}

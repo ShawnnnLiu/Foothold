@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "reason_code must be null when validation_outcome is 'pass'",
+    "'schema_rejected'"
+  ]
+}

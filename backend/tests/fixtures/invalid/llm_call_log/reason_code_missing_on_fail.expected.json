@@ -1,0 +1,5 @@
+{
+  "error_substrings": [
+    "reason_code is required when validation_outcome is 'fail'"
+  ]
+}
