@@ -1,0 +1,329 @@
+{
+  "$defs": {
+    "Citation": {
+      "additionalProperties": false,
+      "description": "The ground-truth pointer a finding carries; a partial citation is none.",
+      "properties": {
+        "assist_key": {
+          "pattern": "^[0-9]+/[0-9]+/to/[0-9]+/(Major|Department)/.+$",
+          "title": "Assist Key",
+          "type": "string"
+        },
+        "position": {
+          "minimum": 0,
+          "title": "Position",
+          "type": "integer"
+        },
+        "year_label": {
+          "pattern": "^[0-9]{4}-[0-9]{4}$",
+          "title": "Year Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "assist_key",
+        "position",
+        "year_label"
+      ],
+      "title": "Citation",
+      "type": "object"
+    },
+    "EvaluationFindingCode": {
+      "enum": [
+        "transfers_clean",
+        "advisement_note",
+        "partial_series",
+        "fuzzy_match",
+        "stale_year",
+        "no_articulation",
+        "still_owed",
+        "double_count_risk",
+        "unresolved"
+      ],
+      "title": "EvaluationFindingCode",
+      "type": "string"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "advisements": {
+          "items": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "title": "Advisements",
+          "type": "array"
+        },
+        "bucket": {
+          "$ref": "#/$defs/TriageBucket"
+        },
+        "citation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Citation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "code": {
+          "$ref": "#/$defs/EvaluationFindingCode"
+        },
+        "detail": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "receiving_course_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Receiving Course Code"
+        },
+        "receiving_course_title": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Receiving Course Title"
+        },
+        "student_course_codes": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Student Course Codes",
+          "type": "array"
+        },
+        "units": {
+          "minimum": 0,
+          "title": "Units",
+          "type": "number"
+        }
+      },
+      "required": [
+        "code",
+        "bucket",
+        "units"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "StudentCourse": {
+      "additionalProperties": false,
+      "description": "One resolved input course.\n\nUnresolved input never becomes a `StudentCourse`; it becomes an\n`unresolved` finding instead, so this list is exactly the set of courses\nthe evaluator reasoned about.",
+      "properties": {
+        "course_code": {
+          "title": "Course Code",
+          "type": "string"
+        },
+        "resolution": {
+          "enum": [
+            "exact",
+            "fuzzy_match"
+          ],
+          "title": "Resolution",
+          "type": "string"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "units": {
+          "exclusiveMinimum": 0,
+          "maximum": 20.0,
+          "title": "Units",
+          "type": "number"
+        }
+      },
+      "required": [
+        "course_code",
+        "units",
+        "resolution"
+      ],
+      "title": "StudentCourse",
+      "type": "object"
+    },
+    "TriageBucket": {
+      "enum": [
+        "transfers_clean",
+        "at_risk",
+        "no_articulation",
+        "still_owed"
+      ],
+      "title": "TriageBucket",
+      "type": "string"
+    },
+    "UnitsSummary": {
+      "additionalProperties": false,
+      "description": "Bucket totals for the triage header.\n\nThe four unit totals deliberately do not sum to the student's total units:\n`still_owed_units` counts requirement units no student course covers.",
+      "properties": {
+        "at_risk_dollars": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At Risk Dollars"
+        },
+        "at_risk_units": {
+          "minimum": 0,
+          "title": "At Risk Units",
+          "type": "number"
+        },
+        "clean_units": {
+          "minimum": 0,
+          "title": "Clean Units",
+          "type": "number"
+        },
+        "no_articulation_dollars": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "No Articulation Dollars"
+        },
+        "no_articulation_units": {
+          "minimum": 0,
+          "title": "No Articulation Units",
+          "type": "number"
+        },
+        "still_owed_units": {
+          "minimum": 0,
+          "title": "Still Owed Units",
+          "type": "number"
+        }
+      },
+      "required": [
+        "clean_units",
+        "at_risk_units",
+        "no_articulation_units",
+        "still_owed_units"
+      ],
+      "title": "UnitsSummary",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "dept_keys": {
+      "items": {
+        "pattern": "^[0-9]+/[0-9]+/to/[0-9]+/(Major|Department)/.+$",
+        "type": "string"
+      },
+      "title": "Dept Keys",
+      "type": "array"
+    },
+    "evaluation_id": {
+      "pattern": "^eval_[0-9a-f]{16}$",
+      "title": "Evaluation Id",
+      "type": "string"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/Finding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "major_key": {
+      "pattern": "^[0-9]+/[0-9]+/to/[0-9]+/(Major|Department)/.+$",
+      "title": "Major Key",
+      "type": "string"
+    },
+    "receiving_institution_id": {
+      "exclusiveMinimum": 0,
+      "title": "Receiving Institution Id",
+      "type": "integer"
+    },
+    "sending_institution_id": {
+      "exclusiveMinimum": 0,
+      "title": "Sending Institution Id",
+      "type": "integer"
+    },
+    "student_courses": {
+      "items": {
+        "$ref": "#/$defs/StudentCourse"
+      },
+      "minItems": 1,
+      "title": "Student Courses",
+      "type": "array"
+    },
+    "units": {
+      "$ref": "#/$defs/UnitsSummary"
+    },
+    "year_id": {
+      "exclusiveMinimum": 0,
+      "title": "Year Id",
+      "type": "integer"
+    },
+    "year_label": {
+      "pattern": "^[0-9]{4}-[0-9]{4}$",
+      "title": "Year Label",
+      "type": "string"
+    }
+  },
+  "required": [
+    "evaluation_id",
+    "sending_institution_id",
+    "receiving_institution_id",
+    "major_key",
+    "year_id",
+    "year_label",
+    "student_courses",
+    "units",
+    "created_at"
+  ],
+  "title": "Evaluation",
+  "type": "object"
+}

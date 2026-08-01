@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "year_label '2025-2027' spans non-consecutive years",
+    "expected 2025-2026"
+  ]
+}

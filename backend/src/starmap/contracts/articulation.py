@@ -20,7 +20,12 @@ from pydantic import AfterValidator, BaseModel, Field, field_validator, model_va
 
 from starmap.contracts.articulation_expr import ArticulationExprField
 from starmap.contracts.base import FROZEN, reject_control_chars
-from starmap.contracts.codes import CourseCode, course_code_from_parts
+from starmap.contracts.codes import (
+    COURSE_NUMBER_PATTERN,
+    COURSE_PREFIX_PATTERN,
+    CourseCode,
+    course_code_from_parts,
+)
 
 AGREEMENT_ID_PREFIX = "agr_"
 AGREEMENT_ID_HASH_LENGTH = 16
@@ -44,8 +49,8 @@ class ReceivingCourse(BaseModel):
     model_config = FROZEN
 
     course_code: CourseCode
-    prefix: str = Field(min_length=1, max_length=16, pattern=r"^[A-Z][A-Z0-9&/. \-]{0,15}$")
-    number: str = Field(min_length=1, max_length=8, pattern=r"^[A-Z0-9.\-]{1,8}$")
+    prefix: str = Field(min_length=1, max_length=16, pattern=COURSE_PREFIX_PATTERN)
+    number: str = Field(min_length=1, max_length=8, pattern=COURSE_NUMBER_PATTERN)
     title: str = Field(min_length=1, max_length=300)
     units_min: float = Field(gt=0, le=MAX_UNITS)
     units_max: float = Field(le=MAX_UNITS)

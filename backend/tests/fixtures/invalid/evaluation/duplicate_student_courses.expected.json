@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "student_courses contains duplicate course codes",
+    "MATH 1A"
+  ]
+}

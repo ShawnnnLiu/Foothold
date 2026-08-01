@@ -44,6 +44,21 @@ def derive_agreement_id(assist_key: str) -> str:
     return f"{AGREEMENT_ID_PREFIX}{sha256_hex(assist_key)[:AGREEMENT_ID_HASH_LENGTH]}"
 
 
+def check_consecutive_years(field_name: str, value: str) -> str:
+    """The single consecutive-years rule, shared with `evaluation.Citation`.
+
+    `field_name` is passed in rather than hardcoded because two contracts spell
+    the field differently (`academic_year_label`, `year_label`) and validator
+    messages must name the field they fired on.
+    """
+    begin, end = (int(part) for part in value.split("-"))
+    if end != begin + 1:
+        raise ValueError(
+            f"{field_name} {value!r} spans non-consecutive years; expected {begin}-{begin + 1}"
+        )
+    return value
+
+
 class Agreement(BaseModel):
     model_config = FROZEN
 
@@ -65,13 +80,7 @@ class Agreement(BaseModel):
     @field_validator("academic_year_label")
     @classmethod
     def _check_years_are_consecutive(cls, value: str) -> str:
-        begin, end = (int(part) for part in value.split("-"))
-        if end != begin + 1:
-            raise ValueError(
-                f"academic_year_label {value!r} spans non-consecutive years; "
-                f"expected {begin}-{begin + 1}"
-            )
-        return value
+        return check_consecutive_years("academic_year_label", value)
 
     @model_validator(mode="after")
     def _check_id_derivation(self) -> "Agreement":

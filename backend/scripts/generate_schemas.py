@@ -15,24 +15,32 @@ from pydantic import BaseModel
 from starmap.contracts.agreement import Agreement
 from starmap.contracts.articulation import Articulation
 from starmap.contracts.articulation_expr import ArticulationExprRoot
+from starmap.contracts.cc_course import CcCourse
 from starmap.contracts.corpus_document import CorpusDocument
+from starmap.contracts.evaluation import Evaluation
 from starmap.contracts.institution import Institution
 from starmap.contracts.llm_call_log import LlmCallLogRecord
+from starmap.contracts.target_course import TargetCourse
 
 # Nested models are not registered separately: `ReceivingCourse` is reachable
-# through `articulation`. The template-asset models are the exception - the
-# `Agreement` envelope holds no template field, so `RequirementGroupAsset` is
-# reachable from nothing registered and ships no generated schema. Doc 01 part
-# 6 locks the registry to exactly this name set, and its parenthetical
-# rationale ("reachable through their parents' schemas") does not hold for the
-# template models; the name set is the decision, so it stands.
+# through `articulation`, and `Finding`, `Citation`, `StudentCourse`, and
+# `UnitsSummary` through `evaluation`. The template-asset models are the
+# exception - the `Agreement` envelope holds no template field, so
+# `RequirementGroupAsset` is reachable from nothing registered and ships no
+# generated schema. Doc 01 part 6 locks the registry to exactly this name set,
+# and its parenthetical rationale ("reachable through their parents' schemas")
+# does not hold for the template models; the name set is the decision, so it
+# stands.
 CONTRACTS: dict[str, type[BaseModel]] = {
     "agreement": Agreement,
     "articulation": Articulation,
     "articulation_expr": ArticulationExprRoot,
+    "cc_course": CcCourse,
     "corpus_document": CorpusDocument,
+    "evaluation": Evaluation,
     "institution": Institution,
     "llm_call_log": LlmCallLogRecord,
+    "target_course": TargetCourse,
 }
 
 DEFAULT_SCHEMAS_DIR = Path(__file__).resolve().parents[1] / "schemas"

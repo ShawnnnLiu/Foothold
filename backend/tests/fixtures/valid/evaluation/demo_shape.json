@@ -1,0 +1,193 @@
+{
+  "evaluation_id": "eval_5c81ba07d94e3f62",
+  "sending_institution_id": 113,
+  "receiving_institution_id": 7,
+  "major_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+  "dept_keys": [
+    "76/113/to/7/Department/8952"
+  ],
+  "year_id": 76,
+  "year_label": "2025-2026",
+  "student_courses": [
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "resolution": "exact"
+    },
+    {
+      "course_code": "MATH 1B",
+      "title": "Calculus II",
+      "units": 5.0,
+      "resolution": "exact"
+    },
+    {
+      "course_code": "MATH 1C",
+      "title": "Calculus III",
+      "units": 5.0,
+      "resolution": "exact"
+    },
+    {
+      "course_code": "MATH 2A",
+      "title": "Differential Equations",
+      "units": 5.0,
+      "resolution": "exact"
+    },
+    {
+      "course_code": "MATH 22",
+      "title": "Discrete Mathematics",
+      "units": 5.0,
+      "resolution": "exact"
+    },
+    {
+      "course_code": "MATH 12",
+      "title": "Introductory Calculus for Business and Social Science",
+      "units": 5.0,
+      "resolution": "exact"
+    },
+    {
+      "course_code": "CIS 22C",
+      "title": "Data Abstraction and Structures",
+      "units": 4.5,
+      "resolution": "fuzzy_match"
+    }
+  ],
+  "findings": [
+    {
+      "code": "transfers_clean",
+      "bucket": "transfers_clean",
+      "student_course_codes": [
+        "MATH 1A"
+      ],
+      "receiving_course_code": "MATH 20A",
+      "receiving_course_title": "Calculus for Science and Engineering",
+      "units": 5.0,
+      "citation": {
+        "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+        "position": 5,
+        "year_label": "2025-2026"
+      }
+    },
+    {
+      "code": "advisement_note",
+      "bucket": "at_risk",
+      "student_course_codes": [
+        "MATH 1B"
+      ],
+      "receiving_course_code": "MATH 20B",
+      "receiving_course_title": "Calculus for Science and Engineering",
+      "units": 5.0,
+      "citation": {
+        "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+        "position": 1,
+        "year_label": "2025-2026"
+      },
+      "advisements": [
+        "SYNTHETIC FIXTURE TEXT, NOT FROM ASSIST: the real advisement shape is fixture-pending until split S9c captures an advisement-bearing agreement."
+      ]
+    },
+    {
+      "code": "double_count_risk",
+      "bucket": "at_risk",
+      "student_course_codes": [
+        "MATH 2A"
+      ],
+      "receiving_course_code": "MATH 20D",
+      "receiving_course_title": "Introduction to Differential Equations",
+      "units": 5.0,
+      "citation": {
+        "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+        "position": 0,
+        "year_label": "2025-2026"
+      },
+      "detail": "Also applied at 76/113/to/7/Department/8952:9; ASSIST agreements are evaluated independently, so one course may satisfy both."
+    },
+    {
+      "code": "fuzzy_match",
+      "bucket": "at_risk",
+      "student_course_codes": [
+        "CIS 22C"
+      ],
+      "receiving_course_code": "CSE 12",
+      "receiving_course_title": "Basic Data Structures and Object-Oriented Design",
+      "units": 4.5,
+      "citation": {
+        "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+        "position": 7,
+        "year_label": "2025-2026"
+      },
+      "detail": "CIS 22C was resolved by similarity, not by an exact code match."
+    },
+    {
+      "code": "partial_series",
+      "bucket": "at_risk",
+      "student_course_codes": [
+        "MATH 1C"
+      ],
+      "receiving_course_code": "MATH 20E",
+      "receiving_course_title": "Vector Calculus",
+      "units": 5.0,
+      "citation": {
+        "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+        "position": 3,
+        "year_label": "2025-2026"
+      },
+      "detail": "MATH 1D is still needed; MATH 20E requires MATH 1C and MATH 1D together."
+    },
+    {
+      "code": "stale_year",
+      "bucket": "at_risk",
+      "student_course_codes": [
+        "MATH 22"
+      ],
+      "receiving_course_code": "MATH 15A",
+      "receiving_course_title": "Discrete Mathematics",
+      "units": 5.0,
+      "citation": {
+        "assist_key": "75/113/to/7/Department/8952",
+        "position": 4,
+        "year_label": "2024-2025"
+      },
+      "detail": "The newest published agreement for this pair is 2025-2026."
+    },
+    {
+      "code": "unresolved",
+      "bucket": "at_risk",
+      "student_course_codes": [
+        "PHYS 4A"
+      ],
+      "units": 0.0,
+      "detail": "PHYS 4A is not in the De Anza College course list for this year."
+    },
+    {
+      "code": "no_articulation",
+      "bucket": "no_articulation",
+      "student_course_codes": [
+        "MATH 12"
+      ],
+      "units": 5.0,
+      "detail": "No published articulation applies this course to this major."
+    },
+    {
+      "code": "still_owed",
+      "bucket": "still_owed",
+      "student_course_codes": [],
+      "units": 4.0,
+      "citation": {
+        "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+        "position": 0,
+        "year_label": "2025-2026"
+      },
+      "detail": "CSE 15L or CSE 29"
+    }
+  ],
+  "units": {
+    "clean_units": 5.0,
+    "at_risk_units": 24.5,
+    "no_articulation_units": 5.0,
+    "still_owed_units": 4.0,
+    "at_risk_dollars": 2450.0,
+    "no_articulation_dollars": 500.0
+  },
+  "created_at": "2026-08-01T17:04:22+00:00"
+}

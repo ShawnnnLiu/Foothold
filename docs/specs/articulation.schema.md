@@ -25,6 +25,7 @@ The receiving-side course object, shared by `Articulation.receiving_course` and 
 | `units_max` | float | `le=20`. |
 
 `prefix` and `number` are kept alongside the derived `course_code` because ASSIST publishes them separately and the UI displays them separately; storing only the joined code would force a lossy re-split.
+Their two patterns are the constants `COURSE_PREFIX_PATTERN` and `COURSE_NUMBER_PATTERN` in `contracts/codes.py`, hoisted there during S8c when `cc_course` and `target_course` became the second and third models storing the same split pair.
 
 `title` is accepted verbatim, including surrounding whitespace: the major capture publishes CSE 29 as `"Systems Programming and Software Tools "` with a trailing space.
 The contract does not strip it, because a title strip is a normalization decision and `assist/normalize.py` owns normalization; recorded here so increment 5 strips it rather than shipping the gap into the UI.

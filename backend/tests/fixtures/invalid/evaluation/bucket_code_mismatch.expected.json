@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "bucket 'at_risk' does not match code 'transfers_clean'",
+    "expected 'transfers_clean'"
+  ]
+}

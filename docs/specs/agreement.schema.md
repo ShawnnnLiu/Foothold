@@ -43,7 +43,7 @@ Nothing computes on it.
 | distinct institutions | `sending_institution_id != receiving_institution_id`; the error quotes the value. |
 | key/category coherence | The key's fifth segment is `Major` iff `category == "major"` and `Department` iff `category == "dept"`; the error quotes both. |
 | key/id coherence | The key's leading three integers equal `academic_year_id`, `sending_institution_id`, `receiving_institution_id` in that order; the error quotes the key and the mismatching field. |
-| consecutive year label | The second year in `academic_year_label` equals the first plus one; the error quotes the label. |
+| consecutive year label | The second year in `academic_year_label` equals the first plus one; the error quotes the label. The rule is the module-level `check_consecutive_years`, which `evaluation.Citation.year_label` also calls so a citation and the agreement it cites cannot disagree about what a year label means. |
 
 The id derivation is the house content-derived-id pattern (`sha256_hex` from `common/ids.py`): the id is a function of the key, so two builds of the same agreement cannot produce two ids, and an id cannot be reassigned to a different agreement.
 

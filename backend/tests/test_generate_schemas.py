@@ -11,9 +11,12 @@ EXPECTED_CONTRACTS = {
     "agreement",
     "articulation",
     "articulation_expr",
+    "cc_course",
     "corpus_document",
+    "evaluation",
     "institution",
     "llm_call_log",
+    "target_course",
 }
 
 

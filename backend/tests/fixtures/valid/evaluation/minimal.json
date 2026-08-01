@@ -1,0 +1,40 @@
+{
+  "evaluation_id": "eval_0f3a91c26b7d48e5",
+  "sending_institution_id": 113,
+  "receiving_institution_id": 7,
+  "major_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+  "year_id": 76,
+  "year_label": "2025-2026",
+  "student_courses": [
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "resolution": "exact"
+    }
+  ],
+  "findings": [
+    {
+      "code": "transfers_clean",
+      "bucket": "transfers_clean",
+      "student_course_codes": [
+        "MATH 1A"
+      ],
+      "receiving_course_code": "MATH 20A",
+      "receiving_course_title": "Calculus for Science and Engineering",
+      "units": 5.0,
+      "citation": {
+        "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+        "position": 5,
+        "year_label": "2025-2026"
+      }
+    }
+  ],
+  "units": {
+    "clean_units": 5.0,
+    "at_risk_units": 0.0,
+    "no_articulation_units": 0.0,
+    "still_owed_units": 0.0
+  },
+  "created_at": "2026-08-01T17:04:22+00:00"
+}

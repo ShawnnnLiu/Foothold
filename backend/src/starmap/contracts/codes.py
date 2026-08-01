@@ -19,6 +19,13 @@ COURSE_CODE_RE = re.compile(
     r"^[A-Z][A-Z&/.\-]{0,9}(?: [A-Z][A-Z&/.\-]{0,9}){0,2} [A-Z]{0,2}[0-9]{1,4}[A-Z]{0,3}$"
 )
 
+# The two halves of a code as ASSIST publishes them, shared by every contract
+# that stores the split pair beside the derived code: `ReceivingCourse`,
+# `CcCourse`, `TargetCourse`. One home keeps three field declarations from
+# drifting apart while `course_code_from_parts` keeps joining them.
+COURSE_PREFIX_PATTERN = r"^[A-Z][A-Z0-9&/. \-]{0,15}$"
+COURSE_NUMBER_PATTERN = r"^[A-Z0-9.\-]{1,8}$"
+
 
 def normalize_course_code(raw: str) -> str:
     """Uppercase, collapse internal whitespace to one space, strip.
