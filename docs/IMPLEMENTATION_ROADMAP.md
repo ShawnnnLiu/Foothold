@@ -8,7 +8,8 @@ Date anchored: rewritten 2026-07-31; the contest window closes 2026-08-21.
 
 Increments 0-2 of the pre-pivot roadmap are DONE and survive the pivot unchanged: repo bootstrap, day-1 spikes (historical record in `docs/notes/day1_spikes.md`), and the common kernel + contracts machinery + first contracts (commit `8d29759`).
 The pre-pivot increments 3-7 (bulletin fetch/parse, prereq extraction, CULPA ingest) are RETIRED.
-Their execution docs in `docs/week-1-implementations/` are retained for reference; see that folder's README for per-doc status.
+Their execution docs 03, 05, and 07 in `docs/week-1-implementations/` were deleted on 2026-07-31 (recoverable in git history at commit 92998be); see that folder's README for per-doc status.
+The implementation docs for the new increments 4-7 live in `docs/implementation-plans/articulation/`.
 
 User-decided build order (2026-07-31): ASSIST corpus/pipeline first, then the deterministic transfer evaluator and Mode A end-to-end, then Mode B arbitrage, then Mode C pathways only if time remains (pre-cut by default).
 
