@@ -1,6 +1,17 @@
 # Increment 6: Corpus and Retrieval
 
-Goal: the deterministic retrieval stack (registry, snapshots, chunking, FTS5/BM25) over a corpus built from the catalog, with a hand-labeled eval and measured floors.
+STATUS (2026-07-31): SUPERSEDED at reduced scope by `docs/implementation-plans/articulation/04-fuzzy-course-matcher.md` (roadmap increment 7, split S11).
+Execute that doc, not this one.
+
+Retrieval itself is NOT retired, and it is genuinely a shared resource: the FTS5/BM25 kernel survives the pivot and becomes the vocabulary gate, one `cc_courses` projection feeding both the UI autocomplete and the transcript resolver.
+What the pivot removed is the stack this doc wraps around that kernel, because its inputs no longer exist.
+The corpus here is composed from the Columbia bulletin catalog, whose fetch/parse increment (doc 03) was retired and deleted; `catalog/build_corpus.py` and `build_catalog.py --stage corpus` name modules that no longer exist.
+Dropped with it: the document registry, snapshots, chunking, `normalize_text`, and the labeled eval harness with measured floors.
+The recorded rationale (doc 04, "Reduced scope, locked") is that the corpus rows became `cc_courses` projections regenerated deterministically from `articulation.db` on every build, so append-only registration and snapshot pinning protect nothing, and fixture-driven tests pin the retrieval behavior instead of a labeled eval.
+
+This file is kept as the design record for the dropped machinery, in case a later increment needs document-level retrieval again.
+
+Goal (as originally written): the deterministic retrieval stack (registry, snapshots, chunking, FTS5/BM25) over a corpus built from the catalog, with a hand-labeled eval and measured floors.
 Binding mechanism reference: TR section 1 with the "Starmap deltas (RAG)" applied; deltas restated below are decisions, not suggestions.
 No network, no LLM anywhere in this increment (axiom).
 

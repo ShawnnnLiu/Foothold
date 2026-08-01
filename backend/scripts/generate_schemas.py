@@ -12,20 +12,14 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
+from starmap.contracts.articulation_expr import ArticulationExprRoot
 from starmap.contracts.corpus_document import CorpusDocument
-from starmap.contracts.course import Course
 from starmap.contracts.llm_call_log import LlmCallLogRecord
-from starmap.contracts.offering import Offering
-from starmap.contracts.prereq_expr import PrereqExprRoot
-from starmap.contracts.requirement_group import RequirementGroup
 
 CONTRACTS: dict[str, type[BaseModel]] = {
+    "articulation_expr": ArticulationExprRoot,
     "corpus_document": CorpusDocument,
-    "course": Course,
     "llm_call_log": LlmCallLogRecord,
-    "offering": Offering,
-    "prereq_expr": PrereqExprRoot,
-    "requirement_group": RequirementGroup,
 }
 
 DEFAULT_SCHEMAS_DIR = Path(__file__).resolve().parents[1] / "schemas"

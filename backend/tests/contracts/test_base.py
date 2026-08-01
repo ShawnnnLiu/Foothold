@@ -1,29 +1,30 @@
 import pytest
 from pydantic import ValidationError
 
+from starmap.contracts.articulation_expr import AllOf
 from starmap.contracts.base import rebuild, reject_control_chars
-from starmap.contracts.offering import Offering
 
-OFFERING = Offering.model_validate(
-    {"course_code": "COMS W1002", "term": "fall", "year": 2026, "instructors": ["Ada Lovelace"]}
-)
+# The rebuild harness needs a frozen model carrying a real model validator, so
+# that "rebuild re-runs every invariant" is proven rather than asserted.
+# `AllOf` supplies one: the nesting-depth check.
+GROUP = AllOf.model_validate({"all": [{"course": "MATH 1A"}, {"course": "MATH 1B"}]})
 
 
 def test_rebuild_returns_updated_instance() -> None:
-    updated = rebuild(OFFERING, year=2027)
-    assert updated.year == 2027
-    assert updated.course_code == OFFERING.course_code
-    assert OFFERING.year == 2026
+    updated = rebuild(GROUP, all=[{"course": "MATH 1AH"}])
+    assert updated.model_dump(mode="json") == {"all": [{"course": "MATH 1AH"}]}
+    assert GROUP.model_dump(mode="json") == {"all": [{"course": "MATH 1A"}, {"course": "MATH 1B"}]}
 
 
 def test_rebuild_reruns_model_validators() -> None:
-    with pytest.raises(ValidationError, match="case-insensitive duplicates"):
-        rebuild(OFFERING, instructors=["Ada Lovelace", "ada lovelace"])
+    too_deep = [{"any": [{"all": [{"any": [{"course": "MATH 1A"}]}]}]}]
+    with pytest.raises(ValidationError, match="nesting depth 4 exceeds the maximum of 3"):
+        rebuild(GROUP, all=too_deep)
 
 
 def test_rebuild_rejects_unknown_fields() -> None:
     with pytest.raises(ValidationError, match="bogus"):
-        rebuild(OFFERING, bogus=1)
+        rebuild(GROUP, bogus=1)
 
 
 def test_reject_control_chars_allows_clean_text() -> None:
