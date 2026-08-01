@@ -8,14 +8,14 @@ Per-doc status:
 | `00-repo-bootstrap.md` | Executed; unchanged. |
 | `01-day1-risk-spikes.md` | Executed; historical record (the spike discipline is reused for the ASSIST spike). |
 | `02-common-kernel-and-contracts.md` | Executed; kernel and machinery survive; the Columbia-shaped contracts (`course`, `offering`, `requirement_group`) are slated for retirement, and `prereq_expr` generalizes into `articulation_expr`. |
-| `03-catalog-fetch-parse.md` | RETIRED (bulletin/CourseLeaf specific); its fetcher/cache/fault-isolation discipline is inherited by the ASSIST fetch increment. |
+| `03-catalog-fetch-parse.md` | RETIRED and deleted 2026-07-31; recoverable in git history at commit 92998be. |
 | `04-llm-backbone.md` | Still applies as written; moved to Week 2 (the build pipeline no longer has an LLM stage). |
-| `05-prereq-extraction.md` | RETIRED; the expression evaluator section survives conceptually inside the transfer evaluator. |
+| `05-prereq-extraction.md` | RETIRED and deleted 2026-07-31; recoverable in git history at commit 92998be. |
 | `06-corpus-retrieval.md` | Applies at reduced scope (per-institution FTS5 over `cc_courses`; no interest queries, no eval set of interest-style queries). |
-| `07-culpa-ingest.md` | RETIRED. |
+| `07-culpa-ingest.md` | RETIRED and deleted 2026-07-31; recoverable in git history at commit 92998be. |
 | `SPLITS.md` | Superseded by the rewritten `docs/IMPLEMENTATION_ROADMAP.md`. |
 
-New implementation docs for the ASSIST increments (3-7 in the rewritten roadmap) will live in a sibling folder when authored.
+The implementation docs for the ASSIST increments (4-7 in the rewritten roadmap) live in `docs/implementation-plans/articulation/`.
 The "Globally locked decisions" below still bind except where they name retired Columbia-specific stages.
 
 This folder turns the Week 1 increments of `docs/IMPLEMENTATION_ROADMAP.md` into executable implementation plans.
@@ -31,11 +31,11 @@ These docs cite tech-reference sections instead of restating them; the tech refe
 | `00-repo-bootstrap.md` | Repo bootstrap: uv, package tree, Makefile, CI | nothing |
 | `01-day1-risk-spikes.md` | CULPA spike + bulletin selector pinning (NETWORK) | 00 |
 | `02-common-kernel-and-contracts.md` | `common/` kernel, contracts conventions, first six contracts | 00 |
-| `03-catalog-fetch-parse.md` | Fetcher, CourseLeaf parser, catalog store, build stages 1-2 | 01, 02 |
+| `03-catalog-fetch-parse.md` | RETIRED and deleted 2026-07-31; recoverable in git history at commit 92998be | - |
 | `04-llm-backbone.md` | Generation engine, call log, transports, prompt pins | 02 |
-| `05-prereq-extraction.md` | Expr evaluation, extraction validator, extractor node, build stage 3 (NETWORK) | 03, 04 |
+| `05-prereq-extraction.md` | RETIRED and deleted 2026-07-31; recoverable in git history at commit 92998be | - |
 | `06-corpus-retrieval.md` | Registry, snapshots, chunking, FTS5/BM25, eval, build stage 5 | 03 |
-| `07-culpa-ingest.md` | CULPA ingest per spike findings, build stage 4 (NETWORK) | 01, 03 |
+| `07-culpa-ingest.md` | RETIRED and deleted 2026-07-31; recoverable in git history at commit 92998be | - |
 | `SPLITS.md` | Session splits with kickoff prompts and gates | all |
 
 ## Globally locked decisions
