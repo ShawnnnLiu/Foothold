@@ -1,5 +1,12 @@
 # Starmap Technical Reference (from Agentic-Calendar)
 
+PIVOT NOTICE (2026-07-31): the product pivoted to the Astrolabe transfer credit navigator; see `STARMAP_PATHFINDERS_PLAN.md`.
+This reference remains authoritative for the mechanisms it records, with changed applicability:
+
+- Section 1 (RAG pipeline): applies at reduced scope; the FTS5/BM25 kernel now serves fuzzy course-title matching over `cc_courses` (no interest ranking).
+- Sections on the LLM generation engine, call log, contracts conventions, invalid-fixture harness, sqlite kernel, and app assembly (4.x): apply unchanged.
+- Pathway/knowledge-map and onboarding-wizard sections: stretch-tier only (Mode C, pre-cut); do not build against them without an explicit user go-ahead.
+
 This document is the written design record the Starmap build agent works from.
 It captures, in prose and sketches, everything needed to re-implement three subsystems of Agentic-Calendar ("Loop") as smaller, purpose-built modules: the RAG pipeline, the pathway/knowledge-map feature, and the onboarding flow, plus the cross-cutting kernels they share.
 Read it together with `STARMAP_PATHFINDERS_PLAN.md` (the product/architecture plan); this file is the mechanism-level companion.
