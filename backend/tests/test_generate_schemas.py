@@ -8,12 +8,9 @@ SCRIPT = BACKEND_ROOT / "scripts" / "generate_schemas.py"
 SCHEMAS_DIR = BACKEND_ROOT / "schemas"
 
 EXPECTED_CONTRACTS = {
+    "articulation_expr",
     "corpus_document",
-    "course",
     "llm_call_log",
-    "offering",
-    "prereq_expr",
-    "requirement_group",
 }
 
 
@@ -56,7 +53,7 @@ def test_check_detects_drift_and_missing(tmp_path: Path) -> None:
     working = tmp_path / "schemas"
     shutil.copytree(SCHEMAS_DIR, working)
 
-    mutated = working / "course.schema.json"
+    mutated = working / "articulation_expr.schema.json"
     mutated.write_text(mutated.read_text() + " ")
     result = run_script("--check", "--schemas-dir", str(working))
     assert result.returncode == 1

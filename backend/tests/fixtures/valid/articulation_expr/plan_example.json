@@ -1,0 +1,27 @@
+{
+  "any": [
+    {
+      "all": [
+        {
+          "course": "MATH 1A"
+        },
+        {
+          "course": "MATH 1B"
+        }
+      ]
+    },
+    {
+      "all": [
+        {
+          "course": "MATH 1AH"
+        },
+        {
+          "course": "MATH 1BH"
+        },
+        {
+          "note": "honors series must be completed entirely"
+        }
+      ]
+    }
+  ]
+}
