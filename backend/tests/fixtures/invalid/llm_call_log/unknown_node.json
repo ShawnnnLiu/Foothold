@@ -1,7 +1,7 @@
 {
   "llm_call_log_id": "llm_call_0000000000000001",
   "run_id": "run_demo",
-  "node": "prereq_extractor",
+  "node": "petition_reviewer",
   "prompt_version": "transcript-parser-v1",
   "model_name": "claude-sonnet-5",
   "attempt": 0,
