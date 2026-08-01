@@ -9,7 +9,7 @@ Per-doc status:
 | `01-day1-risk-spikes.md` | Executed; historical record (the spike discipline is reused for the ASSIST spike). |
 | `02-common-kernel-and-contracts.md` | Executed; kernel and machinery survive; the Columbia-shaped contracts (`course`, `offering`, `requirement_group`) are slated for retirement, and `prereq_expr` generalizes into `articulation_expr`. |
 | `03-catalog-fetch-parse.md` | RETIRED and deleted 2026-07-31; recoverable in git history at commit 92998be. |
-| `04-llm-backbone.md` | Still applies as written; moved to Week 2 (the build pipeline no longer has an LLM stage). |
+| `04-llm-backbone.md` | EXECUTED 2026-07-31, with one pivot correction: the closed node enum is `transcript_parser` / `petition_writer` (the doc's pre-pivot `prereq_extractor` / `pathway_proposer` name a retired node and a Mode C stretch node). `AGENTS.md` ("exactly two LLM nodes, both request-time") outranks the doc. The doc's locked prereq-extractor model config was dropped for the same reason; the `claude-sonnet-5` pricing it asked to record lives in `llm/transport_anthropic.py`, and the per-node `AdapterConfig` lands with its node in Week 2. |
 | `05-prereq-extraction.md` | RETIRED and deleted 2026-07-31; recoverable in git history at commit 92998be. |
 | `06-corpus-retrieval.md` | Applies at reduced scope (per-institution FTS5 over `cc_courses`; no interest queries, no eval set of interest-style queries). |
 | `07-culpa-ingest.md` | RETIRED and deleted 2026-07-31; recoverable in git history at commit 92998be. |

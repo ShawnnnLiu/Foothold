@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "refusal is true, which requires validation_outcome 'fail'",
+    "'pass'"
+  ]
+}
