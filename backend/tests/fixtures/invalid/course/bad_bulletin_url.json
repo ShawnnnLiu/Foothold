@@ -1,0 +1,24 @@
+{
+  "bulletin_url": "ftp://bulletin.columbia.edu/x",
+  "course_code": "COMS W4701",
+  "department_code": "COMS",
+  "description": "Basic techniques for building intelligent computer systems.",
+  "points_max": 3.0,
+  "points_min": 3.0,
+  "prereq_confidence": "parsed",
+  "prereq_expr": {
+    "any": [
+      {
+        "course": "COMS W3134"
+      },
+      {
+        "course": "COMS W3136"
+      },
+      {
+        "course": "COMS W3137"
+      }
+    ]
+  },
+  "prereq_prose": "Prerequisites: COMS W3134 or COMS W3136 or COMS W3137.",
+  "title": "Artificial Intelligence"
+}

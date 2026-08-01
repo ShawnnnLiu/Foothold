@@ -1,0 +1,5 @@
+{
+  "error_substrings": [
+    "bulletin_url must start with http:// or https://"
+  ]
+}

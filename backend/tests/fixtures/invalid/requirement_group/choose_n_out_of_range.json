@@ -1,0 +1,13 @@
+{
+  "choose_n": 5,
+  "major_id": "computer-science",
+  "member_courses": [
+    "COMS W4701",
+    "COMS W4705",
+    "COMS W4771"
+  ],
+  "name": "Electives",
+  "note_text": null,
+  "requirement_group_id": "rg_c3d712ed3c9ec45b",
+  "rule_kind": "choose_n"
+}

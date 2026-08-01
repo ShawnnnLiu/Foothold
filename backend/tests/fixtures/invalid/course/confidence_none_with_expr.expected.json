@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "prereq_confidence is 'none'",
+    "prereq_expr is not null"
+  ]
+}
