@@ -1,0 +1,23 @@
+{
+  "agreement_id": "agr_2d6204abcea837f3",
+  "position": 0,
+  "template_cell_id": "b4b0f6be-5735-4dc3-0b38-08ddd3b241bf",
+  "receiving_course": {
+    "course_code": "MATH 20D",
+    "prefix": "MATH",
+    "number": "20D",
+    "title": "Introduction to Differential Equations",
+    "units_min": 4.0,
+    "units_max": 3.0
+  },
+  "sending_expr": {
+    "any": [
+      {
+        "course": "MATH 2A"
+      },
+      {
+        "course": "MATH 2AH"
+      }
+    ]
+  }
+}

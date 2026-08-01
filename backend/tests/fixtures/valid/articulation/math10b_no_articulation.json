@@ -1,0 +1,14 @@
+{
+  "agreement_id": "agr_af1e0bb732a9ffa5",
+  "position": 1,
+  "template_cell_id": null,
+  "receiving_course": {
+    "course_code": "MATH 10B",
+    "prefix": "MATH",
+    "number": "10B",
+    "title": "Calculus II",
+    "units_min": 4.0,
+    "units_max": 4.0
+  },
+  "sending_expr": null
+}

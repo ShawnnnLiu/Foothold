@@ -1,0 +1,27 @@
+{
+  "group_id": "51dd7145-6887-ef11-8474-000d3a37e3b6",
+  "position": 3,
+  "conjunction": "Or",
+  "sections": [
+    {
+      "position": 0,
+      "cells": []
+    },
+    {
+      "position": 1,
+      "cells": [
+        {
+          "cell_id": "bdcc005f-0534-45f3-0b43-08ddd3b241bf",
+          "course": {
+            "course_code": "CSE 29",
+            "prefix": "CSE",
+            "number": "29",
+            "title": "Systems Programming and Software Tools ",
+            "units_min": 4.0,
+            "units_max": 4.0
+          }
+        }
+      ]
+    }
+  ]
+}

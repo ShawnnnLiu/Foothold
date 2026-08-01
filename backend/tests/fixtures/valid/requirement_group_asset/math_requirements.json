@@ -1,0 +1,78 @@
+{
+  "group_id": "f2b26f45-6887-ef11-8474-000d3a37e3b6",
+  "position": 0,
+  "conjunction": "And",
+  "sections": [
+    {
+      "position": 0,
+      "cells": [
+        {
+          "cell_id": "685f96b7-c3d4-482a-0b3a-08ddd3b241bf",
+          "course": {
+            "course_code": "MATH 18",
+            "prefix": "MATH",
+            "number": "18",
+            "title": "Linear Algebra",
+            "units_min": 4.0,
+            "units_max": 4.0
+          }
+        },
+        {
+          "cell_id": "edebf19d-0af3-4ad1-0b3d-08ddd3b241bf",
+          "course": {
+            "course_code": "MATH 20A",
+            "prefix": "MATH",
+            "number": "20A",
+            "title": "Calculus for Science and Engineering",
+            "units_min": 4.0,
+            "units_max": 4.0
+          }
+        },
+        {
+          "cell_id": "3a5c7d44-ebc2-4ab8-0b39-08ddd3b241bf",
+          "course": {
+            "course_code": "MATH 20B",
+            "prefix": "MATH",
+            "number": "20B",
+            "title": "Calculus for Science and Engineering",
+            "units_min": 4.0,
+            "units_max": 4.0
+          }
+        },
+        {
+          "cell_id": "239a8937-a567-4528-0b3c-08ddd3b241bf",
+          "course": {
+            "course_code": "MATH 20C",
+            "prefix": "MATH",
+            "number": "20C",
+            "title": "Calculus and Analytic Geometry for Science and Engineering",
+            "units_min": 4.0,
+            "units_max": 4.0
+          }
+        },
+        {
+          "cell_id": "b4b0f6be-5735-4dc3-0b38-08ddd3b241bf",
+          "course": {
+            "course_code": "MATH 20D",
+            "prefix": "MATH",
+            "number": "20D",
+            "title": "Introduction to Differential Equations",
+            "units_min": 4.0,
+            "units_max": 4.0
+          }
+        },
+        {
+          "cell_id": "d7f5eee6-92d2-4ccb-0b3b-08ddd3b241bf",
+          "course": {
+            "course_code": "MATH 20E",
+            "prefix": "MATH",
+            "number": "20E",
+            "title": "Vector Calculus",
+            "units_min": 4.0,
+            "units_max": 4.0
+          }
+        }
+      ]
+    }
+  ]
+}

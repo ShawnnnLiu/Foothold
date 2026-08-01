@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "course_code 'MATH 20E' does not match prefix 'MATH' and number '20D'",
+    "expected 'MATH 20D'"
+  ]
+}
