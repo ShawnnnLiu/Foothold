@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "title",
+    "contains control character U+0001"
+  ]
+}

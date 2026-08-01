@@ -1,0 +1,227 @@
+{
+  "$defs": {
+    "AllOf": {
+      "additionalProperties": false,
+      "properties": {
+        "all": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AllOf"
+              },
+              {
+                "$ref": "#/$defs/AnyOf"
+              },
+              {
+                "$ref": "#/$defs/CourseLeaf"
+              },
+              {
+                "$ref": "#/$defs/NoteLeaf"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "All",
+          "type": "array"
+        }
+      },
+      "required": [
+        "all"
+      ],
+      "title": "AllOf",
+      "type": "object"
+    },
+    "AnyOf": {
+      "additionalProperties": false,
+      "properties": {
+        "any": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/AllOf"
+              },
+              {
+                "$ref": "#/$defs/AnyOf"
+              },
+              {
+                "$ref": "#/$defs/CourseLeaf"
+              },
+              {
+                "$ref": "#/$defs/NoteLeaf"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Any",
+          "type": "array"
+        }
+      },
+      "required": [
+        "any"
+      ],
+      "title": "AnyOf",
+      "type": "object"
+    },
+    "CourseLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "course": {
+          "title": "Course",
+          "type": "string"
+        }
+      },
+      "required": [
+        "course"
+      ],
+      "title": "CourseLeaf",
+      "type": "object"
+    },
+    "NoteLeaf": {
+      "additionalProperties": false,
+      "properties": {
+        "note": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Note",
+          "type": "string"
+        }
+      },
+      "required": [
+        "note"
+      ],
+      "title": "NoteLeaf",
+      "type": "object"
+    },
+    "ReceivingCourse": {
+      "additionalProperties": false,
+      "description": "The receiving-side course, shared with `agreement.TemplateCell`.",
+      "properties": {
+        "course_code": {
+          "title": "Course Code",
+          "type": "string"
+        },
+        "number": {
+          "maxLength": 8,
+          "minLength": 1,
+          "pattern": "^[A-Z0-9.\\-]{1,8}$",
+          "title": "Number",
+          "type": "string"
+        },
+        "prefix": {
+          "maxLength": 16,
+          "minLength": 1,
+          "pattern": "^[A-Z][A-Z0-9&/. \\-]{0,15}$",
+          "title": "Prefix",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "units_max": {
+          "maximum": 20.0,
+          "title": "Units Max",
+          "type": "number"
+        },
+        "units_min": {
+          "exclusiveMinimum": 0,
+          "maximum": 20.0,
+          "title": "Units Min",
+          "type": "number"
+        }
+      },
+      "required": [
+        "course_code",
+        "prefix",
+        "number",
+        "title",
+        "units_min",
+        "units_max"
+      ],
+      "title": "ReceivingCourse",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "advisements": {
+      "items": {
+        "maxLength": 2000,
+        "minLength": 1,
+        "type": "string"
+      },
+      "title": "Advisements",
+      "type": "array"
+    },
+    "agreement_id": {
+      "pattern": "^agr_[0-9a-f]{16}$",
+      "title": "Agreement Id",
+      "type": "string"
+    },
+    "no_articulation_reason": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "No Articulation Reason"
+    },
+    "position": {
+      "minimum": 0,
+      "title": "Position",
+      "type": "integer"
+    },
+    "receiving_course": {
+      "$ref": "#/$defs/ReceivingCourse"
+    },
+    "sending_expr": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AllOf"
+        },
+        {
+          "$ref": "#/$defs/AnyOf"
+        },
+        {
+          "$ref": "#/$defs/CourseLeaf"
+        },
+        {
+          "$ref": "#/$defs/NoteLeaf"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sending Expr"
+    },
+    "template_cell_id": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Template Cell Id"
+    }
+  },
+  "required": [
+    "agreement_id",
+    "position",
+    "receiving_course"
+  ],
+  "title": "Articulation",
+  "type": "object"
+}

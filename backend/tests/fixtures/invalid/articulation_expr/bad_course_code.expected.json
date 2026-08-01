@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "invalid course code",
+    "MATH 12345"
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "academic_year_id": {
+      "exclusiveMinimum": 0,
+      "title": "Academic Year Id",
+      "type": "integer"
+    },
+    "academic_year_label": {
+      "pattern": "^[0-9]{4}-[0-9]{4}$",
+      "title": "Academic Year Label",
+      "type": "string"
+    },
+    "agreement_id": {
+      "pattern": "^agr_[0-9a-f]{16}$",
+      "title": "Agreement Id",
+      "type": "string"
+    },
+    "assist_key": {
+      "pattern": "^[0-9]+/[0-9]+/to/[0-9]+/(Major|Department)/.+$",
+      "title": "Assist Key",
+      "type": "string"
+    },
+    "category": {
+      "enum": [
+        "major",
+        "dept"
+      ],
+      "title": "Category",
+      "type": "string"
+    },
+    "label": {
+      "maxLength": 300,
+      "minLength": 1,
+      "title": "Label",
+      "type": "string"
+    },
+    "publish_date": {
+      "maxLength": 40,
+      "minLength": 1,
+      "title": "Publish Date",
+      "type": "string"
+    },
+    "receiving_institution_id": {
+      "exclusiveMinimum": 0,
+      "title": "Receiving Institution Id",
+      "type": "integer"
+    },
+    "sending_institution_id": {
+      "exclusiveMinimum": 0,
+      "title": "Sending Institution Id",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "agreement_id",
+    "assist_key",
+    "category",
+    "sending_institution_id",
+    "receiving_institution_id",
+    "academic_year_id",
+    "academic_year_label",
+    "label",
+    "publish_date"
+  ],
+  "title": "Agreement",
+  "type": "object"
+}

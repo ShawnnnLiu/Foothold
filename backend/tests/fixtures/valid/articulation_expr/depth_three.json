@@ -1,0 +1,17 @@
+{
+  "all": [
+    {
+      "any": [
+        {
+          "course": "CIS 22C"
+        },
+        {
+          "course": "CIS 22CH"
+        }
+      ]
+    },
+    {
+      "course": "MATH 1A"
+    }
+  ]
+}

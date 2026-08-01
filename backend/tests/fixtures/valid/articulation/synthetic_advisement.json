@@ -1,0 +1,26 @@
+{
+  "agreement_id": "agr_2d6204abcea837f3",
+  "position": 5,
+  "template_cell_id": "edebf19d-0af3-4ad1-0b3d-08ddd3b241bf",
+  "receiving_course": {
+    "course_code": "MATH 20A",
+    "prefix": "MATH",
+    "number": "20A",
+    "title": "Calculus for Science and Engineering",
+    "units_min": 4.0,
+    "units_max": 4.0
+  },
+  "sending_expr": {
+    "all": [
+      {
+        "course": "MATH 1A"
+      },
+      {
+        "note": "SYNTHETIC FIXTURE TEXT, NOT FROM ASSIST: the real advisement shape is fixture-pending until split S9c captures an advisement-bearing agreement."
+      }
+    ]
+  },
+  "advisements": [
+    "SYNTHETIC FIXTURE TEXT, NOT FROM ASSIST: the real advisement shape is fixture-pending until split S9c captures an advisement-bearing agreement."
+  ]
+}

@@ -307,15 +307,20 @@ Valid fixtures: `minimal.json` (one clean finding) and `demo_shape.json` (one fi
 
 ## Part 6: schema registry and cross-cutting test updates
 
-- `backend/scripts/generate_schemas.py` `CONTRACTS` registry, exact final value: `{"agreement": Agreement, "articulation": Articulation, "articulation_expr": ArticulationExprRoot, "cc_course": CcCourse, "corpus_document": CorpusDocument, "evaluation": Evaluation, "institution": Institution, "target_course": TargetCourse}`.
+- `backend/scripts/generate_schemas.py` `CONTRACTS` registry, exact final value: `{"agreement": Agreement, "articulation": Articulation, "articulation_expr": ArticulationExprRoot, "cc_course": CcCourse, "corpus_document": CorpusDocument, "evaluation": Evaluation, "institution": Institution, "llm_call_log": LlmCallLogRecord, "target_course": TargetCourse}`.
   Note: `RequirementGroupAsset` and the other nested models are reachable through their parents' schemas and are not registered separately.
-- Regenerate `backend/schemas/`; the committed set becomes exactly those eight `.schema.json` files.
-- `backend/tests/test_generate_schemas.py`: update `EXPECTED_CONTRACTS` to the eight names; the drift test mutates `institution.schema.json` instead of the deleted `course.schema.json`.
+  Correction recorded 2026-07-31 during S8a: this list originally named eight contracts and omitted `llm_call_log`.
+  That was an authoring slip, not a decision.
+  The doc was sized against `main` at commit `4762feb`, before the LLM backbone landed at `cd395ab`, and dropping the name would have deleted a live contract's committed schema while its consumer is alive, which part 1's "nothing else is deleted" forbids.
+  `llm_call_log` stays registered; the set is nine.
+- Regenerate `backend/schemas/`; the committed set becomes exactly those nine `.schema.json` files.
+- `backend/tests/test_generate_schemas.py`: update `EXPECTED_CONTRACTS` to the nine names; the drift test mutates `institution.schema.json` instead of the deleted `course.schema.json`.
 - New test `backend/tests/contracts/test_assist_fixture_alignment.py`, the increment's exit proof that contracts fit the captures without duplicating normalizer logic: load `agreement_major_cse_cs_113_to_7_y76.json` and `agreement_dept_math_113_to_7_y76.json`, decode the double-encoded `articulations` field (`json.loads` twice), and assert the fixture facts the contracts were designed from: 8 and 11 articulation entries, every inner articulation `type` is `Course`, MATH 10B/10C carry null `sendingArticulation`, MATH 20D has two groups joined by one `Or` conjunction, every observed `{prefix} {courseNumber}` pair passes `normalize_course_code`, and every `attributes` list at all four levels is empty (the advisement fixture-pending precondition; this assertion is REMOVED when S9c lands the advisement fixture).
 
 ## Exit criteria
 
 - `make check` green with the deletions and additions in the same commit; no orphaned imports (grep for `prereq_expr`, `from starmap.contracts.course`, `offering`, `requirement_group` returns nothing under `backend/src` and `backend/tests`).
-- Eight spec docs current in `docs/specs/` (seven new plus the updated `reason_codes.schema.md`); the deleted four spec docs are gone.
+- Eight spec docs written or updated by this increment (the seven new contracts plus `reason_codes.schema.md`); the deleted four spec docs are gone.
+  `docs/specs/` also still holds the untouched `corpus_document.schema.md` and `llm_call_log.schema.md`, so the directory totals ten; neither is in scope to delete here (same slip as the registry correction in part 6).
 - Every field constraint and model validator above has a named invalid fixture that fires; valid fixtures transcribed from the ASSIST captures parse.
 - `test_assist_fixture_alignment.py` green against the untouched captured fixtures.
