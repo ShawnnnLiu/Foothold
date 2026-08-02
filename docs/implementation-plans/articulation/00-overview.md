@@ -1,11 +1,11 @@
 # Articulation Increments: Overview
 
-This folder turns increments 4-7 of `docs/IMPLEMENTATION_ROADMAP.md` (the pivoted Astrolabe roadmap) into executable implementation plans.
+This folder turns increments 4-7 of `docs/IMPLEMENTATION_ROADMAP.md` (the pivoted Foothold roadmap) into executable implementation plans.
 One doc per increment, written for a less-capable executor model per `AGENTS.md` "Implementation Plan Conventions": every design decision is locked here; the executor implements and does not design.
 Authored 2026-07-31; all cited symbols, file paths, and fixture facts verified against `main` at commit `4762feb` on that date.
 
-Authority order for an executing session: user chat instructions, `CLAUDE.md`, `AGENTS.md`, `docs/STARMAP_PATHFINDERS_PLAN.md` + `docs/STARMAP_TECH_REFERENCE.md`, these docs, `docs/specs/`, code.
-Citations like "TR 4.5" mean `docs/STARMAP_TECH_REFERENCE.md` section 4.5 and are binding pointers, not optional background.
+Authority order for an executing session: user chat instructions, `CLAUDE.md`, `AGENTS.md`, `docs/FOOTHOLD_PATHFINDERS_PLAN.md` + `docs/FOOTHOLD_TECH_REFERENCE.md`, these docs, `docs/specs/`, code.
+Citations like "TR 4.5" mean `docs/FOOTHOLD_TECH_REFERENCE.md` section 4.5 and are binding pointers, not optional background.
 Citations like "spike doc" mean `docs/notes/assist_spike.md`, the verified ground truth for ASSIST API mechanics and payload shapes.
 
 ## Scope and dependency order

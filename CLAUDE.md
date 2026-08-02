@@ -7,7 +7,7 @@ The repository authority order is:
 1. User instructions in the current chat.
 2. `CLAUDE.md`.
 3. `AGENTS.md`.
-4. `docs/STARMAP_PATHFINDERS_PLAN.md` and `docs/STARMAP_TECH_REFERENCE.md`.
+4. `docs/FOOTHOLD_PATHFINDERS_PLAN.md` and `docs/FOOTHOLD_TECH_REFERENCE.md`.
 5. `docs/specs/` and other design docs.
 6. Existing code and tests.
 
@@ -15,8 +15,8 @@ If any instruction conflicts with the contest rules or the project axioms, stop 
 
 ## Project Mission
 
-Astrolabe is a transfer credit navigator for the California community college to UC/CSU corridor, built as an entry for the Stellic Pathfinders challenge (category: Overcoming Obstacles).
-Pivoted from the Columbia course-selection helper on 2026-07-31; see the pivot notice in `docs/STARMAP_PATHFINDERS_PLAN.md`.
+Foothold is a transfer credit navigator for the California community college to UC/CSU corridor, built as an entry for the Stellic Pathfinders challenge (category: Overcoming Obstacles).
+Pivoted from the Columbia course-selection helper on 2026-07-31 and renamed from Astrolabe to Foothold on 2026-08-01; see the pivot and rename notices in `docs/FOOTHOLD_PATHFINDERS_PLAN.md`.
 
 Mode A (headline): a student picks their community college, target university, and major, enters their courses (chips or pasted transcript), and gets a deterministic triage of their credits against the official ASSIST articulation agreement: transfers cleanly / at risk / no articulation, plus requirements still owed and a grounded draft petition letter for credits at risk.
 Mode B: gen-ed arbitrage, the same articulation index inverted to find community-college courses that articulate back to an enrolled student's degree, ranked by cost saved.
@@ -50,8 +50,8 @@ Deterministic code owns the build pipeline (no LLM stage at all), the transfer v
 
 Before any substantive change, read:
 
-- `docs/STARMAP_PATHFINDERS_PLAN.md` (product, architecture, milestones, cut-lines);
-- the relevant section of `docs/STARMAP_TECH_REFERENCE.md` (mechanism-level design record: schemas, invariants, algorithms, gotchas);
+- `docs/FOOTHOLD_PATHFINDERS_PLAN.md` (product, architecture, milestones, cut-lines);
+- the relevant section of `docs/FOOTHOLD_TECH_REFERENCE.md` (mechanism-level design record: schemas, invariants, algorithms, gotchas);
 - the relevant spec in `docs/specs/` if object shape, validation, serialization, fixtures, or generated schemas may change.
 
 Prefer the tech reference over browsing the Agentic-Calendar source.
@@ -107,7 +107,7 @@ Never do these unless the user explicitly requests the exact action:
 
 ## Architecture Boundaries
 
-Backend package boundaries (under `backend/src/starmap/`):
+Backend package boundaries (under `backend/src/starmap/`; the package keeps the legacy codename `starmap`):
 
 - `common/`: tiny shared kernel (sqlite, dbdump, clock, ids, errors).
 - `contracts/`: Pydantic models, one module per spec.

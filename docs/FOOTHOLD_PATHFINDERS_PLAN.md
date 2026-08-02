@@ -1,9 +1,12 @@
-# Stellic Pathfinders: Astrolabe, the Transfer Credit Navigator
+# Stellic Pathfinders: Foothold, the Transfer Credit Navigator
 
 PIVOT NOTICE (2026-07-31): this plan supersedes the Columbia course-selection helper ("Starmap") plan.
-The pre-pivot plan is preserved in git history (last pre-pivot version at commit `8d29759`, this same file path).
+The pre-pivot plan is preserved in git history (last pre-pivot version at commit `8d29759`, at the old path `docs/STARMAP_PATHFINDERS_PLAN.md`).
 The pathway/course-discovery feature is demoted to the lowest-priority stretch tier; it ships only if everything else lands early, and it can be cut entirely.
-The filename is kept so references in `CLAUDE.md`, `AGENTS.md`, and the week-1 docs stay valid.
+
+RENAME NOTICE (2026-08-01): the product is renamed from Astrolabe to **Foothold**, with the visual direction **Ascent** (spec: `docs/design/ASCENT.md`).
+This file was renamed from `STARMAP_PATHFINDERS_PLAN.md`, and all references in `CLAUDE.md`, `AGENTS.md`, and the docs tree were updated in the same change.
+The Python package `backend/src/starmap/` and the `starmap` name in `pyproject.toml` are retained as the legacy codename; only the product name changed.
 
 ## Context
 
@@ -13,11 +16,11 @@ Changed from Degree Planning and Discovery: that category will be flooded with A
 The problem: transfer students lose credits, money, and time.
 The 2017 GAO report (GAO-17-574) estimates students who transferred lost on average 43 percent of their credits; roughly 35 percent of students transfer at least once; half of transfers are Pell recipients, so lost credits are lost aid dollars.
 
-The product: **Astrolabe**, a transfer credit navigator for the largest transfer corridor in the US, California community colleges to UC/CSU.
+The product: **Foothold**, a transfer credit navigator for the largest transfer corridor in the US, California community colleges to UC/CSU.
 
-- Mode A, Transfer Check (the headline): student picks their community college, target university, and major, then enters their courses (paste, autocomplete chips, or transcript upload); Astrolabe evaluates their courses against the official ASSIST articulation agreement and renders a triage board: transfers cleanly / at risk / no articulation, plus the major requirements still owed, with units and dollar figures.
+- Mode A, Transfer Check (the headline): student picks their community college, target university, and major, then enters their courses (paste, autocomplete chips, or transcript upload); Foothold evaluates their courses against the official ASSIST articulation agreement and renders a triage board: transfers cleanly / at risk / no articulation, plus the major requirements still owed, with units and dollar figures.
   The demo climax: a grounded draft petition letter for at-risk and lost credits, citing the specific articulation agreement.
-- Mode B, Gen-Ed Arbitrage (second priority): an enrolled UC/CSU student asks "what can I take at a community college that articulates back to my degree?"; Astrolabe inverts the same articulation index and ranks options by cost saved (CC per-unit cost vs university per-unit cost).
+- Mode B, Gen-Ed Arbitrage (second priority): an enrolled UC/CSU student asks "what can I take at a community college that articulates back to my degree?"; Foothold inverts the same articulation index and ranks options by cost saved (CC per-unit cost vs university per-unit cost).
 - Mode C, Transfer Pathways (stretch, pre-cut): "you have not transferred yet; here is what to take at your CC next term to maximize articulated credit toward your target major."
   This reuses the pre-pivot pathway proposer/validator framework and is the ONLY tier where that framework survives.
 
@@ -36,11 +39,11 @@ The build pipeline is now fully deterministic (ASSIST serves structured JSON; th
 The two LLM nodes are both request-time edges: messy human input in (transcript parsing), grounded human output out (petition letter).
 Everything between them, the transfer verdict itself, is deterministic evaluation over checked-in articulation data.
 
-## Contest facts (re-verified against stellic.com/pathfinders on 2026-07-31)
+## Contest facts (re-verified against stellic.com/pathfinders on 2026-08-01)
 
 - Window: built Jul 20 - Aug 21, 2026. Three weeks remain from the pivot date.
 - Deliverables: title/category, 500-word write-up, 2-min demo video (YouTube/Vimeo/Loom), working link, complete tool inventory.
-- Judging, five equal weights: real student problem, originality, scalability and student impact, design/UX, build quality.
+- Judging, five equally weighted criteria: does it solve a real student problem; is it original; how much could it help students if it scaled; the design and experience; how well it's built.
 - "Coders not required; non-technical judges consider helpfulness above technical complexity."
 - One person may enter up to three submissions (wins only the highest prize).
 - AI tool disclosure is mandatory; omission is a disqualification ground.
@@ -195,16 +198,22 @@ HTTP policy unchanged: LLM failure after repair exhaustion is 200 with `status: 
 
 ## Frontend (2-minute-demo surface set)
 
-1. Landing: "Don't lose the credits you already earned." CC picker, target picker, major picker.
+Visual direction: **Ascent** (spec: `docs/design/ASCENT.md`, binding for all frontend styling).
+The metaphor: the transfer is a wall the student is already partway up; verdicts are hold-tiles, progress is drawn as elevation, and rows terrace like a route.
+Chalk `#F3F1EC` ground, slate `#272B31` ink, Archivo type, hard 2px borders, flat offset shadows.
+
+1. Landing: "Don't lose the credits you already earned." CC picker, target picker, major picker; FOOTHOLD wordmark with the three-step ascending mark.
 2. Courses: autocomplete chips (primary), paste-transcript box (LLM path), sample-transcript button (demo insurance).
-3. Evaluation theater: deterministic checks ticking ("resolved 24 of 25 courses... evaluated 61 articulations... checked 12 advisements").
+3. Evaluation theater: deterministic checks ticking ("resolved 24 of 25 courses... evaluated 61 articulations... checked 12 advisements"), rendered as elevation steps filling sequentially.
    This screen IS the propose/dispose demo moment.
-4. Triage board: three columns, green (transfers cleanly, N units), amber (at risk, each with its typed reason and citation), red (no articulation); a still-owed panel; units and dollar totals in the header.
-5. Petition drawer: select at-risk/lost items, generate the grounded draft letter, copy button, citations visible.
+4. Triage board: terraced rows of hold-tiles - teal `#0E8A6D` (transfers cleanly, N units), amber `#D97706` (at risk, each with its typed reason and citation; the row juts out with an amber offset shadow), red `#B3372E` (no articulation); a still-owed panel styled per ASCENT.md.
+   Every verdict reads as shape + icon + word, never color alone.
+   The header carries the elevation chart (N-of-M units as ascending filled steps, the last step dashed) plus units and dollar totals.
+5. Petition drawer: select at-risk/lost items, generate the grounded draft letter, copy button, citations visible (uppercase highlighter underline in the verdict's hold color, per ASCENT.md).
 6. Arbitrage tab (Mode B): "save $X" ranked list with agreement citations.
 
 All logic in React-free unit-tested `lib/` modules (`lib/evaluation.ts` view-model, `lib/courses.ts` chip state); screens are thin renderers; no component tests.
-Cut from v1: PDF upload (paste only), multi-CC transcripts, editing inputs after evaluation (restart), any atlas/sky visualization.
+Cut from v1: PDF upload (paste only), multi-CC transcripts, editing inputs after evaluation (restart), the pre-pivot atlas/sky pathway visualization (the Ascent elevation chart is in scope; it is a triage summary graphic, not a pathway atlas).
 
 ## Deployment
 
@@ -269,7 +278,7 @@ Cut-lines, first cut first:
 
 1. The stat: 43 percent of credits lost (GAO-17-574); half of transfer students are Pell recipients.
 2. The product: transcript in, triage out, petition letter in hand; gen-ed arbitrage flips the same engine into money saved.
-3. The differentiation: Transferology/TES/ASSIST are lookup tables; Astrolabe is transcript-in, letter-out.
+3. The differentiation: Transferology/TES/ASSIST are lookup tables; Foothold is transcript-in, letter-out.
 4. The architecture: the AI never decides what transfers; the articulation agreement does; LLMs only translate messy human input in and grounded human output out, with bounded repair and typed fallbacks.
 5. Scalability: every CA community college on day one; an equivalency-table adapter per state is the expansion unit.
 6. Full AI-tool disclosure: Claude Code, Claude API (two request-time nodes), and anything added.

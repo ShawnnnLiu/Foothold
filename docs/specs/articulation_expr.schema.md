@@ -62,7 +62,7 @@ That example is the valid fixture `plan_example.json`.
 
 ## Example
 
-The plan's sending-side example, "MATH 1A and MATH 1B, or the honors series" (`docs/STARMAP_PATHFINDERS_PLAN.md`):
+The plan's sending-side example, "MATH 1A and MATH 1B, or the honors series" (`docs/FOOTHOLD_PATHFINDERS_PLAN.md`):
 
 ```json
 {"any": [

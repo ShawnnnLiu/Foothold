@@ -2,14 +2,14 @@
 
 Canonical module: `backend/src/starmap/contracts/llm_call_log.py`.
 
-One frozen record per provider call, per tech reference 4.2 with the Starmap deltas: `plan_version` is dropped entirely (only `run_id` is logged).
+One frozen record per provider call, per tech reference 4.2 with the Foothold deltas: `plan_version` is dropped entirely (only `run_id` is logged).
 The record stores identifiers, counts, hashes, and outcome metadata ONLY, never raw prompts or responses; `extra="forbid"` makes a raw-content field structurally impossible.
 Every provider call appends exactly one row, including a call that failed in transport (logged with zero tokens).
 
 ## LlmNode
 
 The closed enum of callers allowed to write to this log.
-Astrolabe has exactly two LLM nodes, both request-time; no other caller may log here.
+Foothold has exactly two LLM nodes, both request-time; no other caller may log here.
 
 | Value | Meaning |
 | --- | --- |

@@ -1,6 +1,6 @@
 # Implementation Roadmap
 
-This is the build-order plan for Astrolabe, derived from `STARMAP_PATHFINDERS_PLAN.md` (pivoted 2026-07-31 to the transfer credit navigator) and `STARMAP_TECH_REFERENCE.md`.
+This is the build-order plan for Foothold, derived from `FOOTHOLD_PATHFINDERS_PLAN.md` (pivoted 2026-07-31 to the transfer credit navigator) and `FOOTHOLD_TECH_REFERENCE.md`.
 Those two documents remain the authority on product scope and mechanism design; this file only sequences the work into increments with exit criteria.
 Date anchored: rewritten 2026-07-31; the contest window closes 2026-08-21.
 

@@ -12,7 +12,7 @@ The recorded rationale (doc 04, "Reduced scope, locked") is that the corpus rows
 This file is kept as the design record for the dropped machinery, in case a later increment needs document-level retrieval again.
 
 Goal (as originally written): the deterministic retrieval stack (registry, snapshots, chunking, FTS5/BM25) over a corpus built from the catalog, with a hand-labeled eval and measured floors.
-Binding mechanism reference: TR section 1 with the "Starmap deltas (RAG)" applied; deltas restated below are decisions, not suggestions.
+Binding mechanism reference: TR section 1 with the "Foothold deltas (RAG)" applied; deltas restated below are decisions, not suggestions.
 No network, no LLM anywhere in this increment (axiom).
 
 ## Applied deltas (locked)

@@ -1,6 +1,6 @@
 # Testing Strategy
 
-PIVOT NOTICE (2026-07-31): the product pivoted to the transfer credit navigator (see `STARMAP_PATHFINDERS_PLAN.md`).
+PIVOT NOTICE (2026-07-31): the product pivoted to the transfer credit navigator (see `FOOTHOLD_PATHFINDERS_PLAN.md`).
 The layer structure and every principle below are unchanged; the product-specific examples map as follows:
 
 - "prereq expression evaluation" -> `articulation_expr` evaluation (including partial-series and note semantics);
@@ -9,7 +9,7 @@ The layer structure and every principle below are unchanged; the product-specifi
 - "the vocabulary gate" seam -> one `cc_courses` projection feeding both the transcript-resolution gate and the UI autocomplete; the petition findings object feeding both the prompt and the citation check;
 - the repair-loop and HTTP-policy seams apply verbatim to the transcript parser and petition writer nodes.
 
-This document defines how the Astrolabe test suite is shaped and where new tests belong.
+This document defines how the Foothold test suite is shaped and where new tests belong.
 It complements the Testing Requirements section of `CLAUDE.md`, which lists when tests are mandatory; this document explains at what layer to write them and why.
 
 ## Guiding Principle

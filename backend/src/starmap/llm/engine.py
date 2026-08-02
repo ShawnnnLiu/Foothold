@@ -1,4 +1,4 @@
-"""The LLM generation engine (tech reference 4.1, with the Starmap deltas).
+"""The LLM generation engine (tech reference 4.1, with the Foothold deltas).
 
 Two nested loops:
 

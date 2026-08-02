@@ -2,8 +2,9 @@
 
 ## Project Mission
 
-Build Astrolabe: a transfer credit navigator for the California community college to UC/CSU corridor, entered in the Stellic Pathfinders challenge (category: Overcoming Obstacles).
-Pivoted from the Columbia course-selection helper on 2026-07-31; `docs/STARMAP_PATHFINDERS_PLAN.md` is the pivoted product plan.
+Build Foothold: a transfer credit navigator for the California community college to UC/CSU corridor, entered in the Stellic Pathfinders challenge (category: Overcoming Obstacles).
+The backend Python package keeps the legacy codename `starmap`.
+Pivoted from the Columbia course-selection helper on 2026-07-31 and renamed from Astrolabe to Foothold on 2026-08-01; `docs/FOOTHOLD_PATHFINDERS_PLAN.md` is the product plan.
 
 Mode A (headline): community college + target + major + the student's courses in, deterministic triage against the official ASSIST articulation agreement out (transfers cleanly / at risk / no articulation / still owed), with a grounded draft petition letter for credits at risk.
 Mode B: gen-ed arbitrage, the same articulation index inverted and ranked by cost saved.
@@ -38,7 +39,7 @@ Development-time agents and product LLM nodes are different planes; never confla
 - Agentic-Calendar (`/Users/shawnliu/Documents/Agentic-Calendar`) is a read-only design reference.
   Never copy file contents from it (official terms sections 6.1 and 9.2); re-implement smaller, purpose-built modules from the written design records.
 - Track every AI tool used; the tools disclosure is mandatory and omission is a disqualification ground.
-- Judging weighs equally: real student problem, originality, scalability, design/UX, build quality.
+- Judging, five equally weighted criteria: does it solve a real student problem; is it original; how much could it help students if it scaled; the design and experience; how well it's built.
 
 ## Non-Negotiable Axioms
 
@@ -61,8 +62,8 @@ Development-time agents and product LLM nodes are different planes; never confla
 
 ## Required Reading Before Major Changes
 
-- Product, architecture, milestones, risks, cut-lines: `docs/STARMAP_PATHFINDERS_PLAN.md`
-- Mechanism-level design record (schemas, invariants, algorithms, gotchas): `docs/STARMAP_TECH_REFERENCE.md` (see its pivot notice for per-section applicability)
+- Product, architecture, milestones, risks, cut-lines: `docs/FOOTHOLD_PATHFINDERS_PLAN.md`
+- Mechanism-level design record (schemas, invariants, algorithms, gotchas): `docs/FOOTHOLD_TECH_REFERENCE.md` (see its pivot notice for per-section applicability)
   - RAG pipeline (reduced scope: fuzzy course resolution): section 1
   - Pathway map and atlas layout (Mode C stretch only): section 2
   - Onboarding (Mode C stretch only): section 3
@@ -81,7 +82,7 @@ Prefer the tech reference over browsing the Agentic-Calendar source.
 - Keep orchestration state explicit. Do not hide workflow state in prompts or LLM text.
 - LLM SDK imports live only in `llm/`.
 - Region packages do not import sibling regions; communicate through `contracts/` and `common/`.
-- Keep re-implemented kernels minimal and purpose-built; do not carry over generality the reference code has and Starmap does not need.
+- Keep re-implemented kernels minimal and purpose-built; do not carry over generality the reference code has and Foothold does not need.
 - When scope pressure appears, follow the plan's cut-lines in order; do not invent new scope cuts silently.
 
 ## Writing And Craft Standards

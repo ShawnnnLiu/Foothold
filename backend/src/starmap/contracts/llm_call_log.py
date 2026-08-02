@@ -28,7 +28,7 @@ HASH_PATTERN = r"^[0-9a-f]{64}$"
 class LlmNode(StrEnum):
     """The closed set of callers allowed to write to the call log.
 
-    Astrolabe has exactly two LLM nodes, both request-time.
+    Foothold has exactly two LLM nodes, both request-time.
     """
 
     TRANSCRIPT_PARSER = "transcript_parser"

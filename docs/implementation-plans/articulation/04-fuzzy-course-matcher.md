@@ -1,7 +1,7 @@
 # Increment 7: Fuzzy Course Matcher
 
 Goal: the deterministic per-institution FTS5/BM25 index over `cc_courses` in `corpus.db`, plus the fixed-threshold resolver that classifies every lookup as `exact`, `fuzzy_match`, or `unresolved`.
-Binding mechanism references: TR 1.4 (match-expression compilation, `-bm25` ordering, tie-breaks, FTS5 fail-fast) with the "Starmap deltas (RAG)" reduced even further by the pivot, and the vocabulary-gate axiom in `CLAUDE.md`.
+Binding mechanism references: TR 1.4 (match-expression compilation, `-bm25` ordering, tie-breaks, FTS5 fail-fast) with the "Foothold deltas (RAG)" reduced even further by the pivot, and the vocabulary-gate axiom in `CLAUDE.md`.
 No LLM, no network, no embeddings (axioms); SQLite is never faked in tests.
 
 ## Reduced scope, locked

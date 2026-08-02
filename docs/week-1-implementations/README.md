@@ -1,6 +1,6 @@
 # Week 1 Implementation Docs
 
-PIVOT NOTICE (2026-07-31): the product pivoted to the Astrolabe transfer credit navigator (see `docs/STARMAP_PATHFINDERS_PLAN.md`); the roadmap was rewritten.
+PIVOT NOTICE (2026-07-31): the product pivoted to the Foothold transfer credit navigator (see `docs/FOOTHOLD_PATHFINDERS_PLAN.md`); the roadmap was rewritten.
 Per-doc status:
 
 | Doc | Status after pivot |
@@ -21,7 +21,7 @@ The "Globally locked decisions" below still bind except where they name retired 
 This folder turns the Week 1 increments of `docs/IMPLEMENTATION_ROADMAP.md` into executable implementation plans.
 One doc per increment, written for a less-capable executor model per the conventions in `AGENTS.md` (section "Implementation Plan Conventions"): every design decision is locked here, the executor implements and does not design.
 
-Authority order for an executing session: user chat instructions, `CLAUDE.md`, `AGENTS.md`, `docs/STARMAP_PATHFINDERS_PLAN.md` + `docs/STARMAP_TECH_REFERENCE.md`, these docs, `docs/specs/`, code.
+Authority order for an executing session: user chat instructions, `CLAUDE.md`, `AGENTS.md`, `docs/FOOTHOLD_PATHFINDERS_PLAN.md` + `docs/FOOTHOLD_TECH_REFERENCE.md`, these docs, `docs/specs/`, code.
 These docs cite tech-reference sections instead of restating them; the tech reference is required reading for every session, so a citation like "TR 4.1" is a binding pointer, not optional background.
 
 ## Files

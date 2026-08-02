@@ -1,7 +1,7 @@
 {
   "$defs": {
     "LlmNode": {
-      "description": "The closed set of callers allowed to write to the call log.\n\nAstrolabe has exactly two LLM nodes, both request-time.",
+      "description": "The closed set of callers allowed to write to the call log.\n\nFoothold has exactly two LLM nodes, both request-time.",
       "enum": [
         "transcript_parser",
         "petition_writer"
