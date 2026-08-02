@@ -101,9 +101,9 @@
           "type": "string"
         },
         "number": {
-          "maxLength": 8,
+          "maxLength": 11,
           "minLength": 1,
-          "pattern": "^[A-Z0-9.\\-]{1,8}$",
+          "pattern": "^[A-Z0-9.+\\-]{1,8}(?: [A-Z]{1,2})?$",
           "title": "Number",
           "type": "string"
         },

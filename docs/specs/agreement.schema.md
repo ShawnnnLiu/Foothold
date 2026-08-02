@@ -27,6 +27,8 @@ This contract holds the NORMALIZED envelope; the double-decode and the template 
 
 `assist_key` is the agreement's identity as ASSIST states it, in the two observed key formats: `76/113/to/7/Major/d2dfb7a8-...` (GUID tail) and `76/113/to/7/Department/8952` (integer tail).
 The report lists also contain `SendingDepartment` keys (`76/113/to/7/SendingDepartment/9040`, owned by the sending institution); those are the mirror-direction agreements and are out of scope for v1, so the pattern excludes them and the fetcher never requests them.
+That last clause became true only in S9c: `corridor.select_depts` now enforces it, and before that the walk fetched all 86 of the demo pair's dept reports and the 36 mirrors surfaced as `envelope_invalid` exclusions in the build report.
+The exclusion is safe, and this was verified against the S9c capture rather than assumed: the 36 mirror agreements publish 120 articulation pairs, every one of which the 50 receiving-side agreements also publish, and those publish 329 further pairs the mirrors do not.
 Widening `category` and this pattern later is an append, not a break.
 
 `publish_date` is a VERBATIM provenance string, deliberately not a `datetime`.

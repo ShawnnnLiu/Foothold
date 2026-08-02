@@ -1,6 +1,10 @@
 .claude/settings.local.json
 data/raw/
 data/build/
+# SQLite WAL sidecars: the committed artifacts are read-only at runtime, but
+# any reader recreates these beside them. The artifact itself is self-contained.
+*.db-wal
+*.db-shm
 backend/.venv/
 __pycache__/
 *.pyc

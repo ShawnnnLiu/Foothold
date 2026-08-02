@@ -78,4 +78,5 @@ Assessment: polite (1 req/s), cached, non-commercial contest use with visible at
 5. `isCommunityCollege` from `/api/institutions` is the authoritative sending-side filter; no hand-curated CC list needed.
 6. Latest published year is discovered per pair via `hasReports`/report presence, not assumed globally; record the year id on every stored agreement.
 7. The fixtures in `backend/tests/fixtures/assist/` cover: both list shapes, both agreement models, a no-articulation cell, honors-vs-regular `Or` groups, and a multi-course `And` group (MATH 1C + 1D to MATH 20E).
-   Advisement `attributes` content is NOT yet covered; capture one advisement-bearing agreement during increment 5's first corridor fetch and add it as a fixture.
+   Advisement `attributes` content was NOT covered by these seven; split S9c captured `agreement_with_advisements_4_to_39_y76.json` from the live corridor and pinned the shape as `{"content": str, "position": int}`.
+   That fetch also corrected two things this note assumed: ASSIST meters requests PER SESSION (~50-55, then 429 until a new session), and `attributes` prose also lives at `courseAttributes` and on template groups and cells, three levels the original reading missed.

@@ -36,6 +36,7 @@ class PairReport:
     major_reports: int
     major_selected: int
     dept_reports: int
+    dept_selected: int
     agreements_stored: int
     agreements_excluded: tuple[Exclusion, ...]
     articulations_stored: int
@@ -77,6 +78,7 @@ def pair_report(
         major_reports=scope.major_reports,
         major_selected=scope.major_selected,
         dept_reports=scope.dept_reports,
+        dept_selected=scope.dept_selected,
         agreements_stored=len(stored),
         agreements_excluded=tuple([*fetch_failures, *excluded]),
         articulations_stored=sum(len(agreement.articulations) for agreement in stored),
@@ -128,6 +130,7 @@ def _pair_object(pair: PairReport) -> dict[str, object]:
         "major_reports": pair.major_reports,
         "major_selected": pair.major_selected,
         "dept_reports": pair.dept_reports,
+        "dept_selected": pair.dept_selected,
         "agreements_stored": pair.agreements_stored,
         "agreements_excluded": [
             _exclusion_object(exclusion, with_position=False)

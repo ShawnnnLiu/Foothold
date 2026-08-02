@@ -31,12 +31,16 @@ places doc 02 does not enumerate one by one:
   the expected ASSIST shape") is exactly what a payload that will not fit its
   contract is.
 
-Advisements are fixture-pending (overview doc): `advisement_texts` returns `[]`
-for an absent or empty list and raises `advisement_shape_unknown` for anything
-else. Split S9c replaces the raise with the real mapping once an
-advisement-bearing payload is captured; do not guess the shape before then.
-Note that on "No Course Articulated" rows ASSIST sends `null` rather than `[]`
-for its attribute lists, so absent and empty must read the same.
+Advisements were pinned in S9c from live corridor payloads (see
+`advisement_texts`). Seven levels feed it: the four doc 02 locks (articulation,
+sending-articulation, sending course group, sending course) plus three that a
+corridor-wide sweep proved carry real prose while nothing read them -
+`courseAttributes`, and `attributes` on template groups and template cells.
+`receivingAttributes` is the one attribute list still unmapped; it was empty in
+all 364 payloads swept, and it is named here so the next person knows it was
+looked at rather than missed.
+On "No Course Articulated" rows ASSIST sends `null` rather than `[]` for its
+attribute lists, so absent and empty must read the same.
 """
 
 import json
@@ -60,6 +64,7 @@ from starmap.contracts.articulation_expr import (
     CourseLeaf,
     NoteLeaf,
 )
+from starmap.contracts.base import reject_control_chars
 from starmap.contracts.cc_course import CcCourse
 from starmap.contracts.codes import course_code_from_parts
 from starmap.contracts.institution import Institution, InstitutionKind
@@ -76,6 +81,10 @@ STRINGIFIED_FIELDS = (
     "templateAssets",
     "articulations",
 )
+
+# The pinned advisement entry shape (S9c, from live corridor payloads).
+ADVISEMENT_TEXT_KEY = "content"
+MAX_ADVISEMENT_LENGTH = 2000  # matches `AdvisementText` in contracts/articulation.py
 
 COURSE_ITEM_TYPE = "Course"
 SUPPORTED_ARTICULATION_TYPE = "Course"
@@ -208,28 +217,65 @@ def decode_field(result: dict[str, object], name: str) -> object:
 
 
 def advisement_texts(attributes: object) -> list[str]:
-    """The fixture-pending advisement gate (overview doc).
+    """ASSIST attribute entries in, advisement strings out.
 
-    Absent or empty means no advisements. ANY other shape raises
-    `advisement_shape_unknown`, which the isolation loop records as an
-    exclusion: nothing here invents, paraphrases, or silently drops an
-    advisement, and the build report's count of this code is the signal that
-    drives split S9c's fixture capture.
+    The shape was pinned in S9c from live corridor payloads, not guessed:
+    a text advisement is exactly `{"content": str, "position": int}`, and the
+    corridor publishes 11 distinct strings of it ("Minimum grade required: C or
+    better", "Complete entire sequence at same institution prior to transfer",
+    and so on). Absent or empty still means no advisements, because ASSIST
+    sends `null` on "No Course Articulated" rows and `[]` elsewhere.
 
-    The four levels routed through here are the ones doc 02 locks: articulation,
-    sending-articulation, sending course group, and sending course. ASSIST also
-    publishes `courseAttributes` and `receivingAttributes` beside them, and
-    `attributes` on template rows and cells, all empty in every capture and all
-    outside the locked mapping; if S9c finds any of them populated, widening
-    this gate to cover them is that split's call, not a guess made here.
+    ANYTHING else still raises `advisement_shape_unknown`, and that gate is
+    load-bearing rather than vestigial: the same `advisements` field on
+    template sections carries a completely different, STRUCTURED shape
+    (`{"type": "NFollowing", "amount": 2.0, "selectionType": "Select", ...}`,
+    i.e. "select 2 of the following"). That is a requirement rule, not prose.
+    Flattening it to text would be an invention, and skipping it would leave a
+    group reading as "complete all of" when it means "select 2 of", so the
+    group is excluded and reported instead. Modelling those N-from semantics is
+    deferred (see the S9c notes).
+
+    Text is taken verbatim apart from an outer strip: never paraphrased, never
+    merged, never truncated. An entry that survives the shape check but could
+    not become an `AdvisementText` is a shape failure too, not a silent drop.
     """
     if attributes is None or attributes == []:
         return []
-    raise _fail(
-        f"ASSIST attributes list carried {type(attributes).__name__} content whose advisement "
-        f"shape is still fixture-pending",
-        AssistBuildCode.ADVISEMENT_SHAPE_UNKNOWN,
-    )
+    entries = _as_list(attributes, what="attributes", code=AssistBuildCode.ADVISEMENT_SHAPE_UNKNOWN)
+    texts: list[tuple[int, str]] = []
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get(ADVISEMENT_TEXT_KEY), str):
+            raise _fail(
+                f"ASSIST attribute entry {_shape_of(entry)} is not the pinned advisement shape "
+                f"{{{ADVISEMENT_TEXT_KEY!r}, 'position'}}",
+                AssistBuildCode.ADVISEMENT_SHAPE_UNKNOWN,
+            )
+        content = str(entry[ADVISEMENT_TEXT_KEY]).strip()
+        if not content or len(content) > MAX_ADVISEMENT_LENGTH:
+            raise _fail(
+                f"ASSIST advisement text of length {len(content)} cannot become an "
+                f"AdvisementText (1..{MAX_ADVISEMENT_LENGTH} characters)",
+                AssistBuildCode.ADVISEMENT_SHAPE_UNKNOWN,
+            )
+        try:
+            reject_control_chars(content)
+        except ValueError as error:
+            raise _fail(
+                "ASSIST advisement text carried control characters",
+                AssistBuildCode.ADVISEMENT_SHAPE_UNKNOWN,
+            ) from error
+        texts.append((_position_of(entry), content))
+    # `position` is ASSIST's published order; ties keep list order, so the
+    # result is a pure function of the payload.
+    return [content for _, content in sorted(texts, key=lambda pair: pair[0])]
+
+
+def _shape_of(entry: object) -> str:
+    """A compact description of an unexpected entry, for the exclusion detail."""
+    if isinstance(entry, dict):
+        return f"with keys {sorted(str(key) for key in entry)}"
+    return f"of type {type(entry).__name__}"
 
 
 # --- stage B: institutions and years ----------------------------------------
@@ -453,6 +499,10 @@ def _articulation(
 
     advisements = [
         *advisement_texts(inner.get("attributes")),
+        # `courseAttributes` sits beside `attributes` and carries real
+        # advisements ("Articulation is subject to placement by proficiency
+        # exam"); before S9c measured that, it was read by nothing at all.
+        *advisement_texts(inner.get("courseAttributes")),
         *_sending_advisements(inner.get("sendingArticulation")),
     ]
     try:
@@ -636,7 +686,13 @@ def _requirement_groups(
 def _requirement_group(
     entry: dict[str, object], *, receiving_id: int
 ) -> tuple[RequirementGroupAsset, list[TargetCourse]]:
-    advisements = list(advisement_texts(entry.get("advisements")))
+    # Both group-level lists: ASSIST publishes the prose under `attributes`
+    # ("Minimum grade required: C or better") and keeps `advisements` for the
+    # structured N-from rules, which stay a typed exclusion.
+    advisements = [
+        *advisement_texts(entry.get("advisements")),
+        *advisement_texts(entry.get("attributes")),
+    ]
     sections: list[dict[str, object]] = []
     courses: list[TargetCourse] = []
     raw_sections = _by_position(
@@ -658,6 +714,9 @@ def _requirement_group(
         )
         for row in rows:
             cell = _template_cell(row)
+            # Cell-level prose ("Maximum credit, one course") belongs to the
+            # group: `TemplateCell` carries the join key and the course only.
+            advisements.extend(advisement_texts(cell.get("attributes")))
             course_raw = _as_dict(
                 cell.get("course"),
                 what="template cell course",
@@ -742,8 +801,10 @@ def _course_row[CourseRow: (ReceivingCourse, CcCourse, TargetCourse)](
     `ReceivingCourse` is the one without an institution: it is a field of an
     articulation, not a projection row.
     """
-    prefix = raw.get("prefix")
-    number = raw.get("courseNumber")
+    # ASSIST publishes these unevenly ("C1000 " padded, "c1001" lowercase).
+    # Normalize once, here, so the stored parts and the derived code agree.
+    prefix = _normalize_part(raw.get("prefix"))
+    number = _normalize_part(raw.get("courseNumber"))
     fields: dict[str, object] = {
         "course_code": _course_code(prefix, number),
         "prefix": prefix,
@@ -762,6 +823,20 @@ def _course_row[CourseRow: (ReceivingCourse, CcCourse, TargetCourse)](
             f"{_validation_detail(error)}",
             AssistBuildCode.COURSE_CODE_UNPARSEABLE,
         ) from error
+
+
+def _normalize_part(value: object) -> object:
+    """Apply `normalize_course_code`'s own hygiene to a single part.
+
+    The derived code is uppercased and whitespace-collapsed, but the stored
+    `prefix`/`number` fields kept whatever ASSIST published, so a padded
+    `"C1000 "` or a lowercase `"c1001"` failed its contract pattern while the
+    code derived from it validated fine. Both sides now see the same string.
+
+    Non-strings pass through so the contract reports the real type error rather
+    than a confusing one about a value this helper invented.
+    """
+    return " ".join(value.upper().split()) if isinstance(value, str) else value
 
 
 def _course_code(prefix: object, number: object) -> str:

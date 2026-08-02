@@ -24,8 +24,9 @@ Delete the empty pre-pivot `backend/src/starmap/catalog/` package (plan architec
 The fetch layer is faked at the network boundary only (testing strategy, "Hard Rules").
 
 - `HttpResponse` frozen dataclass: `status: int`, `body: bytes`.
-- `HttpTransport` Protocol: `get(url: str, headers: dict[str, str]) -> HttpResponse` and `cookie_value(name: str) -> str | None`; raising `OSError`/`urllib.error.URLError` signals network failure.
+- `HttpTransport` Protocol: `get(url: str, headers: dict[str, str]) -> HttpResponse`, `cookie_value(name: str) -> str | None`, and `clear_cookies() -> None`; raising `OSError`/`urllib.error.URLError` signals network failure.
   `cookie_value` is on the Protocol, not only on the production class, because `fetch.py` reads the XSRF cookie through the seam; a Protocol without it cannot be satisfied by the test twin.
+  `clear_cookies` is on the Protocol for the same reason: the jar IS the session, so emptying it is how `fetch.py` starts a new one (added in S9c, see the session-quota rule below).
 - `UrllibTransport`: production implementation over `urllib.request` with a shared `http.cookiejar.CookieJar` via `HTTPCookieProcessor` (the jar is what persists the ASSIST session cookies across calls); `cookie_value(name) -> str | None` exposes the non-HttpOnly `X-XSRF-TOKEN` cookie value for header echo; 30 s per-request timeout; no retries at this layer.
   A `urllib.error.HTTPError` is translated back into a plain `HttpResponse` carrying its status, because ASSIST answers 400 as ordinary control flow and `urllib` raises on every 4xx/5xx; `URLError`/`OSError` propagate untouched.
 - `build_transport()` production factory (the `llm/transport_anthropic.build_client` pattern): the only thing that creates a cookie jar, so tests never build a networked object implicitly.
@@ -56,6 +57,7 @@ Status handling, locked in full:
 | Bootstrap `GET /` non-200, or 200 with no `X-XSRF-TOKEN` cookie | `AssistFetchError(session_bootstrap_failed)` |
 | API 200 | cache the body and return the decoded JSON |
 | API 400 | re-bootstrap once, retry once; a second 400 is `agreement_fetch_failed` |
+| API 429 | renew the session (empty the jar, re-bootstrap) and retry, at most `MAX_SESSION_RENEWALS` = 3 times; still 429 is `agreement_fetch_failed` naming the URL |
 | Any other API non-200 | `agreement_fetch_failed` naming the URL and the status (never a re-bootstrap: a 500 is not a session problem) |
 | Body that is not valid JSON | `agreement_fetch_failed` naming the URL |
 | `OSError`/`URLError` out of the transport | `agreement_fetch_failed` naming the URL and the exception TYPE NAME, chained with `raise ... from` |
@@ -64,6 +66,17 @@ Error messages carry urls, statuses, and exception type names only.
 They never carry response bodies and never carry the `X-XSRF-TOKEN` value, mirroring the same rule in `llm/errors.py`: a body can quote request content, and the token is a session credential.
 
 Politeness, locked: at least 1.0 s between consecutive NETWORK requests, enforced with `clock.monotonic()` plus the injected sleeper; cache hits neither sleep nor touch the network.
+
+Session quota, locked in S9c against live ASSIST (this replaces the pre-S9c assumption that one session lasts a whole run).
+ASSIST meters requests PER SESSION, not per unit time: the S9c pilot measured 55 requests before every later request answered 429, a second session measured 50, and a fresh session then succeeded immediately with NO idle period while the exhausted one stayed shut.
+The 429 responses carry no `Retry-After` and no rate-limit headers, so there is nothing to obey but the observation.
+Therefore:
+
+- a bootstrap starts a NEW session: `clear_cookies()` first, then `GET /`, so the renewal cannot inherit the spent quota;
+- the fetcher renews PROACTIVELY every `SESSION_REQUEST_BUDGET` = 40 API requests, which is below the smaller observation, so the walk spends requests on payloads instead of on rejections (politeness axiom: fewer refused requests, not more);
+- a 429 renews REACTIVELY as the status table says, bounded at 3.
+
+Pacing is unchanged by all of this: the quota is about session identity, not about going faster.
 
 On-disk cache, locked:
 
@@ -83,9 +96,16 @@ TARGET_IDS = (7, 39, 117, 120)          # UCSD, SJSU, UCLA, UCI (plan corridor, 
 DEMO_SENDING_ID = 113                    # De Anza
 DEMO_RECEIVING_ID = 7                    # UCSD
 PINNED_MAJOR_KEYWORDS = ("computer science", "economics", "psychology", "biology", "business")
+MAX_MAJORS_PER_PAIR = 6                  # per non-demo pair (S9c; see below)
 PREFERRED_YEAR_ID = 76                   # 2025-2026, latest published (spike doc)
 YEAR_FALLBACK_DEPTH = 2                  # try 76, then 75, then 74 per pair
 ```
+
+`MAX_MAJORS_PER_PAIR` was added in S9c against live data.
+Keyword matching is substring-based, so it over-selects badly: the pilot measured 32 of De Anza's 168 UCSD major reports matching, because `business` catches "Business Analytics Minor" and `computer science` catches every CSE specialization.
+Uncapped, the corridor is roughly 16,000 requests (about 11 hours at the observed 2.5 s per request) and a ~125 MB artifact; capped at 6 it is roughly 3,900 requests and a ~30 MB artifact.
+The cap is round-robin across the keyword families (`select_majors`), NOT a flat alphabetical cut, because taking the first six labels by name returns six psychology specializations and no computer science at all.
+Within a family the order is by label then key, so the selection is a pure function of the reports list; the demo pair is exempt and still takes every major.
 
 Endpoint URL builders (paths verified in the spike doc, "Endpoints") live HERE rather than in `fetch.py`.
 The walk needs both the builders and the fetcher, so keeping the builders beside the corridor constants is what makes the dependency one-way (`corridor` -> `fetch`) instead of circular, and it leaves `fetch.py` as a transport-agnostic polite cached fetcher with no ASSIST endpoint knowledge.
@@ -101,10 +121,12 @@ Corridor walk (the fetch stage), locked order and selection rules:
 1. Fetch academic years and institutions.
 2. Sending side = every institution with `isCommunityCollege: true`, sorted by id (116 per the fixture; the authoritative filter per spike implication 5).
 3. For each pair `(cc, target)` in (cc id asc, target id asc) order: fetch categories at `PREFERRED_YEAR_ID`; if the `major` category has `hasReports: false`, step the year id down by one, at most `YEAR_FALLBACK_DEPTH` times; record the year used per pair (spike implication 6); if no year in range has reports, record the pair as empty in the build report and continue.
-4. Fetch the major reports list at the chosen year; select reports whose `label` casefold-contains any `PINNED_MAJOR_KEYWORDS` entry; for the demo pair select ALL major reports; fetch each selected agreement payload by `key`.
-5. Demo pair only: also fetch the dept reports list and every dept agreement payload (dept depth beyond the demo pair is cuttable major-depth per the plan; the sending-CC breadth is never cut).
+4. Fetch the major reports list at the chosen year; select reports whose `label` casefold-contains any `PINNED_MAJOR_KEYWORDS` entry, capped at `MAX_MAJORS_PER_PAIR` round-robin across the keyword families; for the demo pair select ALL major reports; fetch each selected agreement payload by `key`.
+5. Demo pair only: also fetch the dept reports list and every RECEIVING-side dept agreement payload, i.e. the keys whose fifth segment is `Department` (`select_depts`); the `SendingDepartment` mirrors are out of scope for v1 per `agreement.schema.md` and are dropped before any payload fetch.
+   Dept depth beyond the demo pair is cuttable major-depth per the plan; the sending-CC breadth is never cut.
 
-Volume sanity per the plan: roughly 2,300-2,600 requests, about 40-45 minutes at 1 req/s, one-time (cached thereafter).
+Volume sanity, MEASURED in S9c and superseding the plan's estimate: roughly 3,900 requests at `MAX_MAJORS_PER_PAIR = 6`, about 2.7 hours at the observed 2.5 s per request (1 s pacing plus real network time on ~40 KB payloads), one-time (cached thereafter).
+The plan's "2,300 requests, 40 minutes" assumed ~5 majors per pair and 1 s per request; both were optimistic.
 
 `walk_corridor(fetcher, *, only_pair: tuple[int, int] | None = None) -> CorridorScope` returns what it saw, as frozen tuple-valued dataclasses that `report.py` folds into the build report; `only_pair` is the seam the build script's `--pair S:R` flag uses.
 
@@ -112,7 +134,7 @@ Volume sanity per the plan: roughly 2,300-2,600 requests, about 40-45 minutes at
 AgreementRef(assist_key, category, label, sending_id, receiving_id, year_id)   # exactly normalize_agreement's arguments
 FetchFailure(assist_key, reason_code, detail)
 PairScope(sending_id, receiving_id, year_id | None, major_reports, major_selected,
-          dept_reports, agreements, fetch_failures, scope_error | None)
+          dept_reports, dept_selected, agreements, fetch_failures, scope_error | None)
 CorridorScope(targets, sending_count, preferred_year_id, pairs)
 ```
 
@@ -158,8 +180,11 @@ Per-articulation mapping, inside the per-articulation try/except (fault isolatio
 5. Articulation-level and sending-articulation-level `attributes` map through `advisement_texts` into `Articulation.advisements`.
 6. Every `CourseLeaf` course on the sending side also emits a `CcCourse` row (institution = sending id; title/units from the raw course item); the receiving course and every template cell course emit `TargetCourse` rows.
 
-`advisement_texts(attributes: list[object]) -> list[str]`, the fixture-pending gate (overview doc, "Advisements are fixture-pending"): empty list -> `[]`; ANY non-empty list -> `AssistNormalizeError(advisement_shape_unknown)`, which the isolation loop records as that articulation's exclusion.
-Split S9c replaces the raise with the real mapping once an advisement-bearing payload is captured as a fixture; do not guess the shape before then.
+`advisement_texts(attributes: object) -> list[str]`, pinned in S9c from live payloads (overview doc, "Advisements: RESOLVED in S9c").
+Absent or empty -> `[]`.
+The pinned entry shape is `{"content": str, "position": int}`: text is taken verbatim apart from an outer strip, ordered by `position`, never merged or truncated.
+ANYTHING else -> `AssistNormalizeError(advisement_shape_unknown)`, which the isolation loop records as that articulation's or group's exclusion; this covers the structurally different `NFollowing` selection rules template sections publish under the same field name.
+Seven levels feed it: the four locked above plus `courseAttributes` and template group/cell `attributes`, which the S9c sweep proved carry real prose that nothing was reading.
 
 Template assets (major agreements only; `templateAssets` null for dept):
 
@@ -210,7 +235,7 @@ Shape, locked:
   "corridor": {"targets": [...], "sending_count": 116, "preferred_year_id": 76},
   "pairs": [
     {"sending_id": 113, "receiving_id": 7, "year_id": 76,
-     "major_reports": 168, "major_selected": 168, "dept_reports": 86,
+     "major_reports": 168, "major_selected": 168, "dept_reports": 86, "dept_selected": 50,
      "agreements_stored": 0, "agreements_excluded": [{"assist_key": "...", "reason_code": "...", "detail": "..."}],
      "articulations_stored": 0,
      "articulations_excluded": [{"assist_key": "...", "position": 0, "reason_code": "...", "detail": "..."}]}
@@ -238,7 +263,7 @@ The stale `scripts/build_catalog.py` reference in the current Makefile disappear
 ## Tests (all offline; fixtures are the only payload source)
 
 - `UrllibTransport` against a stub opener: an `HTTPError` comes back as an `HttpResponse` carrying its status, a `URLError` propagates, headers and timeout pass through, `cookie_value` reads a real `CookieJar`.
-- Fetcher against `FakeHttpTransport`: bootstrap sends the cookie header echo on API calls; missing cookie and non-200 bootstrap -> typed `session_bootstrap_failed`; 400 triggers exactly one re-bootstrap plus retry, second 400 -> typed failure naming the URL; another non-200, a non-JSON body, and a transport `URLError` -> typed `agreement_fetch_failed`; 1 req/s pacing via recorded sleeper (`sleeps` between two network calls >= 1.0); cache hit performs zero transport calls and zero sleeps; offline mode raises typed on miss and still serves a hit; manifest line written per network fetch, failures included; no error message contains the token or a response body.
+- Fetcher against `FakeHttpTransport`: bootstrap sends the cookie header echo on API calls; missing cookie and non-200 bootstrap -> typed `session_bootstrap_failed`; 400 triggers exactly one re-bootstrap plus retry, second 400 -> typed failure naming the URL; a 429 renews the session and retries, a persistent 429 fails typed after exactly `MAX_SESSION_RENEWALS` renewals, the session renews proactively at `SESSION_REQUEST_BUDGET`, and a renewed session echoes the new token; another non-200, a non-JSON body, and a transport `URLError` -> typed `agreement_fetch_failed`; 1 req/s pacing via recorded sleeper (`sleeps` between two network calls >= 1.0); cache hit performs zero transport calls and zero sleeps; offline mode raises typed on miss and still serves a hit; manifest line written per network fetch, failures included; no error message contains the token or a response body.
 - Corridor against `FakeHttpTransport` seeded from the seven captured fixtures: the url builders are byte-exact (including the percent-encoded agreement key); the demo pair resolves to year 76 with 168 major reports selected and 86 dept reports; keyword selection, year fallback, an exhausted fallback, an isolated agreement failure, an isolated reports-list failure, and the non-isolated session failure each have a case; two walks produce equal `CorridorScope` values.
 - Static gates extended in `backend/tests/test_import_boundaries.py`: `urllib` is confined to `assist/http.py` plus `assist/corridor.py`, and no region package imports a sibling region (the testing strategy's planned import-boundary addition). `backend/tests/test_package.py` registers `starmap.assist`.
 - Normalize on the two captured agreement fixtures end-to-end: the major fixture yields 8 articulations (MATH 20D `any`-of-two-singles, MATH 20E `all`-of-two, positions stable) and 4 requirement groups including the `Or` group with cells CSE 15L / CSE 29; the dept fixture yields 11 articulations with MATH 10B/10C as `sending_expr` null; every produced object passes its contract.

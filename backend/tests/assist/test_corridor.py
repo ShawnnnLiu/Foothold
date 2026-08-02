@@ -13,6 +13,7 @@ import pytest
 from starmap.assist.corridor import (
     DEMO_RECEIVING_ID,
     DEMO_SENDING_ID,
+    MAX_MAJORS_PER_PAIR,
     PREFERRED_YEAR_ID,
     ROOT_URL,
     TARGET_IDS,
@@ -26,6 +27,8 @@ from starmap.assist.corridor import (
     institutions_url,
     major_category_has_reports,
     matches_pinned_keyword,
+    select_depts,
+    select_majors,
     walk_corridor,
 )
 from starmap.assist.errors import AssistFetchError
@@ -153,7 +156,10 @@ def test_the_demo_pair_walk_matches_the_captured_corridor(harness: Harness) -> N
     pair = scope.pairs[0]
     assert (pair.sending_id, pair.receiving_id, pair.year_id) == (113, 7, 76)
     assert (pair.major_reports, pair.major_selected, pair.dept_reports) == (168, 168, 86)
-    assert len(pair.agreements) == 168 + 86
+    # 50 of the 86 dept reports are receiving-side; the other 36 are their
+    # `SendingDepartment` mirrors, which the spec puts out of scope for v1.
+    assert pair.dept_selected == 50
+    assert len(pair.agreements) == 168 + 50
     assert pair.fetch_failures == ()
     assert pair.scope_error is None
 
@@ -249,6 +255,85 @@ def test_a_non_demo_pair_keeps_only_the_pinned_keyword_majors(harness: Harness) 
     ]
     # Department depth is demo-pair only.
     assert not any("categoryCode=dept" in url for url in transport.urls)
+
+
+def major_refs(labels: list[str]) -> tuple[AgreementRef, ...]:
+    return tuple(
+        AgreementRef(
+            assist_key=f"76/114/to/7/Major/{index}",
+            category="major",
+            label=label,
+            sending_id=OTHER_CC,
+            receiving_id=7,
+            year_id=PREFERRED_YEAR_ID,
+        )
+        for index, label in enumerate(labels)
+    )
+
+
+def test_sending_department_mirrors_are_never_selected() -> None:
+    """`agreement.schema.md` puts the sending-side direction out of scope for
+    v1 and says the fetcher never requests it. Measured against the S9c
+    capture: the mirrors add 120 articulation pairs, all 120 already published
+    by the receiving-side agreements, so this drops duplicates only.
+    """
+    refs = (
+        *major_refs([]),
+        AgreementRef("76/113/to/7/Department/8952", "dept", "Mathematics", 113, 7, 76),
+        AgreementRef("76/113/to/7/SendingDepartment/9040", "dept", "Mathematics", 113, 7, 76),
+    )
+
+    selected = select_depts(refs)
+
+    assert [ref.assist_key for ref in selected] == ["76/113/to/7/Department/8952"]
+
+
+def test_the_captured_dept_reports_split_into_fifty_receiving_and_thirty_six_mirrors() -> None:
+    """The split is a fact of the capture, not an assumption of the filter."""
+    reports = reports_of(fixture("agreement_reports_dept_113_to_7_y76.json"))
+    refs = tuple(
+        AgreementRef(entry["key"], "dept", entry["label"], 113, 7, 76) for entry in reports
+    )
+
+    assert len(refs) == 86
+    assert len(select_depts(refs)) == 50
+
+
+def test_major_selection_is_capped_and_spread_across_the_keyword_families() -> None:
+    """Substring matching over-selects (the S9c pilot: 32 of 168 for one pair),
+    so the selection is capped. The cap is round-robin across the pinned
+    families, because a flat alphabetical cut would return six psychology
+    specializations and no computer science at all.
+    """
+    labels = [
+        *[f"Psychology B.S. Specialization {index}" for index in range(8)],
+        "Computer Science B.S.",
+        "Economics B.A.",
+    ]
+    selected = [ref.label for ref in select_majors(major_refs(labels))]
+
+    assert len(selected) == MAX_MAJORS_PER_PAIR
+    assert "Computer Science B.S." in selected
+    assert "Economics B.A." in selected
+    assert sum(1 for label in selected if label.startswith("Psychology")) == 4
+
+
+def test_major_selection_is_a_pure_function_of_the_reports_list() -> None:
+    """Order stability: the same reports in a different order select the same
+    agreements, so two builds of one corridor cannot disagree."""
+    labels = [
+        "Business Analytics Minor",
+        "Computer Science B.S.",
+        "Economics B.A.",
+        "General Biology B.S.",
+        "Psychology B.S.",
+        "Cognitive Psychology B.S.",
+        "Marine Biology B.S.",
+    ]
+    forward = select_majors(major_refs(labels))
+    shuffled = select_majors(sorted(major_refs(labels), key=lambda ref: ref.label, reverse=True))
+
+    assert [ref.label for ref in forward] == [ref.label for ref in shuffled]
 
 
 def test_a_year_without_reports_steps_down_to_the_next(harness: Harness) -> None:

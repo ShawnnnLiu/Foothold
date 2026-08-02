@@ -33,6 +33,12 @@ Those seven fixture files are the design source for every schema decision below;
 | `agreement_major_cse_cs_113_to_7_y76.json` | Template-cell model; 8 articulations; `templateAssets` with `RequirementGroup`/`GeneralTitle`/`GeneralText`; an `Or`-instruction group (CSE 15L or CSE 29) whose cells have NO articulation entries. |
 | `agreement_dept_math_113_to_7_y76.json` | Base model (bare articulation list); `templateAssets` null; MATH 10B/10C carry `sendingArticulation: null` ("No Course Articulated"). |
 
+An eighth fixture was captured later, in split S9c, from the live corridor rather than the spike:
+
+| File | What it pins |
+|---|---|
+| `agreement_with_advisements_4_to_39_y76.json` | College of Marin -> San Jose State, Computer Science B.S. The POPULATED advisement shape `{"content": str, "position": int}`, which no spike capture could show because all seven are empty at every attribute level. Four sending-course advisements on two articulations; all five requirement groups carry `NFromArea`/`Following` instructions and are therefore excluded. |
+
 Two payload facts the spike doc's prose does not spell out, verified 2026-07-31 and binding on normalization:
 
 - "No Course Articulated" appears BOTH as `sendingArticulation: null` (dept fixture, MATH 10B/10C) and as empty `items` (spike doc, major-model observation); both mean the same thing.
@@ -56,12 +62,31 @@ These bind every increment and are not to be relitigated by executors.
 
 ```python
 COURSE_CODE_RE = re.compile(
-    r"^[A-Z][A-Z&/.\-]{0,9}(?: [A-Z][A-Z&/.\-]{0,9}){0,2} [A-Z]{0,2}[0-9]{1,4}[A-Z]{0,3}$"
+    r"^[A-Z][A-Z0-9&/.\-]{0,9}(?: [A-Z][A-Z0-9&/.\-]{0,9}){0,2}"
+    r" -?[A-Z]{0,2}[0-9]{1,4}(?:\.[0-9]{1,2})?[A-Z0-9+\-]{0,3}"
+    r"(?: [A-Z]{1,2})?$"
 )
 ```
 
-- Shape: one to three prefix tokens (letters plus `&/.-`), then one number token (up to 2 leading letters, 1-4 digits, up to 3 trailing letters).
+- Shape: one to three prefix tokens (letters, then letters/digits plus `&/.-`), one number token (optional leading `-`, up to 2 leading letters, 1-4 digits, an optional decimal part, up to 3 trailing letters/digits/`+`/`-`), and an optional trailing campus-suffix token of 1-2 letters.
 - Covers every code in the captures: `MATH 1A`, `MATH 2AH`, `STAT C1000H`, `CIS 22C`, `CIS 22CH`, `CSE 15L`, `MATH 20E`, `CSE 11`.
+
+The first three clauses of that pattern were WIDENED in S9c, after the full corridor build excluded 1,624 articulations (about 6%) as `course_code_unparseable` across 150 distinct codes.
+The original regex was designed from the De Anza-to-UCSD captures alone, and California course codes are more varied than that one pair shows:
+
+| Shape | Corridor count | Examples |
+|---|---|---|
+| Digit inside a prefix token | 1,006 | `BUS1 20`, `BUS2 90` (San Jose State business departments), `IN4MATX 43` (UCI) |
+| Trailing campus-suffix token | 338 | `MATH 151 F` (Fullerton), `CSCI 133 C` (Cypress), `CHEM 211 AC` |
+| Leading hyphen on the number | 190 | `MATH -04A`, `MATH -08` |
+| Decimal number | 26 | `BIO 2.1`, `CS 17.11` |
+| `+` or embedded `-` suffix | 19 | `MATH 103E+`, `CIST 004B1`, `MATH 120-S` |
+
+A separate 42 were a bug on OUR side rather than a regex gap: ASSIST publishes padded values like `courseNumber: "C1000 "`, and the normalizer passed the raw strings to the contract while deriving the code from the collapsed ones.
+`normalize._course_row` now strips and collapses both parts before validation, which is why `COURSE_NUMBER_PATTERN` admits an internal space (`C1000 H`) but never a leading or trailing one.
+
+The regex is deliberately looser than it was, and that is a real cost: a genuinely malformed code is now likelier to pass than to be excluded.
+The compensating check is that a code still has to round-trip `course_code == course_code_from_parts(prefix, number)` on every one of the three models that store the split pair.
 - `normalize_course_code(raw)` keeps its current contract: uppercase, collapse internal whitespace runs to one space, strip, then fullmatch; `ValueError` naming the input on failure.
 - New helper in the same module: `course_code_from_parts(prefix: str, number: str) -> str` returning `normalize_course_code(f"{prefix} {number}")`; this is the single derivation every contract and normalizer uses.
 - A code that fails normalization at build time is a per-articulation typed exclusion (`course_code_unparseable`), counted in the build report, never fatal (fault-isolation axiom).
@@ -74,14 +99,15 @@ Locked: increment 4 DELETES those three families under the same 2026-07-31 pivot
 `LlmReasonCode` is unchanged (its consumer, the Week 2 LLM backbone, is alive).
 Increment 4 ADDS three families (exact members locked in doc 01): `EvaluationFindingCode`, `AssistBuildCode`, `RetrievalCode`, plus the `TriageBucket` enum and the `BUCKET_FOR_CODE` mapping.
 
-### Advisements are fixture-pending (never invent shapes)
+### Advisements: RESOLVED in S9c (was fixture-pending)
 
-Per the spike doc, `attributes` lists exist at four levels (articulation, sending-articulation, group, course) and are the advisement carrier, but every captured list is EMPTY.
-Locked treatment, restated in docs 01-03:
+Per the spike doc, `attributes` lists exist at four levels (articulation, sending-articulation, group, course) and are the advisement carrier, but every SPIKE captured list is EMPTY, so the mapping was deferred rather than guessed.
+The first live corridor fetch settled it. What S9c measured, and what now binds:
 
-- The note-leaf MECHANISM (contract shape, evaluator semantics) is built and tested now with synthetic note fixtures.
-- The attributes-to-text MAPPING is deferred: `assist/normalize.py` ships `advisement_texts(attributes)` that returns `[]` for an empty list and raises the typed `advisement_shape_unknown` exclusion for anything non-empty.
-- The first corridor fetch (split S9c) captures one advisement-bearing agreement payload as a new fixture in `backend/tests/fixtures/assist/`, pins the real shape in `advisement_texts`, adds its tests, and rebuilds; the build report's `advisement_shape_unknown` count is the signal that drives this.
+- A text advisement is exactly `{"content": str, "position": int}`; the corridor publishes 11 distinct strings of it ("Minimum grade required: C or better", "Complete entire sequence at same institution prior to transfer", ...). `advisement_texts` maps that shape, sorted by `position`, verbatim apart from an outer strip.
+- SEVEN levels feed it, not four. A corridor-wide sweep found real prose at three levels nothing was reading: `courseAttributes` (9 instances), template group `attributes` (46), and template cell `attributes` (2). Those were silent drops, which the axiom forbids, and they are now mapped. `receivingAttributes` was empty in all 364 payloads swept and remains unmapped, named here so it reads as examined rather than missed.
+- The gate NARROWED, it did not disappear. Anything that is not the pinned shape still raises `advisement_shape_unknown`, and that is load-bearing: template sections carry a structurally different `{"type": "NFollowing", "amount": 2.0, "selectionType": "Select"}` under the same field name, meaning "select 2 of the following". Flattening it to prose would invent an advisement; skipping it would let a group that means "select 2 of" read as "complete all of". So the group is excluded and reported. Modelling N-from semantics is deferred to a later increment.
+- The note-leaf MECHANISM (contract shape, evaluator semantics) is unchanged; group and course texts still become `NoteLeaf`s INSIDE the group node.
 - Nothing anywhere silently satisfies, drops, or paraphrases an advisement (axiom).
 
 ### Committed-artifact identity at ASSIST scale

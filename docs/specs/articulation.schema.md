@@ -19,7 +19,7 @@ The receiving-side course object, shared by `Articulation.receiving_course` and 
 | --- | --- | --- |
 | `course_code` | str | Normalized via `normalize_course_code`; must match `COURSE_CODE_RE`. |
 | `prefix` | str | 1..16 chars, pattern `^[A-Z][A-Z0-9&/. \-]{0,15}$`. |
-| `number` | str | 1..8 chars, pattern `^[A-Z0-9.\-]{1,8}$`. |
+| `number` | str | 1..10 chars, pattern `^[A-Z0-9.+\- ]{1,10}$`. |
 | `title` | str | 1..300 chars; control-character hygiene. |
 | `units_min` | float | `gt=0`, `le=20`. |
 | `units_max` | float | `le=20`. |

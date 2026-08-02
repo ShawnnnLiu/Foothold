@@ -16,6 +16,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from starmap.contracts.articulation import MAX_UNITS
 from starmap.contracts.base import FROZEN, reject_control_chars
 from starmap.contracts.codes import (
+    COURSE_NUMBER_MAX_LENGTH,
     COURSE_NUMBER_PATTERN,
     COURSE_PREFIX_PATTERN,
     CourseCode,
@@ -29,7 +30,9 @@ class TargetCourse(BaseModel):
     institution_id: int = Field(gt=0)
     course_code: CourseCode
     prefix: str = Field(min_length=1, max_length=16, pattern=COURSE_PREFIX_PATTERN)
-    number: str = Field(min_length=1, max_length=8, pattern=COURSE_NUMBER_PATTERN)
+    number: str = Field(
+        min_length=1, max_length=COURSE_NUMBER_MAX_LENGTH, pattern=COURSE_NUMBER_PATTERN
+    )
     title: str = Field(min_length=1, max_length=300)
     units_min: float = Field(gt=0, le=MAX_UNITS)
     units_max: float = Field(le=MAX_UNITS)

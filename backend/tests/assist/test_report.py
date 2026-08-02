@@ -54,6 +54,7 @@ def demo_scope(*, failures: tuple[FetchFailure, ...] = ()) -> PairScope:
         major_reports=168,
         major_selected=168,
         dept_reports=86,
+        dept_selected=50,
         agreements=(
             AgreementRef(
                 MAJOR_KEY, "major", "Mathematics/Computer Science B.S.", DE_ANZA, UCSD, 76
@@ -104,6 +105,9 @@ def test_the_report_carries_the_corridor_and_the_demo_pair() -> None:
     assert pair["receiving_id"] == UCSD
     assert pair["year_id"] == 76
     assert (pair["major_reports"], pair["major_selected"], pair["dept_reports"]) == (168, 168, 86)
+    # Reported separately from `dept_reports` so the 36 filtered
+    # `SendingDepartment` mirrors read as a decision rather than a gap.
+    assert pair["dept_selected"] == 50
 
 
 def test_totals_count_what_was_stored_and_what_was_not() -> None:

@@ -15,6 +15,8 @@ Three decisions worth stating:
 2. The cookie jar IS the session. It persists the `X-XSRF-TOKEN` cookie that
    every API request must echo as a header, so one jar lives for the life of
    one transport and `build_transport()` is the only thing that creates one.
+   Because the jar is the session identity, emptying it is how a caller starts
+   a new one; ASSIST meters requests per session, so `fetch.py` needs that.
 3. A browser User-Agent is required: the spike confirmed the API refuses the
    default `urllib` agent.
 
@@ -47,11 +49,15 @@ class HttpTransport(Protocol):
     `urllib.error.URLError` is a subclass) only for a genuine network failure.
     `cookie_value` exposes the non-HttpOnly `X-XSRF-TOKEN` cookie so `fetch.py`
     can echo it as a header without knowing how the jar is stored.
+    `clear_cookies` discards the whole jar, which is how `fetch.py` starts a
+    genuinely NEW session rather than refreshing the token of the old one.
     """
 
     def get(self, url: str, headers: dict[str, str]) -> HttpResponse: ...
 
     def cookie_value(self, name: str) -> str | None: ...
+
+    def clear_cookies(self) -> None: ...
 
 
 class RawResponse(Protocol):
@@ -103,6 +109,9 @@ class UrllibTransport:
             if cookie.name == name:
                 return cookie.value
         return None
+
+    def clear_cookies(self) -> None:
+        self._jar.clear()
 
 
 def build_transport() -> UrllibTransport:

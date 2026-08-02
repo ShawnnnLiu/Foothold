@@ -21,7 +21,7 @@ Locked deviation from the plan's sketch: the plan showed a single `units` column
 | `institution_id` | int | `gt=0`; the ASSIST institution id of the receiving university. |
 | `course_code` | str | Normalized via `normalize_course_code`; must match `COURSE_CODE_RE`. |
 | `prefix` | str | 1..16 chars, pattern `COURSE_PREFIX_PATTERN`. |
-| `number` | str | 1..8 chars, pattern `COURSE_NUMBER_PATTERN`. |
+| `number` | str | 1..10 chars, pattern `COURSE_NUMBER_PATTERN`. |
 | `title` | str | 1..300 chars; control-character hygiene. |
 | `units_min` | float | `gt=0`, `le=20`. |
 | `units_max` | float | `le=20`. |

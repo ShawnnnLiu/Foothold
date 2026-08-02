@@ -37,6 +37,9 @@ from starmap.contracts.reason_codes import AssistBuildCode
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "assist"
 MAJOR = "agreement_major_cse_cs_113_to_7_y76.json"
 DEPT = "agreement_dept_math_113_to_7_y76.json"
+# The S9c capture that pins the populated advisement shape (College of Marin
+# -> San Jose State, Computer Science B.S.), which the spike captures could not.
+ADVISEMENTS = "agreement_with_advisements_4_to_39_y76.json"
 MAJOR_KEY = "76/113/to/7/Major/f8d5b3e6-1d24-4b7a-9a3f-1b2c3d4e5f60"
 DEPT_KEY = "76/113/to/7/Department/12"
 DE_ANZA = 113
@@ -185,6 +188,29 @@ def test_dept_single_course_group_maps_to_a_bare_leaf() -> None:
     assert articulation_for(dept(), "MATH 10A").sending_expr == CourseLeaf(course="MATH 12")
 
 
+def test_padded_course_parts_are_collapsed_before_they_reach_a_contract() -> None:
+    """ASSIST pads its split parts (`courseNumber: "C1000 "`).
+
+    The code was derived from the COLLAPSED pair while the stored fields kept
+    the raw one, so a padded value failed `COURSE_NUMBER_PATTERN` even though
+    its own course code validated: 42 corridor articulations were excluded by
+    that mismatch rather than by anything wrong in the payload.
+    """
+
+    def mutate(entries: list[Any]) -> None:
+        course = entries[0]["sendingArticulation"]["items"][0]["items"][0]
+        course["prefix"] = "  MATH  "
+        course["courseNumber"] = "12 "
+
+    normalized = normalize(
+        poisoned_dept(mutate), key=DEPT_KEY, category="dept", label="Mathematics"
+    )
+
+    assert normalized.exclusions == ()
+    (course,) = [row for row in normalized.cc_courses if row.course_code == "MATH 12"]
+    assert (course.prefix, course.number) == ("MATH", "12")
+
+
 def test_projections_come_from_both_sides_of_every_articulation() -> None:
     normalized = dept()
     cc_courses, _ = dedupe_course_rows(normalized.cc_courses)
@@ -211,7 +237,9 @@ def test_three_poisoned_articulations_produce_three_exclusions_and_keep_the_rest
     def mutate(entries: list[Any]) -> None:
         entries[0]["type"] = "Series"
         entries[3]["course"]["courseNumber"] = "not a number"
-        entries[4]["attributes"] = [{"content": "Advisement text of unknown shape"}]
+        # A structured N-from rule where prose belongs: still unmodeled, so
+        # still an exclusion rather than an invented advisement.
+        entries[4]["attributes"] = [{"type": "NFollowing", "amount": 2.0, "position": 0}]
 
     normalized = normalize(
         poisoned_dept(mutate), key=DEPT_KEY, category="dept", label="Mathematics"
@@ -349,27 +377,77 @@ def test_absent_and_empty_attributes_both_mean_no_advisements(attributes: object
     assert advisement_texts(attributes) == []
 
 
-@pytest.mark.parametrize("attributes", [[{"content": "see counselor"}], "text", {"a": 1}])
-def test_any_other_attributes_shape_is_the_fixture_pending_exclusion(attributes: object) -> None:
-    """Nothing invents, paraphrases, or silently drops an advisement; split S9c
-    replaces this raise with the real mapping."""
+def test_the_pinned_shape_maps_to_text_in_published_order() -> None:
+    """`{content, position}` is the shape S9c measured live; `position` is the
+    published order, so the result cannot depend on list order."""
+    attributes = [
+        {"content": "second", "position": 1},
+        {"content": "  first  ", "position": 0},
+    ]
+
+    assert advisement_texts(attributes) == ["first", "second"]
+
+
+@pytest.mark.parametrize(
+    "attributes",
+    [
+        pytest.param("text", id="not-a-list"),
+        pytest.param({"a": 1}, id="a-mapping"),
+        pytest.param([{"position": 0}], id="no-content"),
+        pytest.param([{"content": 7, "position": 0}], id="content-not-a-string"),
+        pytest.param([{"content": "   ", "position": 0}], id="content-empty-after-strip"),
+        pytest.param([{"content": "x" * 2001, "position": 0}], id="content-too-long"),
+        pytest.param([{"content": "line\x07break", "position": 0}], id="control-characters"),
+    ],
+)
+def test_anything_but_the_pinned_shape_is_still_the_typed_exclusion(attributes: object) -> None:
+    """The gate narrowed in S9c; it did not disappear. Nothing invents,
+    paraphrases, truncates, or silently drops an advisement."""
     with pytest.raises(AssistNormalizeError) as caught:
         advisement_texts(attributes)
     assert caught.value.assist_reason_code is AssistBuildCode.ADVISEMENT_SHAPE_UNKNOWN
 
 
+def test_the_structured_n_from_shape_is_excluded_rather_than_flattened() -> None:
+    """Template sections carry `{"type": "NFollowing", "amount": 2.0, ...}` in
+    the same field name: a requirement rule, not prose. Flattening it to text
+    would invent an advisement, and skipping it would let a group that means
+    "select 2 of" read as "complete all of".
+    """
+    selection = [
+        {
+            "type": "NFollowing",
+            "amount": 2.0,
+            "amountUnitType": "Course",
+            "position": 0,
+            "selectionType": "Select",
+        }
+    ]
+
+    with pytest.raises(AssistNormalizeError) as caught:
+        advisement_texts(selection)
+    assert caught.value.assist_reason_code is AssistBuildCode.ADVISEMENT_SHAPE_UNKNOWN
+
+
 @pytest.mark.parametrize(
     "level",
-    ["articulation", "sending_articulation", "group", "course"],
+    ["articulation", "courseAttributes", "sending_articulation", "group", "course"],
 )
-def test_each_of_the_four_advisement_levels_fires_the_exclusion(level: str) -> None:
-    """Doc 02 routes exactly these four `attributes` lists into advisements, so
-    each one needs its own proof that content there is never absorbed."""
-    content = [{"content": "Complete with a grade of C or better."}]
+def test_every_articulation_level_advisement_reaches_the_contract(level: str) -> None:
+    """Seven levels feed `advisement_texts`; these five sit on an articulation.
+
+    `courseAttributes` is in the list because the S9c sweep found real prose
+    there ("Articulation is subject to placement by proficiency exam") that
+    nothing was reading at all.
+    """
+    content = [{"content": "Complete with a grade of C or better.", "position": 0}]
 
     def mutate(entries: list[Any]) -> None:
         entry = entries[0]
         sending = entry["sendingArticulation"]
+        if level == "courseAttributes":
+            entry["courseAttributes"] = content
+            return
         targets = {
             "articulation": entry,
             "sending_articulation": sending,
@@ -381,21 +459,64 @@ def test_each_of_the_four_advisement_levels_fires_the_exclusion(level: str) -> N
     normalized = normalize(
         poisoned_dept(mutate), key=DEPT_KEY, category="dept", label="Mathematics"
     )
-    assert len(normalized.articulations) == 10
-    assert [item.reason_code for item in normalized.exclusions] == [
-        AssistBuildCode.ADVISEMENT_SHAPE_UNKNOWN
-    ]
-    assert normalized.exclusions[0].position == 0
+
+    assert normalized.exclusions == ()
+    assert len(normalized.articulations) == 11
+    text = "Complete with a grade of C or better."
+    first = normalized.articulations[0]
+    if level in {"articulation", "courseAttributes", "sending_articulation"}:
+        assert first.advisements == [text]
+    else:
+        # Group and course texts become note leaves INSIDE the group node, so
+        # no advisement can be satisfied by taking the course.
+        assert text in json.dumps(first.sending_expr.model_dump())
 
 
-def test_a_template_group_advisement_excludes_only_that_group() -> None:
+def test_a_group_level_advisement_becomes_a_note_leaf_in_the_expression() -> None:
+    """The note rides inside the group node rather than beside it: an `all` of
+    the course and its note, never an `any` that the course alone satisfies."""
+
+    def mutate(entries: list[Any]) -> None:
+        entries[0]["sendingArticulation"]["items"][0]["attributes"] = [
+            {"content": "Must be taken for a letter grade", "position": 0}
+        ]
+
+    normalized = normalize(
+        poisoned_dept(mutate), key=DEPT_KEY, category="dept", label="Mathematics"
+    )
+
+    expression = normalized.articulations[0].sending_expr.model_dump()
+    assert "all" in expression
+    assert {"note": "Must be taken for a letter grade"} in expression["all"]
+
+
+def test_a_template_group_advisement_is_carried_not_excluded() -> None:
+    """ASSIST publishes group prose under `attributes`; before S9c measured
+    that, nothing read the field and 46 corridor advisements vanished."""
     raw = fixture(MAJOR)
     assets = json.loads(raw["result"]["templateAssets"])
     groups = [asset for asset in assets if asset["type"] == "RequirementGroup"]
-    groups[0]["advisements"] = [{"content": "See a counselor."}]
+    groups[0]["attributes"] = [{"content": "Minimum grade required: C or better", "position": 0}]
     raw["result"]["templateAssets"] = json.dumps(assets)
 
     normalized = normalize(raw, key=MAJOR_KEY, category="major", label="Mathematics")
+
+    assert normalized.exclusions == ()
+    assert len(normalized.requirement_groups) == 4
+    assert normalized.requirement_groups[0].advisements == ["Minimum grade required: C or better"]
+
+
+def test_a_template_section_selection_rule_excludes_only_that_group() -> None:
+    raw = fixture(MAJOR)
+    assets = json.loads(raw["result"]["templateAssets"])
+    groups = [asset for asset in assets if asset["type"] == "RequirementGroup"]
+    groups[0]["sections"][0]["advisements"] = [
+        {"type": "NFollowing", "amount": 1.0, "position": 0, "selectionType": "Select"}
+    ]
+    raw["result"]["templateAssets"] = json.dumps(assets)
+
+    normalized = normalize(raw, key=MAJOR_KEY, category="major", label="Mathematics")
+
     assert len(normalized.requirement_groups) == 3
     assert len(normalized.articulations) == 8
     assert [item.reason_code for item in normalized.exclusions] == [
@@ -403,9 +524,43 @@ def test_a_template_group_advisement_excludes_only_that_group() -> None:
     ]
 
 
-def test_the_captured_agreements_carry_no_advisements_yet() -> None:
+def test_the_original_captures_carry_no_advisements() -> None:
+    """The seven spike captures are all-empty at every level; the advisement
+    fixture below is what pins the populated shape."""
     assert all(item.advisements == [] for item in major().articulations)
     assert all(group.advisements == [] for group in major().requirement_groups)
+
+
+def test_the_captured_advisement_agreement_maps_its_real_texts() -> None:
+    """The S9c capture: College of Marin -> San Jose State Computer Science,
+    the payload the mapping was pinned from.
+
+    Its four sending-course advisements land on two articulations as note
+    leaves. Its one group-level advisement does NOT survive, because that group
+    carries an `NFromArea` instruction and is excluded whole: the advisement
+    goes with a typed exclusion in the report rather than into a group whose
+    selection rule this build cannot express.
+    """
+    normalized = normalize_agreement(
+        fixture(ADVISEMENTS),
+        assist_key="76/4/to/39/Major/3ccc93fd-a5dc-4e22-3433-08ddb349963e",
+        category="major",
+        label="Computer Science, B.S.",
+        sending_id=4,  # College of Marin
+        receiving_id=39,  # San Jose State
+    )
+
+    note = "Complete entire sequence at same institution prior to transfer"
+    with_notes = [
+        item.position
+        for item in normalized.articulations
+        if item.sending_expr is not None and note in json.dumps(item.sending_expr.model_dump())
+    ]
+    assert with_notes == [3, 10]
+    assert normalized.requirement_groups == ()
+    assert {item.reason_code for item in normalized.exclusions} == {
+        AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED
+    }
 
 
 # --- institutions and years -------------------------------------------------
