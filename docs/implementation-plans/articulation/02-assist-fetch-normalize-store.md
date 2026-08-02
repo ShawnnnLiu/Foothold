@@ -24,16 +24,23 @@ Delete the empty pre-pivot `backend/src/starmap/catalog/` package (plan architec
 The fetch layer is faked at the network boundary only (testing strategy, "Hard Rules").
 
 - `HttpResponse` frozen dataclass: `status: int`, `body: bytes`.
-- `HttpTransport` Protocol: `get(url: str, headers: dict[str, str]) -> HttpResponse`; raising `OSError`/`urllib.error.URLError` signals network failure.
+- `HttpTransport` Protocol: `get(url: str, headers: dict[str, str]) -> HttpResponse` and `cookie_value(name: str) -> str | None`; raising `OSError`/`urllib.error.URLError` signals network failure.
+  `cookie_value` is on the Protocol, not only on the production class, because `fetch.py` reads the XSRF cookie through the seam; a Protocol without it cannot be satisfied by the test twin.
 - `UrllibTransport`: production implementation over `urllib.request` with a shared `http.cookiejar.CookieJar` via `HTTPCookieProcessor` (the jar is what persists the ASSIST session cookies across calls); `cookie_value(name) -> str | None` exposes the non-HttpOnly `X-XSRF-TOKEN` cookie value for header echo; 30 s per-request timeout; no retries at this layer.
-- `FakeHttpTransport` test twin in `backend/tests/support/http.py`: a scripted `dict[url, HttpResponse | Exception]` plus a recorded request list, in the FakeTransport style of TR 4.6.
+  A `urllib.error.HTTPError` is translated back into a plain `HttpResponse` carrying its status, because ASSIST answers 400 as ordinary control flow and `urllib` raises on every 4xx/5xx; `URLError`/`OSError` propagate untouched.
+- `build_transport()` production factory (the `llm/transport_anthropic.build_client` pattern): the only thing that creates a cookie jar, so tests never build a networked object implicitly.
+- `FakeHttpTransport` test twin in `backend/tests/support/http.py`: a scripted `dict[url, HttpResponse | Exception | list[...]]` plus a recorded request list, in the FakeTransport style of TR 4.6.
+  A list value is consumed left to right and asserts when exhausted, which is what makes the "400, then 200 after the re-bootstrap" sequence expressible; a bare value answers its url unlimited times; there is no default response, so an unscripted url is a loud test failure.
 
 Locked User-Agent, sent on every request (the spike confirmed a browser UA is required):
 `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36`.
 
-## `assist/fetch.py`: session, cache, endpoints
+## `assist/fetch.py`: session and cache
 
-`AssistFetcher(transport, cache_dir: Path, clock: Clock, sleeper: Callable[[float], None])`.
+`AssistFetcher(transport, cache_dir: Path, clock: Clock, sleeper: Callable[[float], None] = time.sleep, *, root_url: str, offline: bool = True)`.
+
+`offline` DEFAULTS to true: network access is opt-in, which is what makes the S9c permission gate a deliberate act rather than an omission.
+`root_url` is injected rather than imported so this module keeps no ASSIST endpoint knowledge; `corridor.ROOT_URL` is what every caller passes.
 
 Session bootstrap (the spike doc's "Access mechanics" verbatim):
 
@@ -42,27 +49,36 @@ Session bootstrap (the spike doc's "Access mechanics" verbatim):
 3. Every subsequent API request sends headers: the UA above, `Accept: application/json`, and `X-XSRF-TOKEN: <cookie value>`.
 4. If an API response has HTTP status 400, re-bootstrap ONCE and retry the request once; a second 400 raises `AssistFetchError(agreement_fetch_failed)` naming the URL.
 
+Status handling, locked in full:
+
+| Condition | Outcome |
+|---|---|
+| Bootstrap `GET /` non-200, or 200 with no `X-XSRF-TOKEN` cookie | `AssistFetchError(session_bootstrap_failed)` |
+| API 200 | cache the body and return the decoded JSON |
+| API 400 | re-bootstrap once, retry once; a second 400 is `agreement_fetch_failed` |
+| Any other API non-200 | `agreement_fetch_failed` naming the URL and the status (never a re-bootstrap: a 500 is not a session problem) |
+| Body that is not valid JSON | `agreement_fetch_failed` naming the URL |
+| `OSError`/`URLError` out of the transport | `agreement_fetch_failed` naming the URL and the exception TYPE NAME, chained with `raise ... from` |
+
+Error messages carry urls, statuses, and exception type names only.
+They never carry response bodies and never carry the `X-XSRF-TOKEN` value, mirroring the same rule in `llm/errors.py`: a body can quote request content, and the token is a session credential.
+
 Politeness, locked: at least 1.0 s between consecutive NETWORK requests, enforced with `clock.monotonic()` plus the injected sleeper; cache hits neither sleep nor touch the network.
 
 On-disk cache, locked:
 
 - Path: `data/raw/assist/<sha256_hex(url)[:16]>.json`, raw response body bytes verbatim.
-- Manifest: `data/raw/assist/manifest.jsonl`, one line per NETWORK fetch: `{"url": ..., "key": ..., "status": ..., "fetched_at": <ISO from clock.now()>}`; append-only; gitignored along with the whole cache (overview doc, "Committed-artifact identity").
+- Manifest: `data/raw/assist/manifest.jsonl`, one line per `fetch_json` NETWORK outcome: `{"url": ..., "key": ..., "status": ..., "fetched_at": <ISO from clock.now()>}` written with `sort_keys=True`; append-only; gitignored along with the whole cache (overview doc, "Committed-artifact identity").
+  A non-200 is recorded too, so a failure leaves a trace instead of vanishing (no silent drops); the bootstrap `GET /` is session plumbing rather than a fetched payload and is not recorded.
 - `fetch_json(url) -> object`: cache hit reads and `json.loads` the file; miss goes to the network (session-bootstrapping lazily on first need), writes the cache file, appends the manifest line.
 - `offline` mode flag: a cache miss raises `AssistFetchError(agreement_fetch_failed)` instead of touching the network; this is how tests and `make build-data` run.
-
-Endpoint URL builders (paths verified in the spike doc, "Endpoints"):
-
-- `academic_years_url()` -> `https://www.assist.org/api/AcademicYears`
-- `institutions_url()` -> `https://www.assist.org/api/institutions`
-- `categories_url(receiving_id, sending_id, year_id)` -> `/api/agreements/categories?receivingInstitutionId=&sendingInstitutionId=&academicYearId=`
-- `agreements_url(receiving_id, sending_id, year_id, category_code)` -> `/api/agreements?...&categoryCode=` with `category_code` in `major | dept`
-- `agreement_url(key)` -> `/api/articulation/Agreements?Key=<urllib.parse.quote(key, safe="")>`
+- The cache directory is created on first WRITE, so an offline run against a missing directory fails typed instead of creating one.
 
 ## `assist/corridor.py`: the corridor scope (locked constants)
 
 ```python
 BASE_URL = "https://www.assist.org"
+ROOT_URL = f"{BASE_URL}/"               # the session-bootstrap url passed to AssistFetcher
 TARGET_IDS = (7, 39, 117, 120)          # UCSD, SJSU, UCLA, UCI (plan corridor, ids from institutions.json)
 DEMO_SENDING_ID = 113                    # De Anza
 DEMO_RECEIVING_ID = 7                    # UCSD
@@ -70,6 +86,15 @@ PINNED_MAJOR_KEYWORDS = ("computer science", "economics", "psychology", "biology
 PREFERRED_YEAR_ID = 76                   # 2025-2026, latest published (spike doc)
 YEAR_FALLBACK_DEPTH = 2                  # try 76, then 75, then 74 per pair
 ```
+
+Endpoint URL builders (paths verified in the spike doc, "Endpoints") live HERE rather than in `fetch.py`.
+The walk needs both the builders and the fetcher, so keeping the builders beside the corridor constants is what makes the dependency one-way (`corridor` -> `fetch`) instead of circular, and it leaves `fetch.py` as a transport-agnostic polite cached fetcher with no ASSIST endpoint knowledge.
+
+- `academic_years_url()` -> `https://www.assist.org/api/AcademicYears`
+- `institutions_url()` -> `https://www.assist.org/api/institutions`
+- `categories_url(receiving_id, sending_id, year_id)` -> `/api/agreements/categories?receivingInstitutionId=&sendingInstitutionId=&academicYearId=`
+- `agreements_url(receiving_id, sending_id, year_id, category)` -> `/api/agreements?...&categoryCode=` with `category` a `Literal["major", "dept"]`
+- `agreement_url(key)` -> `/api/articulation/Agreements?Key=<urllib.parse.quote(key, safe="")>`
 
 Corridor walk (the fetch stage), locked order and selection rules:
 
@@ -80,6 +105,22 @@ Corridor walk (the fetch stage), locked order and selection rules:
 5. Demo pair only: also fetch the dept reports list and every dept agreement payload (dept depth beyond the demo pair is cuttable major-depth per the plan; the sending-CC breadth is never cut).
 
 Volume sanity per the plan: roughly 2,300-2,600 requests, about 40-45 minutes at 1 req/s, one-time (cached thereafter).
+
+`walk_corridor(fetcher, *, only_pair: tuple[int, int] | None = None) -> CorridorScope` returns what it saw, as frozen tuple-valued dataclasses that `report.py` folds into the build report; `only_pair` is the seam the build script's `--pair S:R` flag uses.
+
+```python
+AgreementRef(assist_key, category, label, sending_id, receiving_id, year_id)   # exactly normalize_agreement's arguments
+FetchFailure(assist_key, reason_code, detail)
+PairScope(sending_id, receiving_id, year_id | None, major_reports, major_selected,
+          dept_reports, agreements, fetch_failures, scope_error | None)
+CorridorScope(targets, sending_count, preferred_year_id, pairs)
+```
+
+Fault isolation in the walk, locked:
+
+- A failed agreement payload fetch is recorded as a `FetchFailure` on its pair and the walk continues; one bad agreement never breaks the build.
+- A failed categories or reports-list fetch ends that pair with `scope_error` set and the walk continues to the next pair.
+- A `session_bootstrap_failed` is NOT isolated: it is a global condition, and swallowing it per pair would silently burn hundreds of requests, so it propagates out of the walk.
 
 ## `assist/normalize.py`: two-stage decode into contracts
 
@@ -196,7 +237,10 @@ The stale `scripts/build_catalog.py` reference in the current Makefile disappear
 
 ## Tests (all offline; fixtures are the only payload source)
 
-- Fetcher against `FakeHttpTransport`: bootstrap sends the cookie header echo on API calls; missing cookie -> typed `session_bootstrap_failed`; 400 triggers exactly one re-bootstrap plus retry, second 400 -> typed failure naming the URL; 1 req/s pacing via recorded sleeper (`sleeps` between two network calls >= 1.0); cache hit performs zero transport calls and zero sleeps; offline mode raises typed on miss; manifest line written per network fetch.
+- `UrllibTransport` against a stub opener: an `HTTPError` comes back as an `HttpResponse` carrying its status, a `URLError` propagates, headers and timeout pass through, `cookie_value` reads a real `CookieJar`.
+- Fetcher against `FakeHttpTransport`: bootstrap sends the cookie header echo on API calls; missing cookie and non-200 bootstrap -> typed `session_bootstrap_failed`; 400 triggers exactly one re-bootstrap plus retry, second 400 -> typed failure naming the URL; another non-200, a non-JSON body, and a transport `URLError` -> typed `agreement_fetch_failed`; 1 req/s pacing via recorded sleeper (`sleeps` between two network calls >= 1.0); cache hit performs zero transport calls and zero sleeps; offline mode raises typed on miss and still serves a hit; manifest line written per network fetch, failures included; no error message contains the token or a response body.
+- Corridor against `FakeHttpTransport` seeded from the seven captured fixtures: the url builders are byte-exact (including the percent-encoded agreement key); the demo pair resolves to year 76 with 168 major reports selected and 86 dept reports; keyword selection, year fallback, an exhausted fallback, an isolated agreement failure, an isolated reports-list failure, and the non-isolated session failure each have a case; two walks produce equal `CorridorScope` values.
+- Static gates extended in `backend/tests/test_import_boundaries.py`: `urllib` is confined to `assist/http.py` plus `assist/corridor.py`, and no region package imports a sibling region (the testing strategy's planned import-boundary addition). `backend/tests/test_package.py` registers `starmap.assist`.
 - Normalize on the two captured agreement fixtures end-to-end: the major fixture yields 8 articulations (MATH 20D `any`-of-two-singles, MATH 20E `all`-of-two, positions stable) and 4 requirement groups including the `Or` group with cells CSE 15L / CSE 29; the dept fixture yields 11 articulations with MATH 10B/10C as `sending_expr` null; every produced object passes its contract.
 - Normalize fault isolation: a poisoned copy of a fixture (mutated in-test, never on disk) with an unknown articulation `type`, an unparseable course code, and a non-empty `attributes` list produces exactly three typed exclusions and keeps the remaining articulations (the "one poisoned member never breaks the build" seam per the testing strategy).
 - Envelope failures: `isSuccessful` false -> `envelope_invalid`; corrupt stringified field -> `field_decode_failed` naming the field.

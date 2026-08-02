@@ -9,6 +9,7 @@ REGION_MODULES = [
     "starmap.contracts",
     "starmap.retrieval",
     "starmap.llm",
+    "starmap.assist",
     "starmap.catalog",
     "starmap.prereqs",
     "starmap.pathways",
