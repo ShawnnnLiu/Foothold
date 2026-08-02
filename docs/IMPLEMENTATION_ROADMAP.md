@@ -96,7 +96,7 @@ Milestone Aug 13: demo student to triage board + validated petition end-to-end; 
 2. Increment 4: deleting the retired Columbia-shaped contracts and their fixtures.
 3. Week 2: live Anthropic API calls (`ANTHROPIC_API_KEY`; register at stellic.com/pathfinders for credits first) and frontend scaffold dependencies (Vite, React, vitest).
 4. Week 3: Fly.io account and deploy; any Mode C go-ahead.
-5. Any new backend dependency beyond the already-approved set (pydantic, beautifulsoup4 may become droppable, anthropic; dev: pytest, ruff, mypy).
+5. Any new backend dependency beyond the already-approved set (pydantic, anthropic; dev: pytest, ruff, mypy). `beautifulsoup4` was dropped on 2026-08-01 once the Columbia bulletin pipeline retired.
 
 ## AI tool disclosure ledger
 

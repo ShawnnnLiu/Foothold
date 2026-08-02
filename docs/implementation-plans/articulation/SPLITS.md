@@ -59,7 +59,6 @@ Kickoff:
 
 Scope: `normalize.py` (envelope, double-decode, expression mapping, fixture-pending `advisement_texts`, template assets, projections), `store.py`, `report.py`, `scripts/build_articulation.py` with `--check`, Makefile updates, deletion of the empty `catalog/` package, and the full offline test list against the captured fixtures.
 Fallback boundary: normalize green on both captured agreement fixtures (tests passing) before store and the build script; if squeezed, commit normalize alone with the store carried to a follow-up commit.
-End-of-split action: propose (do not execute) the `beautifulsoup4` removal to the user.
 
 Kickoff:
 

@@ -46,7 +46,7 @@ These bind every increment and are not to be relitigated by executors.
 
 - Everything from `docs/week-1-implementations/README.md` "Globally locked decisions" still binds except where it names retired Columbia-specific stages.
 - NO new dependencies anywhere in increments 4-7: HTTP via stdlib `urllib.request` + `http.cookiejar`, fuzzy similarity via stdlib `difflib`.
-  `beautifulsoup4` becomes unused; leave it installed and untouched (removing it is a dependency change requiring user go-ahead; propose it at the end of increment 5).
+  `beautifulsoup4` became unused with the Columbia bulletin pipeline and was REMOVED on 2026-08-01 with the user's go-ahead, along with its `types-beautifulsoup4` stub; the runtime dependency set is now `pydantic` and `anthropic` only.
 - Data artifacts: `data/articulation.db` and `data/corpus.db` (committed, read-only at runtime), raw fetch cache in gitignored `data/raw/assist/`, build report in committed `data/reports/`, curated inputs in `data/curated/`.
 - Package moves per the plan's architecture section: increment 5 creates `assist/` and deletes the empty pre-pivot `catalog/` package; increment 6 creates `transfer/` and deletes the empty pre-pivot `prereqs/` package.
 
@@ -106,7 +106,6 @@ Both gates are specified in doc 02.
 | Live network: full corridor fetch (~2,300 requests, ~40 min at 1 req/s) | S9c | Go-ahead before the first request; also confirms ASSIST attribution text |
 | Cost-table numbers (`data/curated/costs.json`) | S10b | Source URLs and figures confirmed by the user; no invented numbers |
 | Committing `articulation.db` (est. tens of MB) and `corpus.db` | S9c, S11 | Confirm artifact size is acceptable before the commit |
-| Dependency removal proposal (`beautifulsoup4`) | end of S9b | Propose only; do not remove without approval |
 | Commits | every split | Each split ends in exactly one commit per its kickoff prompt |
 
 Everything else in these docs (edits, deletions listed in doc 01, offline builds from fixtures, tests) is pre-approved by the user's 2026-07-31 instructions.
@@ -114,5 +113,6 @@ Everything else in these docs (edits, deletions listed in doc 01, offline builds
 ## Standing decision points for the user (not for executors)
 
 1. Whether to delete the dormant `contracts/corpus_document.py` stack once increment 7 confirms the reduced-scope retrieval never uses it.
-2. Whether to remove the now-unused `beautifulsoup4` dependency.
-3. Whether `scripts/spike_fetch.py` (the retired spike tool) should be deleted or kept as a historical record.
+2. Whether `scripts/spike_fetch.py` (the retired spike tool) should be deleted or kept as a historical record.
+
+Resolved: the `beautifulsoup4` removal (approved and executed 2026-08-01, after S9a).
