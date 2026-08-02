@@ -1,4 +1,4 @@
-.PHONY: test lint typecheck schema-check check build-data
+.PHONY: test lint typecheck schema-check check build-data build-check
 
 test:
 	cd backend && uv run pytest
@@ -14,10 +14,14 @@ schema-check:
 
 check: lint typecheck test schema-check
 
-# The pre-pivot `scripts/build_catalog.py` was retired with the Columbia
-# bulletin pipeline on 2026-07-31. Its replacement, `scripts/build_articulation.py`,
-# lands in increment 5 (implementation plan doc 02, split S9b), at which point
-# this target invokes it. Failing loudly beats invoking a deleted script.
+# Offline and cache-driven: every stage reads `data/raw/assist/`, and live
+# ASSIST requests need `--allow-network`, which is a user permission gate.
 build-data:
-	@echo "build-data is unavailable: the ASSIST build script lands in increment 5 (see docs/implementation-plans/articulation/02-assist-fetch-normalize-store.md)." >&2
-	@exit 1
+	cd backend && uv run python scripts/build_articulation.py --stage all
+
+# The LOCAL committed-artifact gate: rebuild from the same cache and compare
+# canonical dumps. It needs the raw cache, which is gitignored and far too
+# large to commit, so this is deliberately NOT wired into CI; run it before
+# any commit that touches `data/articulation.db` or the build report.
+build-check:
+	cd backend && uv run python scripts/build_articulation.py --check
