@@ -1,7 +1,7 @@
 # Frontend Increments: Session Splits
 
 Sizing per `AGENTS.md`: each split is one fresh Claude Code session ending in exactly one commit, budgeted at roughly 300k total session tokens or less at planning time, overhead included (`CLAUDE.md`, `AGENTS.md`, this folder, named sources and tests read before the first edit).
-Splits F1-F4 are sequential; F5 additionally blocks on the LLM-node increments (separate plan folder, not yet written).
+Splits F1-F4 are sequential; F5 additionally blocks on the LLM-node increments (`docs/implementation-plans/llm-nodes/`, splits N1-N3).
 Dependency installs inside a split need the user's explicit OK before `uv add` / `npm install` runs; the kickoff prompts say so.
 
 | Split | Doc | Branch | Est. tokens | Blockers |
