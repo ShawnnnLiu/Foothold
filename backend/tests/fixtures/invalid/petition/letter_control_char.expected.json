@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "letter_text",
+    "contains control character U+0007"
+  ]
+}

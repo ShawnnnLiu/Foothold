@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "CitedCourse": {
+      "additionalProperties": false,
+      "description": "One deterministic letter-to-finding citation the UI renders.",
+      "properties": {
+        "course_code": {
+          "title": "Course Code",
+          "type": "string"
+        },
+        "finding_position": {
+          "minimum": 0,
+          "title": "Finding Position",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "course_code",
+        "finding_position"
+      ],
+      "title": "CitedCourse",
+      "type": "object"
+    },
+    "LlmReasonCode": {
+      "enum": [
+        "auth_failed",
+        "rate_limited",
+        "call_failed",
+        "retry_limit_exceeded",
+        "refusal",
+        "truncated",
+        "malformed_output",
+        "schema_rejected",
+        "repair_limit_exceeded"
+      ],
+      "title": "LlmReasonCode",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The stored and polled petition artifact.",
+  "properties": {
+    "cited": {
+      "items": {
+        "$ref": "#/$defs/CitedCourse"
+      },
+      "title": "Cited",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "evaluation_id": {
+      "pattern": "^eval_[0-9a-f]{16}$",
+      "title": "Evaluation Id",
+      "type": "string"
+    },
+    "fallback": {
+      "default": false,
+      "title": "Fallback",
+      "type": "boolean"
+    },
+    "finding_positions": {
+      "items": {
+        "minimum": 0,
+        "type": "integer"
+      },
+      "minItems": 1,
+      "title": "Finding Positions",
+      "type": "array"
+    },
+    "letter_text": {
+      "anyOf": [
+        {
+          "maxLength": 8000,
+          "minLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Letter Text"
+    },
+    "petition_id": {
+      "pattern": "^pet_[0-9a-f]{16}$",
+      "title": "Petition Id",
+      "type": "string"
+    },
+    "reason_code": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LlmReasonCode"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "succeeded",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    }
+  },
+  "required": [
+    "petition_id",
+    "evaluation_id",
+    "finding_positions",
+    "status",
+    "created_at"
+  ],
+  "title": "Petition",
+  "type": "object"
+}

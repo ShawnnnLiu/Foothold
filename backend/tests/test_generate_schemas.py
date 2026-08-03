@@ -16,6 +16,8 @@ EXPECTED_CONTRACTS = {
     "evaluation",
     "institution",
     "llm_call_log",
+    "petition",
+    "petition_draft",
     "target_course",
     "transcript_parse",
 }

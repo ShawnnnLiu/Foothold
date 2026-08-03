@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "finding_positions must be strictly ascending",
+    "[7, 1]"
+  ]
+}

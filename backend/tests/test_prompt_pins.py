@@ -16,6 +16,7 @@ from typing import NamedTuple
 import pytest
 
 from starmap.common.ids import sha256_hex
+from starmap.llm.petition_writer import PETITION_WRITER_SYSTEM
 from starmap.llm.transcript_parser import TRANSCRIPT_PARSER_SYSTEM
 
 
@@ -28,6 +29,12 @@ class PromptPin(NamedTuple):
 
 # One row per system-prompt constant; the node increments each add theirs.
 SYSTEM_PROMPT_PINS: tuple[PromptPin, ...] = (
+    PromptPin(
+        "PETITION_WRITER_SYSTEM",
+        PETITION_WRITER_SYSTEM,
+        "petition-writer-v1",
+        "edfa3abe661d0b80db2ed1824b0224c82ea39c5092c15b1467bd704eeb8696ce",
+    ),
     PromptPin(
         "TRANSCRIPT_PARSER_SYSTEM",
         TRANSCRIPT_PARSER_SYSTEM,

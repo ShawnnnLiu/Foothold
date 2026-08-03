@@ -1,0 +1,17 @@
+{
+  "additionalProperties": false,
+  "description": "The petition writer's LLM output contract.",
+  "properties": {
+    "letter_text": {
+      "maxLength": 8000,
+      "minLength": 200,
+      "title": "Letter Text",
+      "type": "string"
+    }
+  },
+  "required": [
+    "letter_text"
+  ],
+  "title": "PetitionDraft",
+  "type": "object"
+}

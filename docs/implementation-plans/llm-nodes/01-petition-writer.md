@@ -15,7 +15,7 @@ Contract-discipline order (`CLAUDE.md`, "Schema And Contract Rules"): spec doc f
 | `backend/src/starmap/llm/petition_writer.py` | Config, prompts, bundle builder, citation validator, template letter, `write_petition`. |
 | `backend/tests/contracts/test_petition.py` + `backend/tests/fixtures/{valid,invalid}/petition/` | Fixture harness rows, one named invalid fixture per constraint and validator. |
 | `backend/tests/llm/test_petition_writer.py` | The FakeTransport suite and both prompt-pin layers. |
-| `backend/schemas/petition.schema.json` | Generated; wire `Petition` (and `PetitionDraft`) into `backend/scripts/generate_schemas.py` the same way existing contracts are listed. |
+| `backend/schemas/petition.schema.json`, `backend/schemas/petition_draft.schema.json` | Generated; `Petition` and `PetitionDraft` are separate registry entries in `backend/scripts/generate_schemas.py` (the draft is the LLM output contract, not a model nested inside `Petition`), so each ships its own schema file. |
 | `backend/tests/test_prompt_pins.py` | Add the `PETITION_WRITER_SYSTEM` row to `SYSTEM_PROMPT_PINS`. |
 
 ## Contracts (`contracts/petition.py`)
@@ -149,7 +149,10 @@ Allowed vocabularies, computed from the bundle only:
 
 1. Allowed course codes: the union over selected findings of `student_course_codes`, `receiving_course_code` (when present), and every course-code-shaped token found by `CODE_SCAN_RE` inside `receiving_course_title`, `detail`, and each `advisements` entry.
    The prose fields are included because the evaluator's deterministic text may itself name agreement courses (a `partial_series` detail names the missing series member), and anything inside the findings object is legitimately citeable.
-2. Allowed agreement keys: the set of `citation.assist_key` values on selected findings.
+2. Allowed agreement keys: the set of `citation.assist_key` values on selected findings, plus every key-shaped token found by `KEY_SCAN_RE` inside `receiving_course_title`, `detail`, and each `advisements` entry - the same prose-field rule as course codes, for the same reason.
+   (Amended 2026-08-03 during N1 execution; the original rule was citations only.
+   That rule is internally inconsistent with the template-letter self-consistency requirement below: the demo pair's `double_count_risk` detail names the sibling agreement key it also applied at (`Also applied at 76/113/to/7/Department/8952:9`), the template letter echoes that detail verbatim through `{detail_clause}`, so a citations-only key set makes the deterministic fallback fail its own validator whenever that finding is selected.
+   Both vocabularies are still computed from the bundle and nothing else.)
 3. Year labels never need allowing: the scan patterns below cannot match a bare `2025-2026`.
 
 Locked scan patterns (module constants, with a comment tying them to `contracts/codes.py` and `contracts/agreement.ASSIST_KEY_PATTERN`):
@@ -204,7 +207,8 @@ Per finding, choosing the first matching row:
 | otherwise (an at-risk finding with a citation) | `I ask that {codes} be reviewed toward {target}{detail_clause} (agreement {assist_key}, {citation.year_label}).` |
 
 Where `{codes}` joins `student_course_codes` with `", "` and a final `" and "` for two or more; `{target}` is `receiving_course_code`, else `receiving_course_title`, else `the articulated requirement`; `{detail_clause}` is `"; the evaluation noted: {detail}"` when `detail` is present, else empty.
-An `unresolved` finding with empty `student_course_codes` renders `my records` in place of the parenthesized codes.
+An `unresolved` finding with empty `student_course_codes` renders `my records` in place of the codes inside the parentheses, so the paragraph reads `coursework (my records)`.
+(Clarified 2026-08-03 during N1 execution; the branch is defensive only, since real evaluator output always names the course that failed resolution.)
 
 Closing:
 

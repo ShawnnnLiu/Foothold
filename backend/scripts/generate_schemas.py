@@ -20,6 +20,7 @@ from starmap.contracts.cc_course import CcCourse
 from starmap.contracts.evaluation import Evaluation
 from starmap.contracts.institution import Institution
 from starmap.contracts.llm_call_log import LlmCallLogRecord
+from starmap.contracts.petition import Petition, PetitionDraft
 from starmap.contracts.target_course import TargetCourse
 from starmap.contracts.transcript_parse import TranscriptParse
 
@@ -41,6 +42,10 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "evaluation": Evaluation,
     "institution": Institution,
     "llm_call_log": LlmCallLogRecord,
+    # `PetitionDraft` is registered separately: it is the petition writer's LLM
+    # output contract, not a model nested inside `Petition`.
+    "petition": Petition,
+    "petition_draft": PetitionDraft,
     "target_course": TargetCourse,
     # `TranscriptChip` and `UnresolvedEntry` are reachable through
     # `transcript_parse`; the proposal models ship no generated schema because

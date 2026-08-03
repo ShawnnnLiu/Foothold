@@ -1,0 +1,5 @@
+{
+  "error_substrings": [
+    "reason_code must be null when fallback is false"
+  ]
+}
