@@ -1,0 +1,31 @@
+# Foothold on Fly.io (plan "Deployment"): a single always-on machine so the
+# demo never cold-starts, sessions.db on the /data volume, ANTHROPIC_API_KEY
+# as the only secret (set via `fly secrets set`, never here).
+app = "foothold"
+primary_region = "sjc"
+
+[env]
+  FOOTHOLD_SESSIONS_DB = "/data/sessions.db"
+  FOOTHOLD_SECURE_COOKIES = "1"
+
+[mounts]
+  source = "foothold_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = "off"
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "15s"
+    method = "GET"
+    path = "/healthz"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "1gb"

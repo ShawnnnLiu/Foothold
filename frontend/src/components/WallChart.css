@@ -31,6 +31,43 @@
   }
 }
 
+/* The ambient sidebar loop holds at both ends so the sweep occupies only the
+   18%-62% window of each cycle. */
+@keyframes fh-wallsheen {
+  0%,
+  18% {
+    background-position:
+      -150% 0,
+      0 0;
+  }
+  62%,
+  100% {
+    background-position:
+      250% 0,
+      0 0;
+  }
+}
+
+/* The chance-event flash (prototype `_nextEvent`): a fast holo sweep with a
+   mid-flight brightness/saturation spike, applied imperatively by
+   WallChart.tsx. */
+@keyframes fh-holoflash {
+  0% {
+    background-position:
+      -160% 0,
+      0 0;
+  }
+  45% {
+    filter: brightness(1.4) saturate(2);
+  }
+  100% {
+    background-position:
+      260% 0,
+      0 0;
+    filter: brightness(1) saturate(1);
+  }
+}
+
 .wall--sidebar {
   display: flex;
   flex-direction: column-reverse;
@@ -64,8 +101,9 @@
   animation-fill-mode: both;
 }
 
-/* Secure: teal fill; the one-shot white sweep rides as the first background
-   layer, second animation slot. */
+/* Secure: teal fill; the white sweep rides as the first background layer,
+   second animation slot. Highlight strength differs per variant in the
+   prototype: .55 in the theater, .5 on the sidebar wall. */
 .wall__step--secure {
   border: 2px solid var(--slate);
   background:
@@ -81,30 +119,71 @@
 
 .wall--sidebar .wall__step--secure {
   border-color: var(--chalk);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .wall__step--secure {
-    animation-name: fh-stepin, fh-sweep;
-    animation-duration: 0.35s, 1.2s;
-    animation-timing-function: ease, ease-in-out;
-    animation-fill-mode: both, both;
-  }
-
-  .wall--theater .wall__step--secure {
-    animation-name: fh-rise, fh-sweep;
-    animation-duration: 0.45s, 1.2s;
-  }
+  background:
+    linear-gradient(
+        105deg,
+        rgba(255, 255, 255, 0) 30%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0) 70%
+      )
+      no-repeat -150% 0 / 250% 100%,
+    var(--hold-teal);
 }
 
 /* Reach: the doc-00 rule-3 translation, chalk fill with a 2px amber border
-   (the prototype's chrome gradient never ships). */
+   (the prototype's chrome gradient never ships). The holographic sheen layer
+   copies the prototype verbatim: .65/.35/.35 in the theater, .6/.3/.3 on the
+   sidebar wall. */
 .wall__step--reach {
   border: 2px solid var(--hold-amber);
-  background: var(--chalk);
+  background:
+    linear-gradient(
+        105deg,
+        rgba(255, 255, 255, 0) 30%,
+        rgba(255, 255, 255, 0.65) 42%,
+        rgba(255, 0, 170, 0.35) 50%,
+        rgba(0, 255, 255, 0.35) 58%,
+        rgba(255, 255, 255, 0) 70%
+      )
+      no-repeat -150% 0 / 250% 100%,
+    var(--chalk);
 }
 
-/* Owed: dashed outline, no fill. */
+.wall--sidebar .wall__step--reach {
+  background:
+    linear-gradient(
+        105deg,
+        rgba(255, 255, 255, 0) 30%,
+        rgba(255, 255, 255, 0.6) 42%,
+        rgba(255, 0, 170, 0.3) 50%,
+        rgba(0, 255, 255, 0.3) 58%,
+        rgba(255, 255, 255, 0) 70%
+      )
+      no-repeat -150% 0 / 250% 100%,
+    var(--chalk);
+}
+
+/* Sheen durations and delays are per-step constants set inline by
+   WallChart.tsx (prototype values, indexed by stable step position). The
+   sidebar sheen loops forever; the theater sweep fires once. */
+@media (prefers-reduced-motion: no-preference) {
+  .wall--sidebar .wall__step--secure,
+  .wall--sidebar .wall__step--reach {
+    animation-name: fh-stepin, fh-wallsheen;
+    animation-timing-function: ease, ease-in-out;
+    animation-fill-mode: both, none;
+    animation-iteration-count: 1, infinite;
+  }
+
+  .wall--theater .wall__step--secure,
+  .wall--theater .wall__step--reach {
+    animation-name: fh-rise, fh-sweep;
+    animation-timing-function: ease, ease-in-out;
+    animation-fill-mode: both, both;
+  }
+}
+
+/* Owed: dashed outline, no fill, no sheen. */
 .wall__step--owed {
   border: 2px dashed var(--slate);
   background: none;

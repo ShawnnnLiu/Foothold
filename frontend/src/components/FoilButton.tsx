@@ -6,12 +6,15 @@ import "./FoilButton.css";
 // lines texture, no runtime finish switching. The sheen is a pure function of
 // cursor position (support.js `_onFoilMove` translated); the prototype's PRNG
 // idle-flash loop is dropped entirely. Disabled renders the flat treatment.
+// Second amendment (2026-08-03): the landing demo button renders the Rainbow
+// finish; `finish` is fixed per call site, still never switched at runtime.
 export default function FoilButton({
   children,
   onClick,
   disabled = false,
   frame = "slate",
   size = "md",
+  finish = "gold",
   title,
 }: {
   children: string;
@@ -19,6 +22,7 @@ export default function FoilButton({
   disabled?: boolean;
   frame?: "slate" | "chalk";
   size?: "lg" | "md" | "sm";
+  finish?: "gold" | "rainbow";
   title?: string;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
@@ -62,7 +66,7 @@ export default function FoilButton({
   return (
     <button
       ref={ref}
-      className={`foil foil--${size} foil--${frame}`}
+      className={`foil foil--${size} foil--${frame} foil--${finish}`}
       onClick={onClick}
       disabled={disabled}
       title={title}

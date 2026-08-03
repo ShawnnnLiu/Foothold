@@ -1,15 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import ErrorBanner from "../components/ErrorBanner";
 import FoilButton from "../components/FoilButton";
 import Wordmark from "../components/Wordmark";
 import type { InstitutionRow, MajorRow } from "../lib/api";
-import { errorText, fetchInstitutions, fetchMajors } from "../lib/client";
+import { errorText, fetchInstitutions, fetchMajors, searchCourses } from "../lib/client";
+import { assembleDemo, DEMO_PRESETS, type DemoStart, pickDemoIndex } from "../lib/demo";
 import type { RouteContext } from "../lib/route";
 
 import "./Landing.css";
 
-export default function Landing({ onStart }: { onStart: (route: RouteContext) => void }) {
+export default function Landing({
+  onStart,
+  onDemo,
+}: {
+  onStart: (route: RouteContext) => void;
+  onDemo: (demo: DemoStart) => void;
+}) {
   const [ccs, setCcs] = useState<InstitutionRow[]>([]);
   const [targets, setTargets] = useState<InstitutionRow[]>([]);
   const [majors, setMajors] = useState<MajorRow[]>([]);
@@ -18,6 +25,8 @@ export default function Landing({ onStart }: { onStart: (route: RouteContext) =>
   const [majorKey, setMajorKey] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [retryTick, setRetryTick] = useState(0);
+  const [demoBusy, setDemoBusy] = useState(false);
+  const lastDemoRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -67,6 +76,41 @@ export default function Landing({ onStart }: { onStart: (route: RouteContext) =>
   const receiving = targets.find((row) => String(row.assist_id) === receivingId);
   const major = majors.find((row) => row.assist_key === majorKey);
   const yearLabel = majors[0]?.year_label;
+
+  // Math.random is click-handler input (which preset to load), never render
+  // state; the chosen preset renders deterministically from there on.
+  const runDemo = async () => {
+    if (demoBusy || ccs.length === 0 || targets.length === 0) {
+      return;
+    }
+    setDemoBusy(true);
+    try {
+      const index = pickDemoIndex(DEMO_PRESETS.length, Math.random, lastDemoRef.current);
+      const preset = DEMO_PRESETS[index];
+      if (!preset) {
+        return;
+      }
+      lastDemoRef.current = index;
+      const demo = await assembleDemo(preset, {
+        ccs,
+        targets,
+        fetchMajors,
+        search: (institutionId, q) => searchCourses(institutionId, q).then((body) => body.courses),
+      });
+      if (demo.unresolved.length > 0) {
+        setError(
+          `Demo preset drifted from the data build - not resolved: ${demo.unresolved.join(", ")}`,
+        );
+        return;
+      }
+      setError(null);
+      onDemo(demo);
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setDemoBusy(false);
+    }
+  };
 
   return (
     <div className="landing">
@@ -135,6 +179,18 @@ export default function Landing({ onStart }: { onStart: (route: RouteContext) =>
           onClick={() => sending && receiving && major && onStart({ sending, receiving, major })}
         >
           Check my credits →
+        </FoilButton>
+      </div>
+      <div className="landing__demo">
+        <span className="landing__demo-hint">No transcript handy?</span>
+        <FoilButton
+          size="md"
+          finish="rainbow"
+          disabled={ccs.length === 0 || targets.length === 0 || demoBusy}
+          onClick={runDemo}
+          title="Load a real route and real courses mined from the ASSIST agreements"
+        >
+          {demoBusy ? "Rolling a real route…" : "🎲 Roll a random demo"}
         </FoilButton>
       </div>
       <div className="landing__stats">

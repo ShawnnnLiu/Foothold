@@ -100,6 +100,19 @@
   padding-bottom: 12px;
 }
 
+.landing__demo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: -8px;
+}
+
+.landing__demo-hint {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(39, 43, 49, 0.65);
+}
+
 .landing__stats {
   text-align: center;
   margin-top: 10px;

@@ -1,0 +1,26 @@
+# The build context needs: backend/ (sans venv), frontend/ (sans node_modules,
+# dist is rebuilt in-image), and the committed data artifacts. Everything else
+# stays out; data/raw alone is ~2 GB.
+.git
+.claude
+docs
+
+data/raw
+data/build
+data/reports
+data/articulation.db
+data/sessions.db*
+*.db-wal
+*.db-shm
+
+frontend/node_modules
+frontend/dist
+frontend/tsconfig.tsbuildinfo
+
+backend/.venv
+**/__pycache__
+*.pyc
+.pytest_cache
+.mypy_cache
+.ruff_cache
+.DS_Store
