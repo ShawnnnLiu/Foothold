@@ -16,7 +16,6 @@ from starmap.contracts.agreement import Agreement
 from starmap.contracts.articulation import Articulation
 from starmap.contracts.articulation_expr import ArticulationExprRoot
 from starmap.contracts.cc_course import CcCourse
-from starmap.contracts.corpus_document import CorpusDocument
 from starmap.contracts.evaluation import Evaluation
 from starmap.contracts.institution import Institution
 from starmap.contracts.llm_call_log import LlmCallLogRecord
@@ -36,7 +35,6 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "articulation": Articulation,
     "articulation_expr": ArticulationExprRoot,
     "cc_course": CcCourse,
-    "corpus_document": CorpusDocument,
     "evaluation": Evaluation,
     "institution": Institution,
     "llm_call_log": LlmCallLogRecord,
