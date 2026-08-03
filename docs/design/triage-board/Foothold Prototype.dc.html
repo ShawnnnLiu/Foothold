@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;800;900&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#F3F1EC;font-family:'Archivo',sans-serif;color:#272B31}
+a{color:#0E8A6D}a:hover{color:#272B31}
+@keyframes fh-rowin{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+@keyframes fh-rise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes fh-stepin{from{opacity:0;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
+@keyframes fh-drawer{from{transform:translateX(100%)}to{transform:none}}
+@keyframes fh-fade{from{opacity:0}to{opacity:1}}
+@keyframes fh-sweep{from{background-position:-150% 0,0 0}to{background-position:250% 0,0 0}}
+@keyframes fh-wallsheen{0%,18%{background-position:-150% 0,0 0}62%,100%{background-position:250% 0,0 0}}
+@keyframes fh-holoflash{0%{background-position:-160% 0,0 0}45%{filter:brightness(1.4) saturate(2)}100%{background-position:260% 0,0 0;filter:brightness(1) saturate(1)}}
+@media (prefers-reduced-motion: reduce){*{animation-duration:0s !important;animation-delay:0s !important;transition-duration:0s !important}}
+</style>
+</helmet>
+<div ref="{{rootRef}}" style="min-height:100vh;background:#F3F1EC;color:#272B31">
+
+<!-- ============ LANDING ============ -->
+<sc-if value="{{isLanding}}" hint-placeholder-val="{{true}}">
+<div data-screen-label="Landing" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;padding:60px 32px;animation:fh-fade .4s both">
+  <div style="display:flex;align-items:flex-end;gap:14px">
+    <svg width="52" height="44" viewBox="0 0 26 22"><rect x="0" y="14" width="7" height="8" fill="#272B31"></rect><rect x="9" y="8" width="7" height="14" fill="#272B31"></rect><rect x="18" y="1" width="7" height="21" fill="#0E8A6D" stroke="#272B31" stroke-width="2"></rect></svg>
+    <span style="font-weight:900;font-size:42px;letter-spacing:.05em;line-height:1">FOOTHOLD</span>
+  </div>
+  <div style="text-align:center">
+    <h1 style="margin:0;font-weight:900;font-size:54px;line-height:1.08;letter-spacing:.01em;text-transform:uppercase;max-width:860px;text-wrap:pretty">Don't lose the credits you already earned.</h1>
+    <p style="margin:16px auto 0;font-size:16px;font-weight:400;max-width:640px;line-height:1.55;color:rgba(39,43,49,.8)">Pick your route. Foothold triages every course against the official ASSIST articulation agreement — and every verdict cites the exact agreement line it came from.</p>
+  </div>
+  <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;justify-content:center">
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <span style="font-weight:900;font-size:10.5px;letter-spacing:.1em">COMMUNITY COLLEGE</span>
+      <select default-value="De Anza College" style="font-family:'Archivo',sans-serif;font-weight:500;font-size:14px;padding:13px 14px;background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;min-width:230px;cursor:pointer">
+        <option>De Anza College</option><option>Foothill College</option><option>Diablo Valley College</option><option>Santa Monica College</option>
+      </select>
+    </div>
+    <span style="font-weight:800;font-size:20px;padding-bottom:12px">→</span>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <span style="font-weight:900;font-size:10.5px;letter-spacing:.1em">TARGET UNIVERSITY</span>
+      <select default-value="UC San Diego" style="font-family:'Archivo',sans-serif;font-weight:500;font-size:14px;padding:13px 14px;background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;min-width:210px;cursor:pointer">
+        <option>UC San Diego</option><option>UCLA</option><option>UC Berkeley</option><option>San José State</option>
+      </select>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:7px">
+      <span style="font-weight:900;font-size:10.5px;letter-spacing:.1em">MAJOR</span>
+      <select default-value="Computer Science, B.S." style="font-family:'Archivo',sans-serif;font-weight:500;font-size:14px;padding:13px 14px;background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;min-width:230px;cursor:pointer">
+        <option>Computer Science, B.S.</option><option>Mathematics, B.S.</option><option>Data Science, B.S.</option>
+      </select>
+    </div>
+    <div onClick="{{goEntry}}" ref="{{creditsRef}}" style="--rx:0deg;--ry:0deg;--mx:50%;--my:50%;--ga:100deg;--ft:.45s;position:relative;transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));transform-style:preserve-3d;transition:transform var(--ft) ease-out;background:linear-gradient(180deg,var(--f0,#FDEBBE) 0%,var(--f1,#EDAD3F) 16%,var(--f2,#CE8412) 48%,var(--f3,#A96606) 80%,var(--f4,#EBB856) 100%);color:var(--ftx,#38220A);font-weight:900;font-size:15px;letter-spacing:.06em;text-transform:uppercase;padding:15px 26px;border:2px solid #272B31;border-radius:4px;box-shadow:5px 5px 0 #272B31, inset 0 1px 0 rgba(255,255,255,.85), inset 0 0 0 1px rgba(255,244,214,.5), inset 0 -3px 5px rgba(80,40,0,.35);cursor:pointer;white-space:nowrap" style-active="transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) scale(.96)">
+      <div style="position:absolute;inset:0;border-radius:2px;pointer-events:none;mix-blend-mode:color-dodge;opacity:var(--fso,.35);background:linear-gradient(var(--ga), rgba(255,0,170,0) calc(var(--mx) - 45%), rgba(255,0,170,.4) calc(var(--mx) - 22%), rgba(0,255,255,.45) var(--mx), rgba(255,215,0,.4) calc(var(--mx) + 22%), rgba(255,0,170,0) calc(var(--mx) + 45%))"></div>
+      <div style="position:absolute;inset:0;border-radius:2px;pointer-events:none;mix-blend-mode:overlay;opacity:.5;background:radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.8), rgba(255,255,255,0) 55%)"></div>
+      <div style="position:absolute;inset:0;border-radius:2px;pointer-events:none;mix-blend-mode:overlay;opacity:.7;background-image:var(--ftex,none);background-size:var(--ftexs,auto)"></div>
+      <span style="position:relative;display:block;transform:translateZ(16px);text-shadow:var(--fts,0 1px 0 rgba(255,248,225,.5))">Check my credits →</span>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:10px">
+    <div style="font-size:13px;font-weight:500"><span style="box-shadow:inset 0 -6px 0 rgba(217,119,6,.4)">Transfer students lose an average of 43% of their credits</span> <span style="font-weight:400;color:rgba(39,43,49,.6)">(GAO-17-574)</span></div>
+    <div style="font-size:11.5px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;margin-top:12px;color:rgba(39,43,49,.55)">Every California community college on day one · Agreement year 2025–2026</div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ COURSE ENTRY ============ -->
+<sc-if value="{{isEntry}}" hint-placeholder-val="{{false}}">
+<div data-screen-label="Course entry" style="min-height:100vh;animation:fh-fade .4s both">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 28px;border-bottom:2px solid #272B31;background:#F3F1EC">
+    <div onClick="{{goLanding}}" style="display:flex;align-items:flex-end;gap:8px;cursor:pointer">
+      <svg width="24" height="20" viewBox="0 0 26 22"><rect x="0" y="14" width="7" height="8" fill="#272B31"></rect><rect x="9" y="8" width="7" height="14" fill="#272B31"></rect><rect x="18" y="1" width="7" height="21" fill="#0E8A6D" stroke="#272B31" stroke-width="2"></rect></svg>
+      <span style="font-weight:900;font-size:19px;letter-spacing:.05em;line-height:1">FOOTHOLD</span>
+    </div>
+    <div style="font-weight:500;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase">De Anza College → UC San Diego — Computer Science, B.S. · 2025–2026</div>
+    <div onClick="{{goLanding}}" style="font-weight:800;font-size:11.5px;letter-spacing:.07em;cursor:pointer">← CHANGE ROUTE</div>
+  </div>
+  <div style="max-width:880px;margin:0 auto;padding:52px 28px 80px;display:flex;flex-direction:column;gap:26px">
+    <div>
+      <h1 style="margin:0;font-weight:900;font-size:34px;letter-spacing:.02em;text-transform:uppercase">Your courses</h1>
+      <p style="margin:8px 0 0;font-size:14.5px;color:rgba(39,43,49,.75)">Add the De Anza courses you've completed — or paste your transcript. Foothold resolves each one against the official course list.</p>
+    </div>
+    <div style="position:relative">
+      <div style="background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;padding:12px;display:flex;flex-wrap:wrap;gap:8px;min-height:92px;align-content:flex-start">
+        <sc-for list="{{chipObjs}}" as="chip" hint-placeholder-count="0">
+          <span style="display:inline-flex;align-items:center;gap:8px;background:#F3F1EC;border:2px solid #272B31;border-radius:4px;padding:6px 10px;font-weight:800;font-size:13px;letter-spacing:.02em">{{chip.name}}<span onClick="{{chip.remove}}" style="font-weight:900;font-size:13px;cursor:pointer;line-height:1;padding:0 2px" style-hover="color:#B3372E">×</span></span>
+        </sc-for>
+        <input value="{{input}}" onChange="{{onInput}}" onKeyDown="{{onKey}}" placeholder="Type a course code — MATH 1A, CIS 22C…" style="flex:1;min-width:220px;border:none;outline:none;background:transparent;font-family:'Archivo',sans-serif;font-size:14px;font-weight:500;padding:6px 4px">
+      </div>
+      <sc-if value="{{sugOpen}}" hint-placeholder-val="{{false}}">
+        <div style="position:absolute;left:0;right:0;top:100%;margin-top:6px;background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;z-index:20;overflow:hidden">
+          <sc-for list="{{sugs}}" as="s" hint-placeholder-count="0">
+            <div onClick="{{s.add}}" style="padding:10px 14px;cursor:pointer;font-size:13.5px;border-bottom:1px solid rgba(39,43,49,.15)" style-hover="background:#F3F1EC"><span style="font-weight:800">{{s.code}}</span> <span style="color:rgba(39,43,49,.75)">{{s.title}}</span></div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px">
+      <div onClick="{{loadSample}}" style="background:#fff;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:11px 16px;border:2px solid #272B31;border-radius:4px;box-shadow:3px 3px 0 #272B31;cursor:pointer" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #272B31" style-active="transform:translate(3px,3px);box-shadow:0 0 0 #272B31">Try a sample transcript</div>
+      <span style="font-weight:500;font-size:11.5px;letter-spacing:.07em;color:rgba(39,43,49,.65)">{{chipCount}} COURSES ADDED</span>
+      <div style="margin-left:auto">
+        <sc-if value="{{canEval}}" hint-placeholder-val="{{false}}">
+          <div onClick="{{startTheater}}" ref="{{evalRef}}" style="--rx:0deg;--ry:0deg;--mx:50%;--my:50%;--ga:100deg;--ft:.45s;position:relative;transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));transform-style:preserve-3d;transition:transform var(--ft) ease-out;background:linear-gradient(180deg,var(--f0,#FDEBBE) 0%,var(--f1,#EDAD3F) 16%,var(--f2,#CE8412) 48%,var(--f3,#A96606) 80%,var(--f4,#EBB856) 100%);color:var(--ftx,#38220A);font-weight:900;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:14px 24px;border:2px solid #272B31;border-radius:4px;box-shadow:5px 5px 0 #272B31, inset 0 1px 0 rgba(255,255,255,.85), inset 0 0 0 1px rgba(255,244,214,.5), inset 0 -3px 5px rgba(80,40,0,.35);cursor:pointer" style-active="transform:perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) scale(.96)">
+            <div style="position:absolute;inset:0;border-radius:2px;pointer-events:none;mix-blend-mode:color-dodge;opacity:var(--fso,.35);background:linear-gradient(var(--ga), rgba(255,0,170,0) calc(var(--mx) - 45%), rgba(255,0,170,.4) calc(var(--mx) - 22%), rgba(0,255,255,.45) var(--mx), rgba(255,215,0,.4) calc(var(--mx) + 22%), rgba(255,0,170,0) calc(var(--mx) + 45%))"></div>
+            <div style="position:absolute;inset:0;border-radius:2px;pointer-events:none;mix-blend-mode:overlay;opacity:.5;background:radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.8), rgba(255,255,255,0) 55%)"></div>
+            <div style="position:absolute;inset:0;border-radius:2px;pointer-events:none;mix-blend-mode:overlay;opacity:.7;background-image:var(--ftex,none);background-size:var(--ftexs,auto)"></div>
+            <span style="position:relative;display:block;transform:translateZ(16px);text-shadow:var(--fts,0 1px 0 rgba(255,248,225,.5))">Evaluate against ASSIST →</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{cantEval}}" hint-placeholder-val="{{true}}">
+          <div style="background:rgba(39,43,49,.15);color:rgba(39,43,49,.5);font-weight:900;font-size:14px;letter-spacing:.06em;text-transform:uppercase;padding:14px 24px;border:2px solid rgba(39,43,49,.3);border-radius:4px">Evaluate against ASSIST →</div>
+        </sc-if>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+      <span style="font-weight:900;font-size:10.5px;letter-spacing:.1em;color:rgba(39,43,49,.65)">OR PASTE YOUR TRANSCRIPT</span>
+      <textarea value="{{paste}}" onChange="{{onPaste}}" placeholder="Paste any transcript text — Foothold picks out the course codes." style="font-family:'Archivo',sans-serif;font-size:13px;font-weight:400;padding:12px 14px;background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;min-height:104px;resize:vertical;outline:none"></textarea>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div onClick="{{parsePaste}}" style="background:#fff;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:10px 15px;border:2px solid #272B31;border-radius:4px;box-shadow:3px 3px 0 #272B31;cursor:pointer;align-self:flex-start" style-hover="transform:translate(-1px,-1px);box-shadow:4px 4px 0 #272B31" style-active="transform:translate(3px,3px);box-shadow:0 0 0 #272B31">Parse courses</div>
+        <span style="font-size:11.5px;font-weight:500;letter-spacing:.05em;color:rgba(39,43,49,.6)">{{parseMsg}}</span>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ EVALUATION THEATER ============ -->
+<sc-if value="{{isTheater}}" hint-placeholder-val="{{false}}">
+<div data-screen-label="Evaluation theater" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:44px;padding:60px 32px">
+  <div style="display:flex;align-items:flex-end;gap:6px;height:190px">
+    <div style="width:58px;height:52px;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.55) 50%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,#0E8A6D;border:2px solid #272B31;border-radius:3px;transform-origin:bottom;animation:fh-rise .45s .1s both,fh-sweep 1.2s ease-in-out .25s both"></div>
+    <div style="width:54px;height:74px;border:2px solid #D97706;border-radius:3px;transform-origin:bottom;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.65) 42%,rgba(255,0,170,.35) 50%,rgba(0,255,255,.35) 58%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,linear-gradient(180deg,#FFFFFF,#DEE6EE 25%,#A9B7C7 60%,#7E8EA0);animation:fh-rise .45s .55s both,fh-sweep 1.15s ease-in-out .62s both"></div>
+    <div style="width:54px;height:96px;border:2px solid #D97706;border-radius:3px;transform-origin:bottom;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.65) 42%,rgba(255,0,170,.35) 50%,rgba(0,255,255,.35) 58%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,linear-gradient(180deg,#FFFFFF,#DEE6EE 25%,#A9B7C7 60%,#7E8EA0);animation:fh-rise .45s 1s both,fh-sweep 1.45s ease-in-out 1.08s both"></div>
+    <div style="width:50px;height:118px;border:2px solid #D97706;border-radius:3px;transform-origin:bottom;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.65) 42%,rgba(255,0,170,.35) 50%,rgba(0,255,255,.35) 58%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,linear-gradient(180deg,#FFFFFF,#DEE6EE 25%,#A9B7C7 60%,#7E8EA0);animation:fh-rise .45s 1.45s both,fh-sweep 1.25s ease-in-out 1.55s both"></div>
+    <div style="width:54px;height:140px;border:2px solid #D97706;border-radius:3px;transform-origin:bottom;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.65) 42%,rgba(255,0,170,.35) 50%,rgba(0,255,255,.35) 58%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,linear-gradient(180deg,#FFFFFF,#DEE6EE 25%,#A9B7C7 60%,#7E8EA0);animation:fh-rise .45s 1.9s both,fh-sweep 1.5s ease-in-out 1.98s both"></div>
+    <div style="width:54px;height:162px;border:2px solid #D97706;border-radius:3px;transform-origin:bottom;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.65) 42%,rgba(255,0,170,.35) 50%,rgba(0,255,255,.35) 58%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,linear-gradient(180deg,#FFFFFF,#DEE6EE 25%,#A9B7C7 60%,#7E8EA0);animation:fh-rise .45s 2.35s both,fh-sweep 1.3s ease-in-out 2.45s both"></div>
+    <div style="width:46px;height:188px;border:2px dashed #272B31;border-radius:3px;transform-origin:bottom;animation:fh-rise .45s 2.8s both"></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px;min-width:440px">
+    <sc-for list="{{theaterLines}}" as="ln" hint-placeholder-count="4">
+      <div style="{{ln.rowStyle}}"><span style="{{ln.boxStyle}}"><svg width="13" height="13" viewBox="0 0 20 20" style="{{ln.markStyle}}"><path d="M4 10.5l4 4 8-9" stroke="#F3F1EC" stroke-width="3.5" fill="none"></path></svg></span><span style="font-weight:500;font-size:15px;letter-spacing:.07em;text-transform:uppercase">{{ln.text}}</span></div>
+    </sc-for>
+  </div>
+  <div style="font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:rgba(39,43,49,.6)">The agreement decides — not the AI</div>
+</div>
+</sc-if>
+
+<!-- ============ TRIAGE ============ -->
+<sc-if value="{{isTriage}}" hint-placeholder-val="{{false}}">
+<div data-screen-label="Triage board" style="display:grid;grid-template-columns:300px 1fr;min-height:100vh">
+  <div style="background:#272B31;color:#F3F1EC;padding:24px 22px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh;box-sizing:border-box;overflow-y:auto">
+    <div onClick="{{goLanding}}" style="display:flex;align-items:flex-end;gap:8px;cursor:pointer">
+      <svg width="24" height="20" viewBox="0 0 26 22"><rect x="0" y="14" width="7" height="8" fill="#F3F1EC"></rect><rect x="9" y="8" width="7" height="14" fill="#F3F1EC"></rect><rect x="18" y="1" width="7" height="21" fill="#0E8A6D" stroke="#F3F1EC" stroke-width="2"></rect></svg>
+      <span style="font-weight:900;font-size:19px;letter-spacing:.05em;line-height:1">FOOTHOLD</span>
+    </div>
+    <div>
+      <div style="font-weight:800;font-size:13px;letter-spacing:.03em;text-transform:uppercase;line-height:1.45">De Anza College → UC San Diego</div>
+      <div style="font-weight:500;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-top:4px;color:rgba(243,241,236,.65)">Computer Science, B.S.<br>Agreement year 2025–2026</div>
+    </div>
+    <div>
+      <div style="font-weight:900;font-size:11px;letter-spacing:.1em;margin-bottom:10px;color:rgba(243,241,236,.7)">THE WALL</div>
+      <div ref="{{wallRef}}" style="display:flex;flex-direction:column-reverse;gap:4px">
+        <div style="width:96px;height:22px;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.5) 50%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,#0E8A6D;border:2px solid #F3F1EC;border-radius:2px;margin-left:0;transform-origin:left;animation:fh-stepin .35s .1s both,fh-wallsheen 6.2s ease-in-out .6s infinite"></div>
+        <div style="width:96px;height:22px;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.6) 42%,rgba(255,0,170,.3) 50%,rgba(0,255,255,.3) 58%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,linear-gradient(180deg,#F6F9FC,#A9B7C7 55%,#7E8EA0);border:2px solid #D97706;border-radius:2px;margin-left:18px;transform-origin:left;animation:fh-stepin .35s .3s both,fh-wallsheen 7.1s ease-in-out 2.3s infinite"></div>
+        <div style="width:96px;height:22px;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.6) 42%,rgba(255,0,170,.3) 50%,rgba(0,255,255,.3) 58%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,linear-gradient(180deg,#F6F9FC,#A9B7C7 55%,#7E8EA0);border:2px solid #D97706;border-radius:2px;margin-left:36px;transform-origin:left;animation:fh-stepin .35s .5s both,fh-wallsheen 5.8s ease-in-out 1.1s infinite"></div>
+        <div style="width:96px;height:22px;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.6) 42%,rgba(255,0,170,.3) 50%,rgba(0,255,255,.3) 58%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,linear-gradient(180deg,#F6F9FC,#A9B7C7 55%,#7E8EA0);border:2px solid #D97706;border-radius:2px;margin-left:54px;transform-origin:left;animation:fh-stepin .35s .7s both,fh-wallsheen 7.6s ease-in-out 3.4s infinite"></div>
+        <div style="width:96px;height:22px;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.6) 42%,rgba(255,0,170,.3) 50%,rgba(0,255,255,.3) 58%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,linear-gradient(180deg,#F6F9FC,#A9B7C7 55%,#7E8EA0);border:2px solid #D97706;border-radius:2px;margin-left:72px;transform-origin:left;animation:fh-stepin .35s .9s both,fh-wallsheen 6.6s ease-in-out 1.9s infinite"></div>
+        <div style="width:96px;height:22px;background:linear-gradient(105deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.6) 42%,rgba(255,0,170,.3) 50%,rgba(0,255,255,.3) 58%,rgba(255,255,255,0) 70%) no-repeat -150% 0/250% 100%,linear-gradient(180deg,#F6F9FC,#A9B7C7 55%,#7E8EA0);border:2px solid #D97706;border-radius:2px;margin-left:90px;transform-origin:left;animation:fh-stepin .35s 1.1s both,fh-wallsheen 7.9s ease-in-out 4.1s infinite"></div>
+        <div style="width:96px;height:22px;border:2px dashed rgba(243,241,236,.8);border-radius:2px;margin-left:108px;transform-origin:left;animation:fh-stepin .35s 1.3s both"></div>
+      </div>
+      <div style="font-weight:500;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;margin-top:10px;line-height:1.5;color:rgba(243,241,236,.8)">5.0 of 34.5 units secure<br>24.5 more within reach</div>
+    </div>
+    <div style="border-top:2px solid rgba(243,241,236,.25);padding-top:16px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;gap:11px"><span style="width:20px;height:20px;flex:none;background:#0E8A6D;border:2px solid #F3F1EC;border-radius:3px;display:inline-flex;align-items:center;justify-content:center"><svg width="12" height="12" viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" stroke="#F3F1EC" stroke-width="4" fill="none"></path></svg></span><div style="flex:1"><div style="font-weight:900;font-size:26px;line-height:1">{{cuClean}} <span style="font-weight:500;font-size:12px">UNITS</span></div><div style="font-weight:500;font-size:10.5px;letter-spacing:.07em;margin-top:3px;color:rgba(243,241,236,.7)">TRANSFERS CLEAN</div></div></div>
+      <div style="display:flex;align-items:center;gap:11px"><span style="width:20px;height:20px;flex:none;background:#D97706;border:2px solid #F3F1EC;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;line-height:1">!</span><div style="flex:1"><div style="font-weight:900;font-size:26px;line-height:1">{{cuRisk}} <span style="font-weight:500;font-size:12px">UNITS</span></div><div style="font-weight:500;font-size:10.5px;letter-spacing:.07em;margin-top:3px;color:rgba(243,241,236,.7)">AT RISK<sc-if value="{{showDollars}}" hint-placeholder-val="{{true}}"><span> · ~{{cuRiskD}}</span></sc-if></div></div></div>
+      <div style="display:flex;align-items:center;gap:11px"><span style="width:20px;height:20px;flex:none;background:#B3372E;border:2px solid #F3F1EC;border-radius:3px;display:inline-flex;align-items:center;justify-content:center"><svg width="10" height="10" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="#F3F1EC" stroke-width="4"></path></svg></span><div style="flex:1"><div style="font-weight:900;font-size:26px;line-height:1">{{cuLost}} <span style="font-weight:500;font-size:12px">UNITS</span></div><div style="font-weight:500;font-size:10.5px;letter-spacing:.07em;margin-top:3px;color:rgba(243,241,236,.7)">NO ARTICULATION<sc-if value="{{showDollars}}" hint-placeholder-val="{{true}}"><span> · ~{{cuLostD}}</span></sc-if></div></div></div>
+      <div style="display:flex;align-items:center;gap:11px"><span style="width:20px;height:20px;flex:none;background:none;border:2px dashed #F3F1EC;border-radius:3px;display:inline-flex;align-items:center;justify-content:center"><svg width="11" height="11" viewBox="0 0 20 20"><path d="M10 16V5M5 9.5L10 4.5l5 5" stroke="#F3F1EC" stroke-width="3" fill="none"></path></svg></span><div style="flex:1"><div style="font-weight:900;font-size:26px;line-height:1">{{cuOwed}} <span style="font-weight:500;font-size:12px">UNITS</span></div><div style="font-weight:500;font-size:10.5px;letter-spacing:.07em;margin-top:3px;color:rgba(243,241,236,.7)">STILL OWED</div></div></div>
+    </div>
+    <div style="margin-top:auto">
+      <div onClick="{{openDrawer}}" ref="{{foilRef}}" style="--rx:0deg;--ry:0deg;--mx:50%;--my:50%;--ga:100deg;--ft:.45s;position:relative;transform:perspective(600px) rotateX(var(--rx)) rotateY(var(--ry));transform-style:preserve-3d;transition:transform var(--ft) ease-out;background:linear-gradient(180deg,var(--f0,#FDEBBE) 0%,var(--f1,#EDAD3F) 16%,var(--f2,#CE8412) 48%,var(--f3,#A96606) 80%,var(--f4,#EBB856) 100%);color:var(--ftx,#38220A);font-weight:900;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:14px 16px;border:2px solid #F3F1EC;border-radius:4px;box-shadow:4px 4px 0 #F3F1EC, inset 0 1px 0 rgba(255,255,255,.85), inset 0 0 0 1px rgba(255,244,214,.5), inset 0 -3px 5px rgba(80,40,0,.45);cursor:pointer;text-align:center" style-active="transform:perspective(600px) rotateX(var(--rx)) rotateY(var(--ry)) scale(.96)">
+        <div style="position:absolute;inset:0;border-radius:2px;pointer-events:none;mix-blend-mode:color-dodge;opacity:var(--fso,.35);background:linear-gradient(var(--ga), rgba(255,0,170,0) calc(var(--mx) - 45%), rgba(255,0,170,.4) calc(var(--mx) - 22%), rgba(0,255,255,.45) var(--mx), rgba(255,215,0,.4) calc(var(--mx) + 22%), rgba(255,0,170,0) calc(var(--mx) + 45%))"></div>
+        <div style="position:absolute;inset:0;border-radius:2px;pointer-events:none;mix-blend-mode:overlay;opacity:.5;background:radial-gradient(circle at var(--mx) var(--my), rgba(255,255,255,.8), rgba(255,255,255,0) 55%)"></div>
+        <div style="position:absolute;inset:0;border-radius:2px;pointer-events:none;mix-blend-mode:overlay;opacity:.7;background-image:var(--ftex,none);background-size:var(--ftexs,auto)"></div>
+        <span style="position:relative;display:block;transform:translateZ(16px);text-shadow:var(--fts,0 1px 0 rgba(255,248,225,.5))">Draft petition letter</span>
+      </div>
+      <div style="font-weight:400;font-size:10px;margin-top:10px;color:rgba(243,241,236,.55);line-height:1.5">Verdicts come from the official ASSIST articulation agreement — every card cites its line.</div>
+    </div>
+  </div>
+
+  <div style="border-left:2px solid #272B31;min-width:0">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 28px;border-bottom:2px solid #272B31">
+      <sc-if value="{{isBoard}}" hint-placeholder-val="{{true}}">
+        <div style="background:#272B31;color:#F3F1EC;font-weight:900;font-size:12px;letter-spacing:.07em;padding:9px 16px;border:2px solid #272B31;border-radius:4px">TRIAGE BOARD</div>
+        <div onClick="{{goArb}}" style="background:#F3F1EC;font-weight:900;font-size:12px;letter-spacing:.07em;padding:9px 16px;border:2px solid #272B31;border-radius:4px;cursor:pointer" style-hover="background:#fff">ARBITRAGE</div>
+      </sc-if>
+      <sc-if value="{{isArb}}" hint-placeholder-val="{{false}}">
+        <div onClick="{{goBoard}}" style="background:#F3F1EC;font-weight:900;font-size:12px;letter-spacing:.07em;padding:9px 16px;border:2px solid #272B31;border-radius:4px;cursor:pointer" style-hover="background:#fff">TRIAGE BOARD</div>
+        <div style="background:#272B31;color:#F3F1EC;font-weight:900;font-size:12px;letter-spacing:.07em;padding:9px 16px;border:2px solid #272B31;border-radius:4px">ARBITRAGE</div>
+      </sc-if>
+      <div onClick="{{goEntry}}" style="margin-left:auto;font-weight:800;font-size:11.5px;letter-spacing:.07em;cursor:pointer">← EDIT COURSES</div>
+    </div>
+
+    <sc-if value="{{isBoard}}" hint-placeholder-val="{{true}}">
+    <div style="padding:26px 40px 36px 28px;display:flex;flex-direction:column;gap:24px">
+      <div style="margin-left:0;animation:fh-rowin .5s .5s both">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+          <span style="width:30px;height:30px;background:#0E8A6D;border:2px solid #272B31;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 #272B31"><svg width="16" height="16" viewBox="0 0 20 20"><path d="M4 10.5l4 4 8-9" stroke="#F3F1EC" stroke-width="3.5" fill="none"></path></svg></span>
+          <span style="font-weight:900;font-size:16px;letter-spacing:.05em">TRANSFERS CLEAN</span>
+          <span style="font-weight:500;font-size:11px;letter-spacing:.06em;color:rgba(39,43,49,.65)">1 COURSE · 5.0 UNITS</span>
+        </div>
+        <div style="background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;padding:13px 18px;display:flex;align-items:center;gap:16px" style-hover="box-shadow:6px 6px 0 #272B31;transform:translate(-1px,-1px)">
+          <div style="flex:1">
+            <div style="font-size:14px"><span style="font-weight:800">MATH 1A</span> Calculus I <span style="font-weight:800">→</span> <span style="font-weight:800">MATH 20A</span> Calculus for Science and Engineering</div>
+            <div style="margin-top:6px"><span style="font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;box-shadow:inset 0 -6px 0 rgba(14,138,109,.35)">Major agreement 2025–2026 — Articulation #5</span></div>
+          </div>
+          <div style="font-weight:800;font-size:14px">5.0 UNITS</div>
+        </div>
+      </div>
+      <div style="margin-left:34px;margin-right:-12px;animation:fh-rowin .5s .35s both">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+          <span style="width:30px;height:30px;background:#D97706;border:2px solid #272B31;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 #272B31;font-weight:900;font-size:17px;color:#F3F1EC;line-height:1">!</span>
+          <span style="font-weight:900;font-size:16px;letter-spacing:.05em">AT RISK</span>
+          <span style="font-weight:500;font-size:11px;letter-spacing:.06em;color:rgba(39,43,49,.65)">6 COURSES · 24.5 UNITS<sc-if value="{{showDollars}}" hint-placeholder-val="{{true}}"><span> · ~$2,450 AT STAKE</span></sc-if></span>
+        </div>
+        <div style="background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:8px 8px 0 #D97706;display:grid;grid-template-columns:1fr 1fr">
+          <div style="padding:12px 16px;border-right:2px solid #272B31" style-hover="background:#FBF4E4">
+            <div style="font-size:13px"><span style="font-weight:800">MATH 1B</span> Calculus II <span style="font-weight:800">→ MATH 20B</span></div>
+            <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:2px solid #D97706;border-radius:4px;padding:1px 6px">Advisement note</span><span style="font-size:11.5px;color:rgba(39,43,49,.75)">"Must complete entire series"</span></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:10.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;box-shadow:inset 0 -5px 0 rgba(217,119,6,.4)">Major agr. 2025–2026 — Art. #1</span><span style="font-weight:800;font-size:12px">5.0 U</span></div>
+          </div>
+          <div style="padding:12px 16px" style-hover="background:#FBF4E4">
+            <div style="font-size:13px"><span style="font-weight:800">MATH 2A</span> Differential Equations <span style="font-weight:800">→ MATH 20D</span></div>
+            <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:2px solid #D97706;border-radius:4px;padding:1px 6px">Double-count risk</span><span style="font-size:11.5px;color:rgba(39,43,49,.75)">Also applied on the dept. agreement</span></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:10.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;box-shadow:inset 0 -5px 0 rgba(217,119,6,.4)">Major agr. 2025–2026 — Art. #0</span><span style="font-weight:800;font-size:12px">5.0 U</span></div>
+          </div>
+          <div style="padding:12px 16px;border-top:2px solid #272B31;border-right:2px solid #272B31" style-hover="background:#FBF4E4">
+            <div style="font-size:13px"><span style="font-weight:800">CIS 22C</span> Data Abstraction &amp; Structures <span style="font-weight:800">→ CSE 12</span></div>
+            <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:2px solid #D97706;border-radius:4px;padding:1px 6px">Fuzzy match</span><span style="font-size:11.5px;color:rgba(39,43,49,.75)">Resolved by title similarity</span></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:10.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;box-shadow:inset 0 -5px 0 rgba(217,119,6,.4)">Major agr. 2025–2026 — Art. #7</span><span style="font-weight:800;font-size:12px">4.5 U</span></div>
+          </div>
+          <div style="padding:12px 16px;border-top:2px solid #272B31" style-hover="background:#FBF4E4">
+            <div style="font-size:13px"><span style="font-weight:800">MATH 1C</span> Calculus III <span style="font-weight:800">→ MATH 20E</span></div>
+            <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:2px solid #D97706;border-radius:4px;padding:1px 6px">Partial series</span><span style="font-size:11.5px;color:rgba(39,43,49,.75)">MATH 1D still needed</span></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:10.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;box-shadow:inset 0 -5px 0 rgba(217,119,6,.4)">Major agr. 2025–2026 — Art. #3</span><span style="font-weight:800;font-size:12px">5.0 U</span></div>
+          </div>
+          <div style="padding:12px 16px;border-top:2px solid #272B31;border-right:2px solid #272B31" style-hover="background:#FBF4E4">
+            <div style="font-size:13px"><span style="font-weight:800">MATH 22</span> Discrete Mathematics <span style="font-weight:800">→ MATH 15A</span></div>
+            <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:2px solid #D97706;border-radius:4px;padding:1px 6px">Stale year</span><span style="font-size:11.5px;color:rgba(39,43,49,.75)">Cited 2024–2025; newest is 2025–2026</span></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:10.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;box-shadow:inset 0 -5px 0 rgba(217,119,6,.4)">Dept. agr. 2024–2025 — Art. #4</span><span style="font-weight:800;font-size:12px">5.0 U</span></div>
+          </div>
+          <div style="padding:12px 16px;border-top:2px solid #272B31" style-hover="background:#FBF4E4">
+            <div style="font-size:13px"><span style="font-weight:800">PHYS 4A</span> <span style="color:rgba(39,43,49,.6)">(unresolved)</span></div>
+            <div style="margin-top:5px;display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:2px solid #D97706;border-radius:4px;padding:1px 6px">Unresolved</span><span style="font-size:11.5px;color:rgba(39,43,49,.75)">Not in the De Anza list — fix the chip</span></div>
+            <div style="margin-top:6px;display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span style="font-size:10.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;color:rgba(39,43,49,.5)">No citation</span><span style="font-weight:800;font-size:12px;color:rgba(39,43,49,.5)">—</span></div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-left:68px;animation:fh-rowin .5s .2s both">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+          <span style="width:30px;height:30px;background:#B3372E;border:2px solid #272B31;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;box-shadow:3px 3px 0 #272B31"><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 5l10 10M15 5L5 15" stroke="#F3F1EC" stroke-width="3.5"></path></svg></span>
+          <span style="font-weight:900;font-size:16px;letter-spacing:.05em">NO ARTICULATION</span>
+          <span style="font-weight:500;font-size:11px;letter-spacing:.06em;color:rgba(39,43,49,.65)">1 COURSE · 5.0 UNITS<sc-if value="{{showDollars}}" hint-placeholder-val="{{true}}"><span> · ~$500</span></sc-if></span>
+        </div>
+        <div style="background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;padding:13px 18px;display:flex;align-items:center;gap:16px" style-hover="box-shadow:6px 6px 0 #272B31;transform:translate(-1px,-1px)">
+          <div style="flex:1">
+            <div style="font-size:14px"><span style="font-weight:800">MATH 12</span> Introductory Calculus for Business and Social Science</div>
+            <div style="margin-top:6px"><span style="font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;box-shadow:inset 0 -6px 0 rgba(179,55,46,.3)">No published articulation applies this course to this major</span></div>
+          </div>
+          <div style="font-weight:800;font-size:14px">5.0 UNITS</div>
+        </div>
+      </div>
+      <div style="margin-left:102px;animation:fh-rowin .5s .05s both">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+          <span style="width:30px;height:30px;background:#F3F1EC;border:2px dashed #272B31;border-radius:4px;display:inline-flex;align-items:center;justify-content:center"><svg width="15" height="15" viewBox="0 0 20 20"><path d="M10 16V5M5 9.5L10 4.5l5 5" stroke="#272B31" stroke-width="2.5" fill="none"></path></svg></span>
+          <span style="font-weight:900;font-size:16px;letter-spacing:.05em">STILL OWED</span>
+          <span style="font-weight:500;font-size:11px;letter-spacing:.06em;color:rgba(39,43,49,.65)">ROUTE AHEAD · 4.0 UNITS</span>
+        </div>
+        <div style="background:#F3F1EC;border:2px dashed #272B31;border-radius:4px;padding:13px 18px;display:flex;align-items:center;gap:16px">
+          <div style="flex:1">
+            <div style="font-size:14px"><span style="font-weight:800">CSE 15L</span> or <span style="font-weight:800">CSE 29</span></div>
+            <div style="margin-top:6px"><span style="font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;box-shadow:inset 0 -6px 0 rgba(39,43,49,.2)">Major agreement 2025–2026 — Articulation #0</span></div>
+          </div>
+          <div style="font-weight:800;font-size:14px">4.0 UNITS</div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+
+    <sc-if value="{{isArb}}" hint-placeholder-val="{{false}}">
+    <div data-screen-label="Arbitrage" style="padding:30px 40px 40px 28px;max-width:1000px;animation:fh-fade .3s both">
+      <h2 style="margin:0;font-weight:900;font-size:26px;letter-spacing:.03em;text-transform:uppercase">Take it at a community college instead</h2>
+      <p style="margin:8px 0 24px;font-size:14px;color:rgba(39,43,49,.75)">Courses still open at De Anza that articulate back to this degree — ranked by tuition saved. Savings are illustrative sample data.</p>
+      <div style="display:flex;flex-direction:column;gap:18px">
+        <div style="background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;padding:16px 20px;display:flex;align-items:center;gap:20px" style-hover="box-shadow:6px 6px 0 #272B31;transform:translate(-1px,-1px)">
+          <div style="font-weight:900;font-size:26px;width:44px">#1</div>
+          <div style="flex:1">
+            <div style="font-size:14.5px"><span style="font-weight:800">MATH 1D</span> Calculus IV <span style="font-weight:800">→ MATH 20E</span> Vector Calculus <span style="color:rgba(39,43,49,.65)">(with MATH 1C)</span></div>
+            <div style="margin-top:7px;display:flex;align-items:center;gap:14px"><span style="font-weight:800;font-size:12px">5.0 UNITS</span><span style="font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;box-shadow:inset 0 -5px 0 rgba(14,138,109,.35)">Major agreement 2025–2026 — Articulation #3</span></div>
+          </div>
+          <div style="background:#0E8A6D;color:#F3F1EC;border:2px solid #272B31;border-radius:4px;box-shadow:3px 3px 0 #272B31;padding:10px 16px;text-align:center"><div style="font-weight:900;font-size:20px;line-height:1">$2,270</div><div style="font-weight:500;font-size:9.5px;letter-spacing:.08em;margin-top:3px">YOU SAVE</div></div>
+        </div>
+        <div style="background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;padding:16px 20px;display:flex;align-items:center;gap:20px" style-hover="box-shadow:6px 6px 0 #272B31;transform:translate(-1px,-1px)">
+          <div style="font-weight:900;font-size:26px;width:44px">#2</div>
+          <div style="flex:1">
+            <div style="font-size:14.5px"><span style="font-weight:800">CIS 22A</span> Python Programming <span style="font-weight:800">→ CSE 8A</span> Intro to Programming</div>
+            <div style="margin-top:7px;display:flex;align-items:center;gap:14px"><span style="font-weight:800;font-size:12px">4.5 UNITS</span><span style="font-size:11px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;box-shadow:inset 0 -5px 0 rgba(14,138,109,.35)">Major agreement 2025–2026 — Articulation #6</span></div>
+          </div>
+          <div style="background:#0E8A6D;color:#F3F1EC;border:2px solid #272B31;border-radius:4px;box-shadow:3px 3px 0 #272B31;padding:10px 16px;text-align:center"><div style="font-weight:900;font-size:20px;line-height:1">$2,043</div><div style="font-weight:500;font-size:9.5px;letter-spacing:.08em;margin-top:3px">YOU SAVE</div></div>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+
+  <!-- Petition drawer -->
+  <sc-if value="{{drawer}}" hint-placeholder-val="{{false}}">
+    <div onClick="{{closeDrawer}}" style="position:fixed;inset:0;background:rgba(39,43,49,.55);z-index:40;animation:fh-fade .25s both"></div>
+    <div data-screen-label="Petition drawer" style="position:fixed;top:0;right:0;bottom:0;width:600px;max-width:92vw;background:#F3F1EC;border-left:2px solid #272B31;box-shadow:-8px 0 0 #D97706;z-index:50;overflow-y:auto;animation:fh-drawer .35s both;box-sizing:border-box;padding:24px 26px 30px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <h2 style="margin:0;font-weight:900;font-size:20px;letter-spacing:.04em;text-transform:uppercase;flex:1">Petition letter</h2>
+        <div onClick="{{closeDrawer}}" style="width:32px;height:32px;border:2px solid #272B31;border-radius:4px;background:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;cursor:pointer;box-shadow:3px 3px 0 #272B31" style-active="transform:translate(3px,3px);box-shadow:0 0 0 #272B31">×</div>
+      </div>
+      <div style="font-weight:500;font-size:11px;letter-spacing:.07em;text-transform:uppercase;margin:6px 0 16px;color:rgba(39,43,49,.65)">{{selCount}} of 6 items selected — the letter rebuilds as you check</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px">
+        <sc-for list="{{petItems}}" as="it" hint-placeholder-count="6">
+          <div onClick="{{it.toggle}}" style="display:flex;align-items:center;gap:11px;background:#fff;border:2px solid #272B31;border-radius:4px;padding:9px 12px;cursor:pointer" style-hover="box-shadow:3px 3px 0 #272B31;transform:translate(-1px,-1px)">
+            <span style="{{it.boxStyle}}">{{it.mark}}</span>
+            <span style="font-weight:800;font-size:13px;width:74px">{{it.code}}</span>
+            <span style="font-size:12px;color:rgba(39,43,49,.75);flex:1">{{it.title}}</span>
+            <span style="{{it.tagStyle}}">{{it.tag}}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:#fff;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #272B31;padding:22px 24px">
+        <div style="font-weight:900;font-size:11px;letter-spacing:.1em;margin-bottom:14px;color:rgba(39,43,49,.6)">DRAFT — GROUNDED IN THE 2025–2026 AGREEMENT</div>
+        <p style="margin:0 0 14px;font-size:13.5px;line-height:1.7">To the Office of Admissions, UC San Diego:</p>
+        <sc-for list="{{letterParas}}" as="p" hint-placeholder-count="3">
+          <p style="margin:0 0 14px;font-size:13.5px;line-height:1.7">{{p.pre}} <span style="{{p.cs}}">{{p.code}}</span> {{p.paren}} {{p.mid}}<span style="{{p.cs}}">{{p.target}}</span>{{p.mid2}} <span style="{{p.ts}}">{{p.cite}}</span>. {{p.tail}}</p>
+        </sc-for>
+        <p style="margin:0;font-size:13.5px;line-height:1.7">Transcript and course syllabi are attached. Thank you for your review.<br>Sincerely,<br>[Your name]</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:14px;margin-top:18px">
+        <div onClick="{{copyLetter}}" style="background:#272B31;color:#F3F1EC;font-weight:900;font-size:13px;letter-spacing:.06em;text-transform:uppercase;padding:13px 20px;border:2px solid #272B31;border-radius:4px;box-shadow:4px 4px 0 #D97706;cursor:pointer" style-hover="transform:translate(-2px,-2px);box-shadow:6px 6px 0 #D97706" style-active="transform:translate(4px,4px);box-shadow:0 0 0 #D97706">{{copyLabel}}</div>
+        <span style="font-size:11.5px;font-weight:500;color:rgba(39,43,49,.65)">This is a draft — verify with your counselor before submitting.</span>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;landing&quot;,&quot;entry&quot;,&quot;theater&quot;,&quot;triage&quot;],&quot;default&quot;:&quot;landing&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Demo&quot;},&quot;foilFinish&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Gold&quot;,&quot;Chrome&quot;,&quot;Oil slick&quot;,&quot;Rose gold&quot;],&quot;default&quot;:&quot;Rose gold&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Foil (buttons)&quot;},&quot;foilTexture&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Smooth&quot;,&quot;Prism lines&quot;,&quot;Sparkle&quot;],&quot;default&quot;:&quot;Prism lines&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Foil (buttons)&quot;},&quot;showDollars&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;reduceMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+class Component extends DCLogic {
+  state = {screen:'landing', chips:[], input:'', paste:'', parseMsg:'', theaterStep:-1, tab:'board', drawer:false, copied:false,
+    sel:{m1b:true,m2a:false,c22c:false,m1c:true,m22:false,m12:true},
+    cu:{clean:0,risk:0,riskD:0,lost:0,lostD:0,owed:0}};
+  CAT = [['MATH 1A','Calculus I'],['MATH 1B','Calculus II'],['MATH 1C','Calculus III'],['MATH 1D','Calculus IV'],['MATH 2A','Differential Equations'],['MATH 22','Discrete Mathematics'],['MATH 12','Intro Calculus for Business and Social Science'],['CIS 22A','Python Programming'],['CIS 22C','Data Abstraction and Structures'],['PHYS 4A','Physics: Mechanics'],['EWRT 1A','Composition and Reading'],['CHEM 1A','General Chemistry']];
+  SAMPLE = ['MATH 1A','MATH 1B','MATH 1C','MATH 2A','MATH 22','MATH 12','CIS 22C','PHYS 4A'];
+  PET = [
+    {k:'m1b',code:'MATH 1B',title:'Calculus II',units:'5.0',target:'MATH 20B',tag:'ADVISEMENT',v:'amber',cite:'articulation #1',agr:'under the 2025\u20132026 De Anza College \u2013 UC San Diego articulation agreement,',tail:'The advisement requires the entire series; my completed calculus sequence is reflected on the attached transcript.'},
+    {k:'m2a',code:'MATH 2A',title:'Differential Equations',units:'5.0',target:'MATH 20D',tag:'DOUBLE-COUNT',v:'amber',cite:'articulation #0',agr:'under the 2025\u20132026 De Anza College \u2013 UC San Diego articulation agreement,',tail:'I ask that it be applied once, to the major requirement, resolving the double-count flag.'},
+    {k:'c22c',code:'CIS 22C',title:'Data Abstraction and Structures',units:'4.5',target:'CSE 12',tag:'FUZZY MATCH',v:'amber',cite:'articulation #7',agr:'under the 2025\u20132026 De Anza College \u2013 UC San Diego articulation agreement,',tail:'The attached syllabus confirms the match resolved by course title.'},
+    {k:'m1c',code:'MATH 1C',title:'Calculus III',units:'5.0',target:'MATH 20E',tag:'PARTIAL SERIES',v:'amber',cite:'articulation #3',agr:'under the 2025\u20132026 De Anza College \u2013 UC San Diego articulation agreement,',tail:'MATH 1D, completing the series, is in progress this term.'},
+    {k:'m22',code:'MATH 22',title:'Discrete Mathematics',units:'5.0',target:'MATH 15A',tag:'STALE YEAR',v:'amber',cite:'articulation #4',agr:'under the 2024\u20132025 department articulation agreement,',tail:'I request confirmation that the articulation carries into the 2025\u20132026 agreement year.'},
+    {k:'m12',code:'MATH 12',title:'Introductory Calculus for Business and Social Science',units:'5.0',target:'',tag:'NO ARTICULATION',v:'red',cite:'2025\u20132026 agreement',agr:'',tail:'I request individual review of the attached syllabus.'}
+  ];
+  UL = {amber:'inset 0 -6px 0 rgba(217,119,6,.4)', red:'inset 0 -6px 0 rgba(179,55,46,.3)'};
+  foilRef = React.createRef(); creditsRef = React.createRef(); evalRef = React.createRef(); rootRef = React.createRef(); wallRef = React.createRef();
+  FOILS = {
+    'Gold':{g:['#FDEBBE','#EDAD3F','#CE8412','#A96606','#EBB856'],tx:'#38220A',so:.35,ts:'0 1px 0 rgba(255,248,225,.5)'},
+    'Chrome':{g:['#FFFFFF','#DEE6EE','#A9B7C7','#7E8EA0','#EAF0F6'],tx:'#1B242E',so:.4,ts:'0 1px 0 rgba(255,255,255,.7)'},
+    'Oil slick':{g:['#57647A','#333D4E','#1B222E','#141A24','#465268'],tx:'#F3F1EC',so:.6,ts:'0 1px 2px rgba(0,0,0,.55)'},
+    'Rose gold':{g:['#FCE9E4','#F2B3A4','#D98873','#B4614C','#F4C8BA'],tx:'#40160B',so:.35,ts:'0 1px 0 rgba(255,236,228,.6)'}
+  };
+  TEX = {
+    'Smooth':{i:'none',s:'auto'},
+    'Prism lines':{i:'repeating-linear-gradient(115deg, rgba(255,255,255,.35) 0px, rgba(255,255,255,.35) 1px, rgba(255,255,255,0) 1px, rgba(255,255,255,0) 4px)',s:'auto'},
+    'Sparkle':{i:'radial-gradient(circle at 25% 35%, rgba(255,255,255,.95) 0px, rgba(255,255,255,.95) 1px, rgba(255,255,255,0) 2px), radial-gradient(circle at 70% 60%, rgba(255,255,255,.8) 0px, rgba(255,255,255,.8) 1px, rgba(255,255,255,0) 1.8px), radial-gradient(circle at 45% 82%, rgba(255,255,255,.85) 0px, rgba(255,255,255,.85) 1px, rgba(255,255,255,0) 1.8px)',s:'26px 26px, 34px 34px, 30px 30px'}
+  };
+  applyFoil(){
+    const el=this.rootRef.current; if(!el) return;
+    const f=this.FOILS[this.props.foilFinish]||this.FOILS['Rose gold'];
+    const t=this.TEX[this.props.foilTexture]||this.TEX['Prism lines'];
+    f.g.forEach((c,i)=>el.style.setProperty('--f'+i,c));
+    el.style.setProperty('--ftx',f.tx); el.style.setProperty('--fso',f.so);
+    el.style.setProperty('--fts',f.ts);
+    el.style.setProperty('--ftex',t.i); el.style.setProperty('--ftexs',t.s);
+  }
+  componentDidUpdate(){ this.applyFoil(); }
+  componentDidMount(){
+    this._onFoilMove=(e)=>{
+      const els=[this.foilRef,this.creditsRef,this.evalRef].map(rf=>rf.current).filter(Boolean);
+      if(!els.length) return;
+      const win=els[0].ownerDocument.defaultView;
+      if(this._foilRaf) win.cancelAnimationFrame(this._foilRaf);
+      this._foilRaf=win.requestAnimationFrame(()=>{
+        for(const el of els){
+          const r=el.getBoundingClientRect(); if(!r.width) continue;
+          const nx=(e.clientX-r.left)/r.width, ny=(e.clientY-r.top)/r.height;
+          const dx=Math.max(r.left-e.clientX, 0, e.clientX-r.right);
+          const dy=Math.max(r.top-e.clientY, 0, e.clientY-r.bottom);
+          const inf=Math.max(0, 1-Math.hypot(dx,dy)/180);
+          el.style.setProperty('--ft','.12s');
+          el.style.setProperty('--rx',((.5-ny)*5*inf).toFixed(2)+'deg');
+          el.style.setProperty('--ry',((nx-.5)*7*inf).toFixed(2)+'deg');
+          el.style.setProperty('--mx',(50+(nx*100-50)*inf).toFixed(1)+'%');
+          el.style.setProperty('--my',(50+(ny*100-50)*inf).toFixed(1)+'%');
+          el.style.setProperty('--ga',(100+(nx-.5)*40*inf).toFixed(1)+'deg');
+        }
+      });
+    };
+    this._foilTimer=setInterval(()=>{
+      const el=this.rootRef.current; if(!el) return;
+      clearInterval(this._foilTimer);
+      this._foilDoc=el.ownerDocument;
+      this._foilDoc.addEventListener('mousemove',this._onFoilMove);
+      this.applyFoil();
+    },100);
+    this._nextEvent=()=>{
+      this._evT=setTimeout(()=>{
+        const wall=this.wallRef.current;
+        if(wall && !this.reduced()){
+          const steps=[...wall.children].filter(c=>(c.style.animationName||'').includes('fh-wallsheen')||(c.style.animation||'').includes('fh-wallsheen'));
+          const flash=(el,d)=>{ const orig=el.style.animation;
+            el.style.animation='fh-stepin 0s both, fh-holoflash '+(0.9+Math.random()*0.6).toFixed(2)+'s ease-in-out '+(d||0)+'ms both';
+            setTimeout(()=>{ el.style.animation=orig; },(d||0)+1800); };
+          const roll=Math.random();
+          if(steps.length){
+            if(roll<0.45) flash(steps[Math.floor(Math.random()*steps.length)]);
+            else if(roll<0.75) steps.forEach((el,i)=>flash(el,i*140));
+            else { const el=steps[Math.floor(Math.random()*steps.length)];
+              el.style.transition='filter .25s ease, box-shadow .25s ease';
+              el.style.filter='brightness(1.7) saturate(1.6)';
+              el.style.boxShadow='0 0 14px rgba(255,255,255,.75)';
+              setTimeout(()=>{ el.style.filter=''; el.style.boxShadow=''; },340); }
+          }
+        }
+        this._nextEvent();
+      },3500+Math.random()*5500);
+    };
+    this._nextEvent();
+    const s = this.props.startScreen ?? 'landing';
+    if(s==='theater') this.startTheaterNow();
+    else if(s==='triage') this.goTriageNow();
+    else if(s!=='landing') this.setState({screen:s});
+  }
+  reduced(){ return (this.props.reduceMotion ?? false) || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  startTheaterNow(){
+    this.setState({screen:'theater', theaterStep:-1, drawer:false});
+    if(this.reduced()){ this.setState({theaterStep:3}); this.tn=setTimeout(()=>this.goTriageNow(),500); return; }
+    let i=-1;
+    this.tt=setInterval(()=>{ i++; this.setState({theaterStep:i}); if(i>=3){ clearInterval(this.tt); this.tn=setTimeout(()=>this.goTriageNow(),1100); } },700);
+  }
+  goTriageNow(){
+    this.setState({screen:'triage', tab:'board', drawer:false});
+    const T={clean:5,risk:24.5,riskD:2450,lost:5,lostD:500,owed:4};
+    if(this.reduced()){ this.setState({cu:T}); return; }
+    const t0=Date.now(), D=1200;
+    const win=(this.rootRef.current && this.rootRef.current.ownerDocument.defaultView) || window;
+    const step=()=>{ const p=Math.min(1,(Date.now()-t0)/D), e=1-Math.pow(1-p,3), cu={};
+      for(const k in T) cu[k]=T[k]*e;
+      this.setState({cu});
+      if(p<1) win.requestAnimationFrame(step); };
+    win.requestAnimationFrame(step);
+  }
+  componentWillUnmount(){
+    clearInterval(this.tt); clearTimeout(this.tn); clearTimeout(this.tc);
+    clearInterval(this._foilTimer); clearTimeout(this._evT);
+    if(this._foilDoc) this._foilDoc.removeEventListener('mousemove',this._onFoilMove);
+  }
+  addChip(code){ if(!this.state.chips.includes(code)) this.setState(s=>({chips:[...s.chips,code],input:''})); else this.setState({input:''}); }
+  renderVals(){
+    const st=this.state, showD=this.props.showDollars ?? true;
+    const q=st.input.trim().toLowerCase();
+    const sugs = q ? this.CAT.filter(([c,t])=>!st.chips.includes(c) && (c+' '+t).toLowerCase().includes(q)).slice(0,6).map(([c,t])=>({code:c,title:t,add:()=>this.addChip(c)})) : [];
+    const lines=['Resolved 24 of 25 courses','Evaluated 61 articulations','Checked 12 advisements','Verdicts locked \u2014 agreement year 2025\u20132026'];
+    const theaterLines = lines.map((text,i)=>{
+      const done = st.theaterStep>=i;
+      return { text,
+        markStyle:{opacity:done?1:0},
+        rowStyle:{display:'flex',alignItems:'center',gap:'12px',opacity:done?1:.3,transition:'opacity .3s'},
+        boxStyle:{width:'22px',height:'22px',flex:'none',background:done?'#0E8A6D':'#F3F1EC',border:'2px solid #272B31',borderRadius:'4px',display:'inline-flex',alignItems:'center',justifyContent:'center',color:'#F3F1EC',fontWeight:900,fontSize:'13px',lineHeight:1} };
+    });
+    const selected = this.PET.filter(it=>st.sel[it.k]);
+    const petItems = this.PET.map(it=>{
+      const on = st.sel[it.k];
+      return { code:it.code, title:it.title, tag:it.tag,
+        toggle:()=>this.setState(s=>({sel:{...s.sel,[it.k]:!s.sel[it.k]}})),
+        mark:on?'\u2713':'',
+        boxStyle:{width:'18px',height:'18px',flex:'none',background:on?'#272B31':'#fff',border:'2px solid #272B31',borderRadius:'3px',display:'inline-flex',alignItems:'center',justifyContent:'center',color:'#F3F1EC',fontWeight:900,fontSize:'11px',lineHeight:1},
+        tagStyle:{fontSize:'9px',fontWeight:800,letterSpacing:'.06em',border:'2px solid '+(it.v==='red'?'#B3372E':'#D97706'),borderRadius:'4px',padding:'1px 6px',whiteSpace:'nowrap'} };
+    });
+    const letterParas = selected.map((it,i)=>{
+      const cs={fontWeight:800,boxShadow:this.UL[it.v]}, ts={fontWeight:500,textTransform:'uppercase',fontSize:'11px',letterSpacing:'.04em',boxShadow:this.UL[it.v]};
+      if(it.v==='red') return {pre:(i===0?'I am writing to petition for transfer credit for':'I also request review of'), code:it.code, paren:'('+it.title+', '+it.units+' units),', mid:'which has no published articulation to UC San Diego for this major under the ', target:'', mid2:'', cite:it.cite, tail:it.tail, cs, ts};
+      return {pre:(i===0?'I am writing to petition for transfer credit for':'I also request review of'), code:it.code, paren:'('+it.title+', '+it.units+' units),', mid:'which articulates to ', target:it.target, mid2:' '+it.agr, cite:it.cite, tail:it.tail, cs, ts};
+    });
+    return {
+      isLanding: st.screen==='landing', isEntry: st.screen==='entry', isTheater: st.screen==='theater', isTriage: st.screen==='triage',
+      isBoard: st.tab==='board', isArb: st.tab==='arb', drawer: st.drawer, showDollars: showD,
+      goLanding:()=>this.setState({screen:'landing'}), goEntry:()=>this.setState({screen:'entry'}),
+      startTheater:()=>this.startTheaterNow(),
+      goBoard:()=>this.setState({tab:'board'}), goArb:()=>this.setState({tab:'arb'}),
+      openDrawer:()=>this.setState({drawer:true}), closeDrawer:()=>this.setState({drawer:false}),
+      foilRef:this.foilRef, creditsRef:this.creditsRef, evalRef:this.evalRef, rootRef:this.rootRef, wallRef:this.wallRef,
+      input: st.input, paste: st.paste, parseMsg: st.parseMsg, sugOpen: sugs.length>0, sugs,
+      onInput:(e)=>this.setState({input:e.target.value}),
+      onKey:(e)=>{ if(e.key==='Enter' && sugs.length){ e.preventDefault(); sugs[0].add(); } else if(e.key==='Backspace' && !st.input && st.chips.length){ this.setState(s=>({chips:s.chips.slice(0,-1)})); } },
+      onPaste:(e)=>this.setState({paste:e.target.value,parseMsg:''}),
+      parsePaste:()=>{ const found=this.CAT.map(([c])=>c).filter(c=>st.paste.toUpperCase().includes(c) && !st.chips.includes(c));
+        this.setState(s=>({chips:[...s.chips,...found], parseMsg: found.length? 'Found '+found.length+' of '+this.CAT.length+' known De Anza courses':'No known De Anza course codes found'})); },
+      loadSample:()=>this.setState({chips:[...this.SAMPLE], parseMsg:''}),
+      chipObjs: st.chips.map(c=>({name:c, remove:()=>this.setState(s=>({chips:s.chips.filter(x=>x!==c)}))})),
+      chipCount: String(st.chips.length), canEval: st.chips.length>0, cantEval: st.chips.length===0,
+      theaterLines,
+      cuClean: st.cu.clean.toFixed(1), cuRisk: st.cu.risk.toFixed(1), cuLost: st.cu.lost.toFixed(1), cuOwed: st.cu.owed.toFixed(1),
+      cuRiskD: '$'+Math.round(st.cu.riskD).toLocaleString('en-US'), cuLostD: '$'+Math.round(st.cu.lostD).toLocaleString('en-US'),
+      petItems, letterParas, selCount: String(selected.length),
+      copyLabel: st.copied ? 'Copied \u2713' : 'Copy letter',
+      copyLetter:()=>{ const txt='To the Office of Admissions, UC San Diego:\n\n'+letterParas.map(p=>[p.pre,p.code,p.paren,p.mid+(p.target?p.target:''),p.mid2,p.cite+'.',p.tail].join(' ').replace(/\s+/g,' ').trim()).join('\n\n')+'\n\nTranscript and course syllabi are attached. Thank you for your review.\nSincerely,\n[Your name]';
+        if(navigator.clipboard) navigator.clipboard.writeText(txt).catch(()=>{});
+        this.setState({copied:true}); clearTimeout(this.tc); this.tc=setTimeout(()=>this.setState({copied:false}),2000); }
+    };
+  }
+}
+
+</script>
+</body>
+</html>
