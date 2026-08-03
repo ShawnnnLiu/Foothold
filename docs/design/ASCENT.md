@@ -34,8 +34,16 @@ The `TriageBucket` contract (`docs/specs/reason_codes.schema.md`) has four value
 | --- | --- | --- | --- | --- |
 | `transfers_clean` | teal `#0E8A6D` | check | TRANSFERS CLEAN | filled tile, solid 2px slate border |
 | `at_risk` | amber `#D97706` | ! | AT RISK | filled tile, solid 2px slate border; the row juts out with an amber offset shadow |
-| `no_articulation` | red `#B3372E` | x | NO ARTICULATION | filled tile, solid 2px slate border |
+| `no_articulation` | red `#B3372E` | x | WON'T TRANSFER | filled tile, solid 2px slate border |
 | `still_owed` | none (chalk fill) | up-arrow | STILL OWED | "route ahead" style: outline-only tile, 2px dashed slate border, no hold color, echoing the elevation chart's dashed final step |
+
+Plain-language amendment (2026-08-03), user-requested: display copy avoids transfer-office jargon; internal identifiers (`TriageBucket` values, route names, component names) are unchanged.
+
+- The `no_articulation` label is WON'T TRANSFER (was NO ARTICULATION).
+- The board tabs are YOUR CREDITS and SAVE MONEY (were TRIAGE BOARD and ARBITRAGE).
+- The evaluate CTA is "See what transfers" (was "Evaluate against ASSIST").
+- Citation tags read `AGREEMENT LINE #N` (was `ARTICULATION #N`).
+- "ASSIST" and "articulation" appear only in fine-print provenance lines (landing footer, triage footnote), never in a control or verdict label.
 
 ## Type
 
@@ -69,7 +77,7 @@ Scope note: this deliberately reverses part of the earlier "any atlas/sky visual
 
 A deliberate, bounded exception to the flat-surface rules above, confirmed by the user at the doc-03 split kickoff per `docs/implementation-plans/frontend/00-overview.md` rule 2.
 
-- Exactly three buttons render as gradient "foil": the landing CTA (Check my credits), the evaluate CTA (Evaluate against ASSIST), and the draft-petition CTA (Draft petition letter).
+- Exactly three buttons render as gradient "foil": the landing CTA (Check my credits), the evaluate CTA (See what transfers), and the draft-petition CTA (Draft petition letter).
 - The finish is fixed to Gold (`#FDEBBE #EDAD3F #CE8412 #A96606 #EBB856`, ink `#38220A`) with the Prism lines texture; there is no runtime finish switching.
 - The sheen is pointer-driven only: every sheen parameter is a pure function of cursor position relative to the button.
   The prototype's PRNG idle-flash loop is dropped entirely, per the determinism axiom (reinstated for the wall pillars only by the third amendment below; foil buttons never flash idle).

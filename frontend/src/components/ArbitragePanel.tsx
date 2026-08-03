@@ -20,13 +20,13 @@ export default function ArbitragePanel({
     <div className="arb">
       <h2 className="arb__headline">Take it at a community college instead</h2>
       <p className="arb__sub">
-        Courses still open at {sendingName} that articulate back to this degree - ranked by
-        tuition saved. Savings are illustrative sample data.
+        Courses still open at {sendingName} that count toward this degree - ranked by tuition
+        saved. Savings are illustrative sample data.
       </p>
       {data.rows.length === 0 ? (
         <p className="arb__empty">
-          Nothing left to take at {sendingName} - your courses already satisfy every
-          articulation the major agreement publishes.
+          Nothing left to take at {sendingName} - your courses already cover everything the
+          major agreement lists.
         </p>
       ) : (
         <div className="arb__cards">

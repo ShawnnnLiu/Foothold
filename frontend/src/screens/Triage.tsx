@@ -122,7 +122,7 @@ export default function Triage({
                 {formatUnits(roundTenth(lost))} <span>UNITS</span>
               </div>
               <div className="triage__totallabel">
-                NO ARTICULATION
+                WON'T TRANSFER
                 {board.header.no_articulation_dollars !== null &&
                   ` · ${formatDollars(lostDollars)}`}
               </div>
@@ -148,8 +148,8 @@ export default function Triage({
             Draft petition letter
           </FoilButton>
           <div className="triage__footnote">
-            Verdicts come from the official ASSIST articulation agreement - every card cites its
-            line.
+            Every result comes straight from ASSIST.org, the official California transfer
+            database - each card cites its exact line.
           </div>
         </div>
       </div>
@@ -160,13 +160,13 @@ export default function Triage({
             className={`triage__tab ${tab === "board" ? "triage__tab--active" : ""}`}
             onClick={() => setTab("board")}
           >
-            TRIAGE BOARD
+            YOUR CREDITS
           </div>
           <div
             className={`triage__tab ${tab === "arbitrage" ? "triage__tab--active" : ""}`}
             onClick={openArbitrage}
           >
-            ARBITRAGE
+            SAVE MONEY
           </div>
           <div className="triage__edit" onClick={onEditCourses}>
             ← EDIT COURSES
@@ -247,7 +247,7 @@ export default function Triage({
           >
             <div className="triage__rowhead">
               <HoldTile bucket="no_articulation" size={30} frame="slate" shadow />
-              <span className="triage__rowtitle">NO ARTICULATION</span>
+              <span className="triage__rowtitle">WON'T TRANSFER</span>
               <span className="triage__rowcount">
                 {countLine(
                   board.columns.no_articulation.length,

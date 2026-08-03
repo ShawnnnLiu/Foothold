@@ -38,8 +38,8 @@ describe("theaterLines", () => {
   it("pins the demo evaluation's four lines (numbers from the response, never placeholders)", () => {
     expect(theaterLines(demoEvaluation)).toStrictEqual([
       "Resolved 9 of 9 courses",
-      "Evaluated 21 articulation findings",
-      "Checked 0 advisements",
+      "Ran 21 checks against the official agreement",
+      "Flagged 0 fine-print conditions",
       "Verdicts locked - agreement year 2025-2026",
     ]);
   });
@@ -56,7 +56,7 @@ describe("theaterLines", () => {
     });
     first.advisements = ["Must complete entire series"];
     expect(theaterLines(altered)[0]).toBe("Resolved 9 of 10 courses");
-    expect(theaterLines(altered)[2]).toBe("Checked 1 advisements");
+    expect(theaterLines(altered)[2]).toBe("Flagged 1 fine-print condition");
   });
 });
 

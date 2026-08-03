@@ -75,8 +75,8 @@ export function theaterLines(evaluation: Evaluation): [string, string, string, s
   const advisementCount = evaluation.findings.filter((f) => f.advisements.length > 0).length;
   return [
     `Resolved ${resolved} of ${resolved + unresolvedCount} courses`,
-    `Evaluated ${evaluation.findings.length} articulation findings`,
-    `Checked ${advisementCount} advisements`,
+    `Ran ${evaluation.findings.length} check${evaluation.findings.length === 1 ? "" : "s"} against the official agreement`,
+    `Flagged ${advisementCount} fine-print condition${advisementCount === 1 ? "" : "s"}`,
     `Verdicts locked - agreement year ${evaluation.year_label}`,
   ];
 }
