@@ -1,0 +1,19 @@
+{
+  "petition_id": "pet_5c81ba07d94e3f62",
+  "evaluation_id": "eval_5c81ba07d94e3f62",
+  "finding_positions": [
+    1,
+    7
+  ],
+  "status": "succeeded",
+  "reason_code": null,
+  "fallback": false,
+  "letter_text": "Dear Transfer Credit Evaluator,\n\nI am writing to request a review of several courses I completed at De Anza College, as part of my application to the Computer Science program at the University of California, San Diego. I ask that MATH 1B be reviewed toward MATH 20B, and that MATH 12 receive an individual review, as the agreement lists no articulation for it.\n\nThank you for your time and consideration.\n\nSincerely,\n[Your name]",
+  "cited": [
+    {
+      "course_code": "MATH",
+      "finding_position": 1
+    }
+  ],
+  "created_at": "2026-08-03T12:00:00+00:00"
+}

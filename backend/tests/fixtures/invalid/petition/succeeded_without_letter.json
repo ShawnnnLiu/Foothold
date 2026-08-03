@@ -1,0 +1,23 @@
+{
+  "petition_id": "pet_5c81ba07d94e3f62",
+  "evaluation_id": "eval_5c81ba07d94e3f62",
+  "finding_positions": [
+    1,
+    7
+  ],
+  "status": "succeeded",
+  "reason_code": null,
+  "fallback": false,
+  "letter_text": null,
+  "cited": [
+    {
+      "course_code": "MATH 1B",
+      "finding_position": 1
+    },
+    {
+      "course_code": "MATH 12",
+      "finding_position": 7
+    }
+  ],
+  "created_at": "2026-08-03T12:00:00+00:00"
+}
