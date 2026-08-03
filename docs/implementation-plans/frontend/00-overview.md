@@ -47,8 +47,8 @@ Cut-line mapping (plan doc, "Cut-lines"): 05 falls first (chips-only input still
 The prototype adds flourishes beyond `ASCENT.md`; these deltas are decided here, once, and are not relitigated by executors.
 
 1. No PRNG anywhere, per the determinism axiom in `CLAUDE.md`.
-   The prototype's idle "holo flash" loop (`Math.random()` timers in `componentDidMount`) is DROPPED entirely.
    The pointer-driven foil sheen (a pure function of cursor position) is KEPT; it is deterministic input-driven presentation.
+   Amended 2026-08-03 at the pillar-animation parity pass: the prototype's idle "holo flash" loop (`Math.random()` timers in `componentDidMount`), originally DROPPED here, is reinstated verbatim on the triage sidebar wall by explicit user decision, as the bounded presentation-only PRNG exception recorded in `ASCENT.md` (third amendment) and carved out in the `CLAUDE.md` axiom.
 2. Foil CTA exception: the three gradient "foil" buttons (landing CTA, evaluate CTA, draft-petition CTA) are kept as a deliberate, bounded exception to Ascent's no-gradient rule, fixed to the `Gold` finish and `Prism lines` texture (no runtime finish switching).
    Everything else stays flat chalk/slate per `ASCENT.md`.
    This exception must be recorded as an amendment to `ASCENT.md` in the same commit as doc 03, and the amendment requires an explicit user OK at that split's kickoff; if declined, the buttons ship flat slate-on-chalk per the Ascent surface rules and nothing else changes.

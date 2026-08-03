@@ -102,7 +102,8 @@ Never do these unless the user explicitly requests the exact action:
 - No sign-in: identity is the server-minted HttpOnly SameSite=Lax `sid` cookie; never trust a client-supplied user id.
 - Articulation satisfaction is evaluated deterministically from validated expression trees; `note` leaves (advisements) are never silently satisfied: they downgrade a match to at-risk and are always surfaced in the UI.
 - Every finding carries its citation (agreement key, articulation position, year) so the UI and the petition letter cite ground truth.
-- Frontend rendering is deterministic: no PRNG, order-stable view-models, stable sort keys.
+- Frontend rendering is deterministic: no PRNG in layout, data, or workflow state; order-stable view-models, stable sort keys.
+  Sole exception (2026-08-03, explicit user decision): the triage wall's ambient "chance event" flashes are PRNG-timed presentation-only effects, per the third amendment in `docs/design/ASCENT.md`.
 - Fetching is polite: 1 req/s, on-disk cache, per-agreement fault isolation; a failing agreement is excluded and reported, never breaks the build.
 
 ## Architecture Boundaries

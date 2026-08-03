@@ -1,5 +1,8 @@
 /* The Gold finish and Prism lines texture are fixed by the ASCENT.md foil
-   amendment; values translated from the prototype's FOILS/TEX tables. */
+   amendment; values translated from the prototype's FOILS/TEX tables.
+   The Rainbow finish (second amendment, 2026-08-03) is reserved for the
+   landing demo button: same metallic structure, holographic hue band, plus a
+   slow CSS-keyframe drift so it shines at rest (deterministic, no PRNG). */
 
 .foil {
   --rx: 0deg;
@@ -8,8 +11,9 @@
   --my: 50%;
   --ga: 100deg;
   --ft: 0.45s;
+  --persp: 700px;
   position: relative;
-  transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));
+  transform: perspective(var(--persp)) rotateX(var(--rx)) rotateY(var(--ry));
   transform-style: preserve-3d;
   transition: transform var(--ft) ease-out;
   background: linear-gradient(
@@ -37,7 +41,7 @@
 }
 
 .foil:active:not(:disabled) {
-  transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) scale(0.96);
+  transform: perspective(var(--persp)) rotateX(var(--rx)) rotateY(var(--ry)) scale(0.96);
 }
 
 .foil--lg {
@@ -51,6 +55,7 @@
 }
 
 .foil--sm {
+  --persp: 600px;
   font-size: 13px;
   padding: 14px 16px;
   width: 100%;
@@ -64,6 +69,55 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.85),
     inset 0 0 0 1px rgba(255, 244, 214, 0.5),
     inset 0 -3px 5px rgba(80, 40, 0, 0.45);
+}
+
+.foil--rainbow {
+  background: linear-gradient(
+    110deg,
+    #f6a9b8 0%,
+    #f7c98b 16%,
+    #f3e88f 32%,
+    #9fe0a8 48%,
+    #8fd0f0 64%,
+    #a9a3ef 80%,
+    #eb9ede 96%,
+    #f6a9b8 100%
+  );
+  background-size: 240% 240%;
+  animation: foil-rainbow-drift 8s ease-in-out infinite alternate;
+  color: #33203a;
+  box-shadow:
+    5px 5px 0 var(--slate),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 240, 250, 0.55),
+    inset 0 -3px 5px rgba(70, 30, 90, 0.3);
+}
+
+@keyframes foil-rainbow-drift {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .foil--rainbow {
+    animation: none;
+  }
+}
+
+.foil--rainbow:disabled {
+  animation: none;
+}
+
+.foil--rainbow .foil__sheen {
+  opacity: 0.5;
+}
+
+.foil--rainbow .foil__label {
+  text-shadow: 0 1px 0 rgba(255, 245, 255, 0.55);
 }
 
 .foil__sheen,

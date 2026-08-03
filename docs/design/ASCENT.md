@@ -72,8 +72,24 @@ A deliberate, bounded exception to the flat-surface rules above, confirmed by th
 - Exactly three buttons render as gradient "foil": the landing CTA (Check my credits), the evaluate CTA (Evaluate against ASSIST), and the draft-petition CTA (Draft petition letter).
 - The finish is fixed to Gold (`#FDEBBE #EDAD3F #CE8412 #A96606 #EBB856`, ink `#38220A`) with the Prism lines texture; there is no runtime finish switching.
 - The sheen is pointer-driven only: every sheen parameter is a pure function of cursor position relative to the button.
-  The prototype's PRNG idle-flash loop is dropped entirely, per the determinism axiom.
+  The prototype's PRNG idle-flash loop is dropped entirely, per the determinism axiom (reinstated for the wall pillars only by the third amendment below; foil buttons never flash idle).
 - Every other surface stays flat chalk/slate; this exception does not extend to new buttons.
+
+Second amendment (2026-08-03), user-requested with the landing demo button:
+
+- A fourth foil button exists: the landing "Roll a random demo" button, and only it renders the Rainbow finish (holographic hue band, ink `#33203A`), with the same Prism lines texture and pointer-driven sheen.
+- The Rainbow finish adds one idle CSS-keyframe drift of the base gradient so the button shines at rest; the drift is a fixed keyframe animation (deterministic, no PRNG) and is disabled under `prefers-reduced-motion`.
+- Finishes stay fixed per call site; there is still no runtime finish switching.
+- Which demo preset loads is chosen randomly in the click handler; this is event input, not render state, so the deterministic-rendering axiom is untouched (the chosen preset renders deterministically).
+
+Third amendment (2026-08-03), user-requested at the pillar-animation parity pass:
+
+- The wall chart copies the prototype's pillar animations exactly.
+  The sidebar wall's sheen loops forever on the prototype's fixed per-step durations and delays, the theater sweep fires once on its fixed per-block timings, and the at-risk steps carry the prototype's holographic sheen layer over their amber-outline chalk fill.
+  All of those constants are pure functions of the step's stable position (deterministic).
+- The prototype's ambient "chance events" are reinstated verbatim on the triage sidebar wall: a `Math.random()`-timed loop (3.5-9s intervals) plays a single holoflash, a staggered all-step cascade, or a brightness pop on the sheen-bearing steps.
+  This is the sole PRNG exception, carved out in the `CLAUDE.md` determinism axiom by explicit user decision: the randomness is presentation-only ambience, never layout, view-model content, or workflow state, and the loop is skipped under `prefers-reduced-motion`.
+- Foil buttons are unaffected: their sheen stays pointer-driven only, plus the Rainbow finish's fixed keyframe drift.
 
 ## Citations
 
