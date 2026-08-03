@@ -35,13 +35,25 @@ from typing import Annotated
 from pydantic import AfterValidator
 
 _PREFIX_TOKEN = r"[A-Z][A-Z0-9&/.\-]{0,9}"
+# A CONTINUATION prefix token may open with `&`, which the first one may not:
+# "Family & Consumer Sciences" publishes `FAM &CS`, while a leading `&FAM` is
+# malformed. Keeping the two tokens distinct buys the real shape without
+# admitting the bogus one (S9d).
+_PREFIX_CONTINUATION_TOKEN = r"[A-Z&][A-Z0-9&/.\-]{0,9}"
 # The trailing group must START with a non-digit, so `MATH 12345` stays invalid
-# while `CIST 004B1`, `MATH 103E+`, and `MATH 120-S` do not.
-_NUMBER_TOKEN = r"-?[A-Z]{0,2}[0-9]{1,4}(?:\.[0-9]{1,2})?(?:[A-Z+\-][A-Z0-9+\-]{0,2})?"
+# while `CIST 004B1`, `MATH 103E+`, and `MATH 120-S` do not. Its length grew
+# from 3 to 4 in S9d for `ENGL 1AMCH` (Multicultural Honors).
+#
+# The LEADING letter run grew from 2 to 3 in the same split, for the activity
+# courses community colleges number by mnemonic rather than by digit: `PEAC
+# TEN1` (tennis), `PEAC YOG1` (yoga), `DANC BAL1` (ballet). A digit is still
+# required, so a purely alphabetic number never parses.
+_NUMBER_TOKEN = r"-?[A-Z]{0,3}[0-9]{1,4}(?:\.[0-9]{1,2})?(?:[A-Z+\-][A-Z0-9+\-]{0,3})?"
 _SUFFIX_TOKEN = r"[A-Z]{1,2}"
 
 COURSE_CODE_RE = re.compile(
-    rf"^{_PREFIX_TOKEN}(?: {_PREFIX_TOKEN}){{0,2}} {_NUMBER_TOKEN}(?: {_SUFFIX_TOKEN})?$"
+    rf"^{_PREFIX_TOKEN}(?: {_PREFIX_CONTINUATION_TOKEN}){{0,2}}"
+    rf" {_NUMBER_TOKEN}(?: {_SUFFIX_TOKEN})?$"
 )
 
 # The two halves of a code as ASSIST publishes them, shared by every contract

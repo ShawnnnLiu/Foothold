@@ -37,7 +37,7 @@ An eighth fixture was captured later, in split S9c, from the live corridor rathe
 
 | File | What it pins |
 |---|---|
-| `agreement_with_advisements_4_to_39_y76.json` | College of Marin -> San Jose State, Computer Science B.S. The POPULATED advisement shape `{"content": str, "position": int}`, which no spike capture could show because all seven are empty at every attribute level. Four sending-course advisements on two articulations; all five requirement groups carry `NFromArea`/`Following` instructions and are therefore excluded. |
+| `agreement_with_advisements_4_to_39_y76.json` | College of Marin -> San Jose State, Computer Science B.S. The POPULATED advisement shape `{"content": str, "position": int}`, which no spike capture could show because all seven are empty at every attribute level. Four sending-course advisements on two articulations. Of its five requirement groups, the two `Following` ones (positions 3 and 7) store as complete-all from S9d onward and the three `NFromArea` ones (1, 5, 9) remain excluded; the single group-level advisement rides on position 5, an excluded group, so it still reaches no one as a satisfied requirement. |
 
 Two payload facts the spike doc's prose does not spell out, verified 2026-07-31 and binding on normalization:
 
@@ -62,11 +62,15 @@ These bind every increment and are not to be relitigated by executors.
 
 ```python
 COURSE_CODE_RE = re.compile(
-    r"^[A-Z][A-Z0-9&/.\-]{0,9}(?: [A-Z][A-Z0-9&/.\-]{0,9}){0,2}"
-    r" -?[A-Z]{0,2}[0-9]{1,4}(?:\.[0-9]{1,2})?[A-Z0-9+\-]{0,3}"
+    r"^[A-Z][A-Z0-9&/.\-]{0,9}(?: [A-Z&][A-Z0-9&/.\-]{0,9}){0,2}"
+    r" -?[A-Z]{0,2}[0-9]{1,4}(?:\.[0-9]{1,2})?(?:[A-Z+\-][A-Z0-9+\-]{0,3})?"
     r"(?: [A-Z]{1,2})?$"
 )
 ```
+
+This block is the SHIPPED pattern as of S9d, re-synchronised against `contracts/codes.py`.
+It had drifted: the version recorded here through S9c wrote the number's trailing group as `[A-Z0-9+\-]{0,3}`, while the code shipped `(?:[A-Z+\-][A-Z0-9+\-]{0,2})?`, which is stricter because it forbids a trailing group that opens with a digit and so keeps `MATH 12345` invalid.
+The code was right and the doc was stale; do not "restore" the looser form.
 
 - Shape: one to three prefix tokens (letters, then letters/digits plus `&/.-`), one number token (optional leading `-`, up to 2 leading letters, 1-4 digits, an optional decimal part, up to 3 trailing letters/digits/`+`/`-`), and an optional trailing campus-suffix token of 1-2 letters.
 - Covers every code in the captures: `MATH 1A`, `MATH 2AH`, `STAT C1000H`, `CIS 22C`, `CIS 22CH`, `CSE 15L`, `MATH 20E`, `CSE 11`.
@@ -106,6 +110,7 @@ The first live corridor fetch settled it. What S9c measured, and what now binds:
 
 - A text advisement is exactly `{"content": str, "position": int}`; the corridor publishes 11 distinct strings of it ("Minimum grade required: C or better", "Complete entire sequence at same institution prior to transfer", ...). `advisement_texts` maps that shape, sorted by `position`, verbatim apart from an outer strip.
 - SEVEN levels feed it, not four. A corridor-wide sweep found real prose at three levels nothing was reading: `courseAttributes` (9 instances), template group `attributes` (46), and template cell `attributes` (2). Those were silent drops, which the axiom forbids, and they are now mapped. `receivingAttributes` was empty in all 364 payloads swept and remains unmapped, named here so it reads as examined rather than missed.
+- AMENDED in S9e: the S9c sweep was a 364-payload sample, and a full-corridor sweep (31,272 payloads) found five more populated levels it missed - `seriesAttributes` on articulations, `attributes` on template sections and rows, and `courseAttributes`/`seriesAttributes` on template cells (41,246 entries at the last alone, "Minimum grade required: B or better"). All five are mapped as of S9e, so TWELVE levels feed the gate. `receivingAttributes` turned out to be populated too but is a verbatim mirror of the articulation-level lists (sampled: 65 of 65 identical), so it stays unread along with `requirementAttributes`, which sits only on `Requirement` cells that already exclude their group. See `docs/notes/articulation_spotchecks.md` section 11.
 - The gate NARROWED, it did not disappear. Anything that is not the pinned shape still raises `advisement_shape_unknown`, and that is load-bearing: template sections carry a structurally different `{"type": "NFollowing", "amount": 2.0, "selectionType": "Select"}` under the same field name, meaning "select 2 of the following". Flattening it to prose would invent an advisement; skipping it would let a group that means "select 2 of" read as "complete all of". So the group is excluded and reported. Modelling N-from semantics is deferred to a later increment.
 - The note-leaf MECHANISM (contract shape, evaluator semantics) is unchanged; group and course texts still become `NoteLeaf`s INSIDE the group node.
 - Nothing anywhere silently satisfies, drops, or paraphrases an advisement (axiom).
@@ -113,6 +118,12 @@ The first live corridor fetch settled it. What S9c measured, and what now binds:
 ### Committed-artifact identity at ASSIST scale
 
 `articulation.db` and `corpus.db` follow the canonical-logical-dump identity from `docs/week-1-implementations/README.md` ("Committed-artifact identity") via `common/dbdump.canonical_dump`.
+
+Packaging deviation, locked in S9d: the COMMITTED form of the articulation artifact is `data/articulation.db.gz`, and `data/articulation.db` itself is gitignored.
+GitHub hard-rejects any file over 100 MB on push, and the fifteen-campus corridor builds to ~319 MB, so committing the database directly is not merely expensive, it is impossible on this remote.
+Gzip takes it to ~35 MB, which keeps the artifact inside a plain `git clone` and avoids Git LFS, whose absence on a judge's machine would turn the checkout into a pointer file and a broken build.
+`make build-data` writes both files; `make unpack-data` restores the database from the gzip and is the first command to run on a fresh clone.
+Artifact identity is unchanged and still defined over the canonical logical dump, never over the compressed bytes: `--check` decompresses nothing and compares dumps of rebuilt databases, exactly as it did before, because gzip output may legitimately differ across zlib builds for the same reason SQLite bytes differ across library versions.
 Deviation, locked here: the raw ASSIST cache (`data/raw/assist/`) is gitignored and too large to commit, so CI cannot regenerate the full corridor.
 Therefore `make build-check` (regenerate from local cache, compare dumps) is a LOCAL gate run before any commit that touches the artifacts, and CI's `make check` enforces determinism through fixture-driven tests instead (store the demo-pair fixtures twice, assert identical dumps).
 Both gates are specified in doc 02.

@@ -20,6 +20,8 @@ and reported; nothing here can turn one bad payload into a failed build.
 """
 
 import argparse
+import gzip
+import shutil
 import sys
 import tempfile
 from collections.abc import Sequence
@@ -70,6 +72,10 @@ DEFAULT_REPORT_PATH = REPO_ROOT / "data" / "reports" / "assist_build_report.json
 # SQLite's WAL sidecars belong to the file they sit beside; a rebuild that left
 # them behind would resurrect rows the new build never wrote.
 SQLITE_SIDECAR_SUFFIXES = ("-wal", "-shm")
+
+# Maximum compression: this runs once per build and the result is what the
+# repository carries forever, so the trade is entirely on the size side.
+GZIP_LEVEL = 9
 
 
 @dataclass(frozen=True, slots=True)
@@ -200,8 +206,15 @@ def run_build(
     report_path: Path,
     only_pair: tuple[int, int] | None = None,
     allow_network: bool = False,
+    pack: bool = True,
 ) -> int:
-    """One build. Returns a process exit code."""
+    """One build. Returns a process exit code.
+
+    `pack` writes the committed gzip beside the database. `--check` turns it
+    off: its rebuild lands in a temp directory that is deleted moments later,
+    and artifact identity is compared over canonical dumps rather than over
+    compressed bytes, so gzipping a throwaway build buys nothing.
+    """
     # Network is reachable from the fetch stages only; normalize and store are
     # pure functions of the cache by construction, not by discipline.
     offline = not (allow_network and stage in {"fetch", "all"})
@@ -222,8 +235,46 @@ def run_build(
             db_path, institutions=outcome.institutions, years=years, agreements=outcome.agreements
         )
         print(f"wrote {db_path}")
+        if pack:
+            packed = pack_database(db_path)
+            print(f"wrote {packed} ({packed.stat().st_size / 1_048_576:.1f} MB)")
     print_summary(outcome.report)
     return 0
+
+
+def pack_database(db_path: Path) -> Path:
+    """Write the committed `<db>.gz` beside the built database.
+
+    GitHub hard-rejects any file over 100 MB, and the fifteen-campus artifact
+    is well past that, so the COMMITTED form of the artifact is the gzip and
+    `articulation.db` itself is a gitignored build output (`make unpack-data`
+    regenerates it from the gzip on a fresh clone).
+
+    `mtime=0` keeps the output a pure function of the input for one zlib build.
+    Artifact identity is still defined over the canonical logical dump, never
+    over these bytes, exactly as the axiom already requires for SQLite files:
+    the compressed bytes may legitimately differ across zlib versions, and
+    `--check` compares dumps rather than files.
+    """
+    packed = db_path.with_suffix(db_path.suffix + ".gz")
+    with (
+        db_path.open("rb") as raw,
+        gzip.GzipFile(packed, "wb", compresslevel=GZIP_LEVEL, mtime=0) as out,
+    ):
+        shutil.copyfileobj(raw, out)
+    return packed
+
+
+def unpack_database(db_path: Path) -> Path:
+    """Restore `articulation.db` from its committed gzip (`make unpack-data`)."""
+    packed = db_path.with_suffix(db_path.suffix + ".gz")
+    if not packed.exists():
+        raise FileNotFoundError(f"no packed artifact at {packed}")
+    for suffix in SQLITE_SIDECAR_SUFFIXES:
+        db_path.with_name(db_path.name + suffix).unlink(missing_ok=True)
+    with gzip.open(packed, "rb") as raw, db_path.open("wb") as out:
+        shutil.copyfileobj(raw, out)
+    return db_path
 
 
 def print_summary(report: BuildReport) -> None:
@@ -261,6 +312,7 @@ def run_check(
             db_path=candidate_db,
             report_path=candidate_report,
             only_pair=only_pair,
+            pack=False,
         )
         if exit_code != 0:
             return exit_code
@@ -310,8 +362,18 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="rebuild from cache and verify the committed artifacts are identical",
     )
+    parser.add_argument(
+        "--unpack",
+        action="store_true",
+        help="restore the database from its committed gzip; no cache needed",
+    )
     args = parser.parse_args(argv)
     stage: Stage = args.stage
+
+    if args.unpack:
+        restored = unpack_database(args.db)
+        print(f"wrote {restored} ({restored.stat().st_size / 1_048_576:.1f} MB)")
+        return 0
 
     if args.check:
         return run_check(

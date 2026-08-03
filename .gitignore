@@ -5,6 +5,12 @@ data/build/
 # any reader recreates these beside them. The artifact itself is self-contained.
 *.db-wal
 *.db-shm
+
+# The articulation artifact is committed as `data/articulation.db.gz`, not as
+# the database: GitHub hard-rejects files over 100 MB and the fifteen-campus
+# corridor builds to ~319 MB (35 MB gzipped). `make unpack-data` restores the
+# database from the gzip; `make build-data` rebuilds both from the raw cache.
+data/articulation.db
 backend/.venv/
 __pycache__/
 *.pyc

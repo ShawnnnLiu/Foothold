@@ -1,4 +1,4 @@
-.PHONY: test lint typecheck schema-check check build-data build-check
+.PHONY: test lint typecheck schema-check check build-data build-check unpack-data
 
 test:
 	cd backend && uv run pytest
@@ -25,3 +25,11 @@ build-data:
 # any commit that touches `data/articulation.db` or the build report.
 build-check:
 	cd backend && uv run python scripts/build_articulation.py --check
+
+# The committed artifact is `data/articulation.db.gz`, not the database itself:
+# GitHub hard-rejects files over 100 MB and the fifteen-campus corridor builds
+# to roughly 319 MB. This restores the database from that gzip and is the FIRST
+# thing to run on a fresh clone, since nothing else regenerates it without the
+# 2 GB raw ASSIST cache.
+unpack-data:
+	cd backend && uv run python scripts/build_articulation.py --unpack

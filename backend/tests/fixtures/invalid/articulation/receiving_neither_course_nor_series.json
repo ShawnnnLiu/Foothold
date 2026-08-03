@@ -1,0 +1,15 @@
+{
+  "agreement_id": "agr_2d6204abcea837f3",
+  "position": 3,
+  "template_cell_id": "d7f5eee6-92d2-4ccb-0b3b-08ddd3b241bf",
+  "sending_expr": {
+    "all": [
+      {
+        "course": "MATH 1C"
+      },
+      {
+        "course": "MATH 1D"
+      }
+    ]
+  }
+}

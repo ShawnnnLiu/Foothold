@@ -40,6 +40,12 @@ DEPT = "agreement_dept_math_113_to_7_y76.json"
 # The S9c capture that pins the populated advisement shape (College of Marin
 # -> San Jose State, Computer Science B.S.), which the spike captures could not.
 ADVISEMENTS = "agreement_with_advisements_4_to_39_y76.json"
+# The S9d capture that pins the `Series` shape (Columbia College -> UCLA), a
+# receiving-side sequence that articulates only as a unit. No earlier fixture
+# has one, because the four-campus corridor's two cleanest targets barely
+# publish them.
+SERIES = "agreement_with_series_10_to_117_y76.json"
+SERIES_KEY = "76/10/to/117/Major/3fc7b07d-4058-4a0a-1f72-08ddcb96df9e"
 MAJOR_KEY = "76/113/to/7/Major/f8d5b3e6-1d24-4b7a-9a3f-1b2c3d4e5f60"
 DEPT_KEY = "76/113/to/7/Department/12"
 DE_ANZA = 113
@@ -314,6 +320,253 @@ def test_an_unmodeled_template_group_is_excluded_and_the_agreement_still_stores(
     assert normalized.exclusions[0].position == 1
 
 
+def test_a_following_instruction_completes_all_rows_like_a_null_one() -> None:
+    """ASSIST renders `Following` as "Complete the following", and its payload
+    carries no `amount` and no `conjunction` - the same meaning a null
+    instruction has. It was the single largest exclusion in the S9c artifact
+    (31% of all requirement groups) purely because the dispatch treated
+    anything that was not `Conjunction` as a selection rule.
+    """
+    raw = fixture(MAJOR)
+    assets = json.loads(raw["result"]["templateAssets"])
+    groups = [asset for asset in assets if asset["type"] == "RequirementGroup"]
+    groups[1]["instruction"] = {
+        "type": "Following",
+        "id": "5c1b8d14-89c9-4d31-678d-08ddcb96dfa1",
+        "selectionType": "Complete",
+    }
+    raw["result"]["templateAssets"] = json.dumps(assets)
+
+    normalized = normalize(raw, key=MAJOR_KEY, category="major", label="Mathematics")
+
+    assert len(normalized.requirement_groups) == 4
+    assert normalized.requirement_groups[1].conjunction == "And"
+    assert normalized.exclusions == ()
+
+
+def test_a_following_instruction_that_selects_is_still_excluded() -> None:
+    """4 of the corridor's 3,565 `Following` instructions say `Select` rather
+    than `Complete`. Those are genuinely ambiguous, and storing one as
+    complete-all would tell a student they owe every row of a group they may
+    only need part of."""
+    raw = fixture(MAJOR)
+    assets = json.loads(raw["result"]["templateAssets"])
+    groups = [asset for asset in assets if asset["type"] == "RequirementGroup"]
+    groups[1]["instruction"] = {
+        "type": "Following",
+        "id": "66e70e0c-4794-4a2a-cec9-08ddd4f82c58",
+        "selectionType": "Select",
+    }
+    raw["result"]["templateAssets"] = json.dumps(assets)
+
+    normalized = normalize(raw, key=MAJOR_KEY, category="major", label="Mathematics")
+
+    assert len(normalized.requirement_groups) == 3
+    assert [item.reason_code for item in normalized.exclusions] == [
+        AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED
+    ]
+    assert normalized.exclusions[0].position == 1
+    assert "selectionType" in normalized.exclusions[0].detail
+
+
+def test_a_series_articulation_keeps_its_courses_as_one_unit() -> None:
+    """A `Series` names several receiving courses satisfied together. Splitting
+    it into one articulation per course would claim each is independently
+    satisfied, which the agreement never says.
+    """
+    normalized = normalize_agreement(
+        fixture(SERIES),
+        assist_key=SERIES_KEY,
+        category="major",
+        label="Physics B.S.",
+        sending_id=10,
+        receiving_id=117,
+    )
+
+    series = [item for item in normalized.articulations if item.receiving_series is not None]
+    assert len(series) == 1
+    found = series[0].receiving_series
+    assert found is not None
+    assert found.name == "PHYSICS 1A, PHYSICS 1B, PHYSICS 1C, PHYSICS 4AL, PHYSICS 4BL"
+    assert found.conjunction == "And"
+    assert [course.course_code for course in found.courses] == [
+        "PHYSICS 1A",
+        "PHYSICS 1B",
+        "PHYSICS 1C",
+        "PHYSICS 4AL",
+        "PHYSICS 4BL",
+    ]
+    assert series[0].receiving_course is None
+    # The whole sequence is satisfied by one sending expression, not five.
+    assert series[0].sending_expr is not None
+
+
+def test_every_course_of_a_series_still_enters_the_target_vocabulary() -> None:
+    """`target_courses` is the receiving-side vocabulary; a course does not
+    stop existing for being articulated only as part of a sequence."""
+    normalized = normalize_agreement(
+        fixture(SERIES),
+        assist_key=SERIES_KEY,
+        category="major",
+        label="Physics B.S.",
+        sending_id=10,
+        receiving_id=117,
+    )
+
+    codes = {course.course_code for course in normalized.target_courses}
+    assert {"PHYSICS 1A", "PHYSICS 1B", "PHYSICS 1C", "PHYSICS 4AL", "PHYSICS 4BL"} <= codes
+
+
+def _with_instruction(instruction: dict[str, object], *, group_index: int = 1) -> object:
+    raw = fixture(MAJOR)
+    assets = json.loads(raw["result"]["templateAssets"])
+    groups = [asset for asset in assets if asset["type"] == "RequirementGroup"]
+    groups[group_index]["instruction"] = instruction
+    raw["result"]["templateAssets"] = json.dumps(assets)
+    return raw
+
+
+def test_a_course_counting_selection_rule_becomes_select_courses() -> None:
+    """The dominant N-from shape, which ASSIST renders as "Complete 2 courses
+    from the following.": the amount counts COURSES drawn from the group's
+    sections as one pool, never sections (verified against rendered agreements
+    in S9e)."""
+    raw = _with_instruction(
+        {
+            "type": "NFromArea",
+            "amount": 2.0,
+            "amountQuantifier": "None",
+            "amountUnitType": "Course",
+            "toAmountDeterminer": "None",
+            "id": "079e9fa0-4d65-4ef7-65d7-08ddb3499762",
+            "selectionType": "Complete",
+        }
+    )
+
+    normalized = normalize(raw, key=MAJOR_KEY, category="major", label="Mathematics")
+
+    assert len(normalized.requirement_groups) == 4
+    assert normalized.requirement_groups[1].conjunction == "Or"
+    assert normalized.requirement_groups[1].select_courses == 2
+    assert normalized.exclusions == ()
+
+
+def test_an_and_area_conjunction_over_one_section_stores_the_pool() -> None:
+    """`NFromConjunction` with conjunction `And` over ONE section renders as
+    "Complete 1 course from A": the conjunction names nothing, so the union
+    reading is exact (UCLA Computer Science B.S. group 2 is this shape)."""
+    raw = _with_instruction(
+        {
+            "type": "NFromConjunction",
+            "conjunction": "And",
+            "amount": 1.0,
+            "amountQuantifier": "None",
+            "amountUnitType": "Course",
+            "toAmountDeterminer": "None",
+            "id": "079e9fa0-4d65-4ef7-65d7-08ddb3499762",
+            "selectionType": "Complete",
+        }
+    )
+
+    normalized = normalize(raw, key=MAJOR_KEY, category="major", label="Mathematics")
+
+    assert len(normalized.requirement_groups) == 4
+    assert normalized.requirement_groups[1].conjunction == "Or"
+    assert normalized.requirement_groups[1].select_courses == 1
+    assert normalized.exclusions == ()
+
+
+def test_an_and_area_conjunction_over_several_sections_is_excluded() -> None:
+    """`NFromConjunction` with conjunction `And` over SEVERAL sections renders
+    as "Complete 1 course from A and B", ambiguous between one course from
+    each and one from the union; neither guess is safe to store."""
+    raw = _with_instruction(
+        {
+            "type": "NFromConjunction",
+            "conjunction": "And",
+            "amount": 1.0,
+            "amountQuantifier": "None",
+            "amountUnitType": "Course",
+            "toAmountDeterminer": "None",
+            "id": "079e9fa0-4d65-4ef7-65d7-08ddb3499762",
+            "selectionType": "Complete",
+        },
+        group_index=3,  # the capture's one two-section group (CSE 15L / CSE 29)
+    )
+
+    normalized = normalize(raw, key=MAJOR_KEY, category="major", label="Mathematics")
+
+    assert len(normalized.requirement_groups) == 3
+    assert [item.reason_code for item in normalized.exclusions] == [
+        AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED
+    ]
+    assert "ambiguous" in normalized.exclusions[0].detail
+
+
+@pytest.mark.parametrize(
+    ("instruction", "why"),
+    [
+        (
+            {
+                "type": "NFromArea",
+                "amount": 8.0,
+                "amountQuantifier": "UpTo",
+                "amountUnitType": "SemesterUnit",
+                "toAmountDeterminer": "None",
+                "selectionType": "Complete",
+            },
+            "a unit CAP is not a requirement",
+        ),
+        (
+            {
+                "type": "NFromArea",
+                "amount": 1.0,
+                "amountQuantifier": "None",
+                "amountUnitType": "Course",
+                "toAmountDeterminer": "Each",
+                "selectionType": "Complete",
+            },
+            "toAmountDeterminer quantifies over a range",
+        ),
+        (
+            {
+                "type": "NToNFromConjunction",
+                "conjunction": "Or",
+                "fromAmount": 4.0,
+                "toAmount": 5.0,
+                "unitType": "Unit",
+                "selectionType": "Select",
+            },
+            "a unit-denominated range",
+        ),
+        (
+            {
+                "type": "NFromArea",
+                "amount": 1.5,
+                "amountQuantifier": "None",
+                "amountUnitType": "Course",
+                "toAmountDeterminer": "None",
+                "selectionType": "Complete",
+            },
+            "half a course is not a section count",
+        ),
+    ],
+)
+def test_selection_rules_outside_the_modeled_slice_stay_excluded(
+    instruction: dict[str, object], why: str
+) -> None:
+    """The node models ONE slice deliberately. Each of these would have to be
+    guessed at, and every available guess is wrong in a way a student pays for."""
+    normalized = normalize(
+        _with_instruction(instruction), key=MAJOR_KEY, category="major", label="Mathematics"
+    )
+
+    assert len(normalized.requirement_groups) == 3, why
+    assert [item.reason_code for item in normalized.exclusions] == [
+        AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED
+    ]
+
+
 def test_a_template_row_without_exactly_one_course_cell_is_excluded() -> None:
     raw = fixture(MAJOR)
     assets = json.loads(raw["result"]["templateAssets"])
@@ -506,6 +759,72 @@ def test_a_template_group_advisement_is_carried_not_excluded() -> None:
     assert normalized.requirement_groups[0].advisements == ["Minimum grade required: C or better"]
 
 
+@pytest.mark.parametrize("level", ["section", "row", "cell_course"])
+def test_template_section_row_and_cell_prose_reaches_the_group(level: str) -> None:
+    """The S9e sweep found real prose at three template levels the S9c sample
+    missed entirely: section `attributes`, row `attributes`, and cell
+    `courseAttributes`, the last carrying 41,246 corridor entries of the
+    "Minimum grade required: B or better" family. Silent drops, now mapped."""
+    content = [{"content": "Minimum grade required: B or better", "position": 0}]
+    raw = fixture(MAJOR)
+    assets = json.loads(raw["result"]["templateAssets"])
+    groups = [asset for asset in assets if asset["type"] == "RequirementGroup"]
+    section = groups[0]["sections"][0]
+    if level == "section":
+        section["attributes"] = content
+    elif level == "row":
+        section["rows"][0]["attributes"] = content
+    else:
+        section["rows"][0]["cells"][0]["courseAttributes"] = content
+    raw["result"]["templateAssets"] = json.dumps(assets)
+
+    normalized = normalize(raw, key=MAJOR_KEY, category="major", label="Mathematics")
+
+    assert normalized.exclusions == ()
+    assert normalized.requirement_groups[0].advisements == ["Minimum grade required: B or better"]
+
+
+def test_series_attributes_reach_the_articulation_and_the_group() -> None:
+    """`seriesAttributes` sits beside `courseAttributes` on series
+    articulations and series template cells ("Departmental credit limitation
+    applies", 2,935 corridor entries); S9d stored the series without reading
+    it."""
+    text = "Departmental credit limitation applies; see university department adviser"
+    content = [{"content": text, "position": 0}]
+    raw = fixture(SERIES)
+    entries = json.loads(raw["result"]["articulations"])
+    series_entries = [entry for entry in entries if entry["articulation"].get("type") == "Series"]
+    assert series_entries, "the series fixture must carry a Series articulation"
+    series_entries[0]["articulation"]["seriesAttributes"] = content
+    raw["result"]["articulations"] = json.dumps(entries)
+    assets = json.loads(raw["result"]["templateAssets"])
+    series_cells = [
+        cell
+        for asset in assets
+        if asset.get("type") == "RequirementGroup"
+        for section in asset["sections"]
+        for row in section["rows"]
+        for cell in row["cells"]
+        if cell.get("type") == "Series"
+    ]
+    assert series_cells, "the series fixture must carry a Series template cell"
+    series_cells[0]["seriesAttributes"] = content
+    raw["result"]["templateAssets"] = json.dumps(assets)
+
+    normalized = normalize_agreement(
+        raw,
+        assist_key=SERIES_KEY,
+        category="major",
+        label="Computer Science/B.S.",
+        sending_id=10,
+        receiving_id=117,
+    )
+
+    with_series = [item for item in normalized.articulations if item.receiving_series]
+    assert any(text in item.advisements for item in with_series)
+    assert any(text in group.advisements for group in normalized.requirement_groups)
+
+
 def test_a_template_section_selection_rule_excludes_only_that_group() -> None:
     raw = fixture(MAJOR)
     assets = json.loads(raw["result"]["templateAssets"])
@@ -540,6 +859,19 @@ def test_the_captured_advisement_agreement_maps_its_real_texts() -> None:
     carries an `NFromArea` instruction and is excluded whole: the advisement
     goes with a typed exclusion in the report rather than into a group whose
     selection rule this build cannot express.
+
+    Five requirement groups, and after S9d they exercise all three branches of
+    the instruction dispatch at once:
+
+    - 3 and 7 are `Following`, stored as complete-all (`And`);
+    - 1 and 9 are `NFromArea` counting one COURSE, stored as `Or` with
+      `select_courses = 1`;
+    - 5 is `NFromArea` counting UP TO 8.00 semester units, which is an elective
+      CAP rather than a requirement and stays excluded.
+
+    Position 5 is also the one carrying a group-level advisement, so the
+    advisement assertion above is unchanged - the advisement still rides out
+    with a typed exclusion rather than into a stored group.
     """
     normalized = normalize_agreement(
         fixture(ADVISEMENTS),
@@ -557,10 +889,20 @@ def test_the_captured_advisement_agreement_maps_its_real_texts() -> None:
         if item.sending_expr is not None and note in json.dumps(item.sending_expr.model_dump())
     ]
     assert with_notes == [3, 10]
-    assert normalized.requirement_groups == ()
+
+    rules = {
+        group.position: (group.conjunction, group.select_courses)
+        for group in normalized.requirement_groups
+    }
+    assert rules == {1: ("Or", 1), 3: ("And", None), 7: ("And", None), 9: ("Or", 1)}
+    assert [item.position for item in normalized.exclusions] == [5]
     assert {item.reason_code for item in normalized.exclusions} == {
         AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED
     }
+    assert "UpTo" in normalized.exclusions[0].detail
+    # The one group-level advisement rides on position 5, an excluded
+    # `NFromArea` group, so it still reaches nobody as a satisfied requirement.
+    assert all(group.advisements == [] for group in normalized.requirement_groups)
 
 
 # --- institutions and years -------------------------------------------------

@@ -14,7 +14,7 @@ imported-from module is the only placement without an import cycle.
 coherence validators).
 """
 
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import AfterValidator, BaseModel, Field, field_validator, model_validator
 
@@ -80,13 +80,41 @@ class ReceivingCourse(BaseModel):
         return self
 
 
+class ReceivingSeries(BaseModel):
+    """Several receiving courses that articulate only as a unit.
+
+    ASSIST's `Series` articulation type: "PHYSICS 1A, 1B, 1C, 4AL, 4BL" is one
+    requirement satisfied by one sending expression, not five separate ones.
+    Flattening it into per-course articulations would be a factual error - it
+    would say each receiving course is independently satisfied, when the
+    agreement only ever promises the whole sequence.
+
+    `conjunction` is `And` in 42,069 of the 42,449 corridor instances and `Or`
+    in 380. `name` is ASSIST's own rendering of the sequence, kept verbatim so
+    the UI and a petition letter can quote the agreement rather than rebuild
+    the phrase from the parts.
+    """
+
+    model_config = FROZEN
+
+    name: str = Field(min_length=1, max_length=300)
+    conjunction: Literal["And", "Or"]
+    courses: list[ReceivingCourse] = Field(min_length=2)
+
+    @field_validator("name")
+    @classmethod
+    def _hygiene(cls, value: str) -> str:
+        return reject_control_chars(value)
+
+
 class Articulation(BaseModel):
     model_config = FROZEN
 
     agreement_id: str = Field(pattern=AGREEMENT_ID_PATTERN)
     position: int = Field(ge=0)
     template_cell_id: str | None = Field(default=None, pattern=GUID_PATTERN)
-    receiving_course: ReceivingCourse
+    receiving_course: ReceivingCourse | None = None
+    receiving_series: ReceivingSeries | None = None
     sending_expr: ArticulationExprField | None = None
     no_articulation_reason: str | None = Field(default=None, min_length=1, max_length=500)
     advisements: list[AdvisementText] = Field(default_factory=list)
@@ -95,6 +123,18 @@ class Articulation(BaseModel):
     @classmethod
     def _hygiene(cls, value: str | None) -> str | None:
         return None if value is None else reject_control_chars(value)
+
+    @model_validator(mode="after")
+    def _check_exactly_one_receiving_side(self) -> "Articulation":
+        """An articulation names a course OR a series, never both and never
+        neither: "what does this satisfy" has to have exactly one answer."""
+        if (self.receiving_course is None) == (self.receiving_series is None):
+            raise ValueError(
+                "articulation needs exactly one of receiving_course and receiving_series, "
+                f"got course={self.receiving_course is not None} "
+                f"series={self.receiving_series is not None}"
+            )
+        return self
 
     @model_validator(mode="after")
     def _check_reason_excludes_expr(self) -> "Articulation":

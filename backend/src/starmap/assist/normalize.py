@@ -32,13 +32,17 @@ places doc 02 does not enumerate one by one:
   contract is.
 
 Advisements were pinned in S9c from live corridor payloads (see
-`advisement_texts`). Seven levels feed it: the four doc 02 locks (articulation,
-sending-articulation, sending course group, sending course) plus three that a
-corridor-wide sweep proved carry real prose while nothing read them -
-`courseAttributes`, and `attributes` on template groups and template cells.
-`receivingAttributes` is the one attribute list still unmapped; it was empty in
-all 364 payloads swept, and it is named here so the next person knows it was
-looked at rather than missed.
+`advisement_texts`). Twelve levels feed it as of S9e: the four doc 02 locks
+(articulation, sending-articulation, sending course group, sending course),
+the three the S9c sweep added (`courseAttributes` on the articulation, and
+`attributes` on template groups and template cells), and five a full-corridor
+S9e sweep proved carry real prose the sample-based S9c sweep missed -
+`seriesAttributes` on the articulation, `attributes` on template sections and
+rows, and `courseAttributes`/`seriesAttributes` on template cells, the last of
+which is the volume carrier ("Minimum grade required: B or better", 41,246
+corridor entries). Two lists stay unread deliberately: `receivingAttributes`
+mirrors the articulation-level lists verbatim, and `requirementAttributes`
+sits only on `Requirement` cells, which already exclude their group.
 On "No Course Articulated" rows ASSIST sends `null` rather than `[]` for its
 attribute lists, so absent and empty must read the same.
 """
@@ -88,9 +92,53 @@ MAX_ADVISEMENT_LENGTH = 2000  # matches `AdvisementText` in contracts/articulati
 
 COURSE_ITEM_TYPE = "Course"
 SUPPORTED_ARTICULATION_TYPE = "Course"
+# Several receiving courses that articulate only as a unit (S9d). 42,449
+# corridor articulations and 49,634 template row cells carry this type; before
+# S9d both were typed exclusions, which cost the artifact every sequence-based
+# transfer rule in the corridor.
+SERIES_ARTICULATION_TYPE = "Series"
+MODELED_CELL_TYPES = (COURSE_ITEM_TYPE, SERIES_ARTICULATION_TYPE)
 REQUIREMENT_GROUP_ASSET_TYPE = "RequirementGroup"
 CONJUNCTION_INSTRUCTION_TYPE = "Conjunction"
 DEFAULT_GROUP_CONJUNCTION = "And"
+
+# "Complete the following", ASSIST's own rendering of a `Following` instruction.
+# The payload carries exactly `{"type", "id", "selectionType"}` in all 39,434
+# corridor instances: no `amount`, no `conjunction`, no selection semantics, so
+# it means the same thing a null instruction does. `selectionType` is the gate,
+# because 460 of those instances say `Select` rather than `Complete` and a
+# selection rule is genuinely unmodeled (S9d; see doc 02).
+FOLLOWING_INSTRUCTION_TYPE = "Following"
+COMPLETE_SELECTION_TYPE = "Complete"
+
+# The N-from selection rules, and the slice of their parameter space this build
+# models (S9d; semantics corrected in S9e against rendered agreements). ASSIST
+# renders every one as "Complete [at least] {amount} {amountUnitType} from
+# {section letters joined by the instruction's own conjunction}", so the amount
+# counts COURSES, never sections. The mapped slice becomes `select_courses`;
+# every other combination stays a typed exclusion for the reasons in
+# `docs/specs/agreement.schema.md`:
+#
+# - `UpTo` is a CAP ("complete up to 8.00 semester units"), not a requirement.
+# - `Unit`/`SemesterUnit` count units, and the template has no unit arithmetic.
+# - `Series`/`Sequence`/`CourseOrCombination`/`OrMoreCourses` denominate the
+#   amount in objects the pool does not count.
+# - `toAmountDeterminer` of `Any`/`Each` quantifies over a range.
+# - An `NFromConjunction` area conjunction of `And` over SEVERAL sections
+#   ("Complete 1 course from A and B") is ambiguous between "from each" and
+#   "from the union"; over one section it names nothing (rendered "from A")
+#   and the union reading is exact.
+#
+# `NFromFollowing` carries an amount and no unit or conjunction at all; "the
+# following" is the group's own sections, so it maps on the union terms.
+SELECTION_GROUP_CONJUNCTION = "Or"
+AREA_SELECTION_TYPES = ("NFromArea", "NFromConjunction")
+CONJUNCTION_SELECTION_TYPE = "NFromConjunction"
+FOLLOWING_SELECTION_TYPE = "NFromFollowing"
+SELECTABLE_AMOUNT_UNIT = "Course"
+SELECTABLE_QUANTIFIERS = ("None", "AtLeast")
+NEUTRAL_TO_AMOUNT_DETERMINERS = ("None", None)
+INERT_AREA_CONJUNCTIONS = ("Or", None)
 
 # `category` as `/api/institutions` publishes it; `isCommunityCollege` wins over
 # both (spike implication 5), and anything else (observed: 5, private) is an
@@ -407,7 +455,7 @@ def normalize_agreement(
             continue
         articulations.append(articulation)
         cc_courses.extend(sending)
-        target_courses.append(receiving)
+        target_courses.extend(receiving)
 
     groups, group_courses, group_exclusions = _requirement_groups(
         decoded["templateAssets"], assist_key=assist_key, receiving_id=receiving_id
@@ -465,7 +513,7 @@ def _articulation(
     position: int,
     sending_id: int,
     receiving_id: int,
-) -> tuple[Articulation, list[CcCourse], TargetCourse]:
+) -> tuple[Articulation, list[CcCourse], list[TargetCourse]]:
     """One articulation entry, both list shapes, into one contract."""
     template_cell_id = entry.get("templateCellId")
     inner = (
@@ -477,20 +525,26 @@ def _articulation(
         if template_cell_id is not None
         else entry
     )
-    if inner.get("type") != SUPPORTED_ARTICULATION_TYPE:
+    kind = inner.get("type")
+    receiving_course = None
+    receiving_series = None
+    if kind == SERIES_ARTICULATION_TYPE:
+        receiving_series, target_courses = _receiving_series(
+            inner.get("series"), receiving_id=receiving_id
+        )
+    elif kind == SUPPORTED_ARTICULATION_TYPE:
+        receiving_raw = _as_dict(
+            inner.get("course"),
+            what="receiving course",
+            code=AssistBuildCode.COURSE_CODE_UNPARSEABLE,
+        )
+        receiving_course = _course_row(ReceivingCourse, receiving_raw, institution_id=None)
+        target_courses = [_course_row(TargetCourse, receiving_raw, institution_id=receiving_id)]
+    else:
         raise _fail(
-            f"ASSIST articulation at position {position} carries unsupported type "
-            f"{inner.get('type')!r}",
+            f"ASSIST articulation at position {position} carries unsupported type {kind!r}",
             AssistBuildCode.ARTICULATION_TYPE_UNSUPPORTED,
         )
-
-    receiving_raw = _as_dict(
-        inner.get("course"),
-        what="receiving course",
-        code=AssistBuildCode.COURSE_CODE_UNPARSEABLE,
-    )
-    receiving_course = _course_row(ReceivingCourse, receiving_raw, institution_id=None)
-    target_course = _course_row(TargetCourse, receiving_raw, institution_id=receiving_id)
 
     cc_courses: list[CcCourse] = []
     sending_expr, no_articulation_reason = _sending(
@@ -502,7 +556,12 @@ def _articulation(
         # `courseAttributes` sits beside `attributes` and carries real
         # advisements ("Articulation is subject to placement by proficiency
         # exam"); before S9c measured that, it was read by nothing at all.
+        # `seriesAttributes` is its Series-articulation sibling ("Departmental
+        # credit limitation applies", 2,935 corridor entries), unread until
+        # S9e. `receivingAttributes` mirrors these lists verbatim and stays
+        # unread deliberately.
         *advisement_texts(inner.get("courseAttributes")),
+        *advisement_texts(inner.get("seriesAttributes")),
         *_sending_advisements(inner.get("sendingArticulation")),
     ]
     try:
@@ -512,6 +571,7 @@ def _articulation(
                 "position": position,
                 "template_cell_id": template_cell_id,
                 "receiving_course": receiving_course,
+                "receiving_series": receiving_series,
                 "sending_expr": sending_expr,
                 "no_articulation_reason": no_articulation_reason,
                 "advisements": advisements,
@@ -523,7 +583,34 @@ def _articulation(
             f"{_validation_detail(error)}",
             AssistBuildCode.ENVELOPE_INVALID,
         ) from error
-    return articulation, cc_courses, target_course
+    return articulation, cc_courses, target_courses
+
+
+def _receiving_series(
+    raw: object, *, receiving_id: int
+) -> tuple[dict[str, object], list[TargetCourse]]:
+    """A `Series` articulation's receiving side: several courses as one unit.
+
+    Every course in the sequence still projects into `target_courses`, because
+    that projection is the receiving-side vocabulary and a course does not stop
+    existing for being articulated only as part of a sequence.
+    """
+    series = _as_dict(raw, what="series", code=AssistBuildCode.ARTICULATION_TYPE_UNSUPPORTED)
+    entries = _dicts(
+        series.get("courses"),
+        what="series courses",
+        code=AssistBuildCode.ARTICULATION_TYPE_UNSUPPORTED,
+    )
+    return (
+        {
+            "name": name.strip() if isinstance(name := series.get("name"), str) else name,
+            "conjunction": series.get("conjunction"),
+            "courses": [
+                _course_row(ReceivingCourse, entry, institution_id=None) for entry in entries
+            ],
+        },
+        [_course_row(TargetCourse, entry, institution_id=receiving_id) for entry in entries],
+    )
 
 
 def _sending_advisements(sending: object) -> list[str]:
@@ -704,6 +791,7 @@ def _requirement_group(
     )
     for section in raw_sections:
         advisements.extend(advisement_texts(section.get("advisements")))
+        advisements.extend(advisement_texts(section.get("attributes")))
         cells: list[dict[str, object]] = []
         rows = _by_position(
             _dicts(
@@ -713,10 +801,23 @@ def _requirement_group(
             )
         )
         for row in rows:
+            advisements.extend(advisement_texts(row.get("attributes")))
             cell = _template_cell(row)
-            # Cell-level prose ("Maximum credit, one course") belongs to the
-            # group: `TemplateCell` carries the join key and the course only.
+            # Cell-level prose belongs to the group: `TemplateCell` carries the
+            # join key and the course only. `courseAttributes` is the volume
+            # carrier ("Minimum grade required: B or better", 41,246 corridor
+            # entries); before S9e nothing read it, nor the row and section
+            # `attributes` above, nor `seriesAttributes` - all silent drops.
             advisements.extend(advisement_texts(cell.get("attributes")))
+            advisements.extend(advisement_texts(cell.get("courseAttributes")))
+            advisements.extend(advisement_texts(cell.get("seriesAttributes")))
+            if cell.get("type") == SERIES_ARTICULATION_TYPE:
+                series, series_courses = _receiving_series(
+                    cell.get("series"), receiving_id=receiving_id
+                )
+                cells.append({"cell_id": cell.get("id"), "series": series})
+                courses.extend(series_courses)
+                continue
             course_raw = _as_dict(
                 cell.get("course"),
                 what="template cell course",
@@ -731,12 +832,14 @@ def _requirement_group(
             courses.append(_course_row(TargetCourse, course_raw, institution_id=receiving_id))
         sections.append({"position": _position_of(section), "cells": cells})
 
+    conjunction, select_courses = _group_rule(entry.get("instruction"), section_count=len(sections))
     try:
         group = RequirementGroupAsset.model_validate(
             {
                 "group_id": entry.get("groupId"),
                 "position": _position_of(entry),
-                "conjunction": _group_conjunction(entry.get("instruction")),
+                "conjunction": conjunction,
+                "select_courses": select_courses,
                 "sections": sections,
                 "advisements": advisements,
             }
@@ -750,34 +853,77 @@ def _requirement_group(
 
 
 def _template_cell(row: dict[str, object]) -> dict[str, object]:
-    """Every observed row holds exactly one `Course` cell; anything else is a
-    shape this build does not model."""
+    """Every observed row holds exactly one `Course` or `Series` cell.
+
+    `Requirement`, `GeneralEducation` and `CALGETC` cells remain unmodeled and
+    take their group with them, because a row this build cannot render would
+    otherwise silently shrink the requirement a student is shown.
+    """
     cells = _dicts(
         row.get("cells"), what="template cells", code=AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED
     )
-    course_cells = [cell for cell in cells if cell.get("type") == COURSE_ITEM_TYPE]
-    if len(cells) != 1 or len(course_cells) != 1:
+    modeled = [cell for cell in cells if cell.get("type") in MODELED_CELL_TYPES]
+    if len(cells) != 1 or len(modeled) != 1:
         raise _fail(
-            f"template row holds {len(cells)} cells of which {len(course_cells)} are courses; "
-            f"exactly one course cell is the only modeled shape",
+            f"template row holds {len(cells)} cells of which {len(modeled)} are modeled "
+            f"({', '.join(MODELED_CELL_TYPES)}); exactly one is the only modeled shape",
             AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED,
         )
-    return course_cells[0]
+    return modeled[0]
 
 
-def _group_conjunction(instruction: object) -> str:
-    """A null instruction is an implicit `And`; a `Conjunction` instruction
-    carries the real one. Any other instruction shape is unmodeled."""
+def _group_rule(instruction: object, *, section_count: int) -> tuple[str, int | None]:
+    """The group's `(conjunction, select_courses)` pair.
+
+    A null instruction is an implicit `And`, and so is `Following`; a
+    `Conjunction` instruction carries the real one; a selection rule that
+    counts COURSES becomes `("Or", n)`, meaning n courses from the union of
+    the sections. Any other shape is excluded rather than guessed at, because
+    the two available fallbacks are both wrong in ways that reach a student:
+    storing it as `And` would say they owe every section, and storing it as
+    `Or` that any single one suffices.
+
+    `section_count` gates the one ambiguity: an `NFromConjunction` whose own
+    area conjunction is `And` renders as "Complete 1 course from A and B" when
+    the group has several sections, which could mean one course from each or
+    one from the union, so it is excluded; with one section it renders "from
+    A" and the union reading is exact.
+    """
     if instruction is None:
-        return DEFAULT_GROUP_CONJUNCTION
+        return DEFAULT_GROUP_CONJUNCTION, None
     entry = _as_dict(
         instruction,
         what="template group instruction",
         code=AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED,
     )
-    if entry.get("type") != CONJUNCTION_INSTRUCTION_TYPE:
+    kind = entry.get("type")
+    if kind == FOLLOWING_INSTRUCTION_TYPE:
+        selection = entry.get("selectionType")
+        if selection != COMPLETE_SELECTION_TYPE:
+            raise _fail(
+                f"template group Following instruction carries selectionType {selection!r}, "
+                f"which selects rather than completes",
+                AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED,
+            )
+        return DEFAULT_GROUP_CONJUNCTION, None
+    if kind in AREA_SELECTION_TYPES or kind == FOLLOWING_SELECTION_TYPE:
+        amount = _selection_amount(entry, kind)
+        area_conjunction = entry.get("conjunction")
+        if (
+            kind == CONJUNCTION_SELECTION_TYPE
+            and area_conjunction not in INERT_AREA_CONJUNCTIONS
+            and section_count > 1
+        ):
+            raise _fail(
+                f"template group {kind!r} selection rule joins {section_count} sections with "
+                f"area conjunction {area_conjunction!r}, which is ambiguous between one pool "
+                f"and one amount per section",
+                AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED,
+            )
+        return SELECTION_GROUP_CONJUNCTION, amount
+    if kind != CONJUNCTION_INSTRUCTION_TYPE:
         raise _fail(
-            f"template group instruction carries type {entry.get('type')!r}, which is outside "
+            f"template group instruction carries type {kind!r}, which is outside "
             f"the modeled asset shapes",
             AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED,
         )
@@ -787,7 +933,37 @@ def _group_conjunction(instruction: object) -> str:
             "template group Conjunction instruction carried no string conjunction",
             AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED,
         )
-    return conjunction
+    return conjunction, None
+
+
+def _selection_amount(entry: dict[str, object], kind: object) -> int:
+    """How many courses an N-from group needs, when the rule counts courses."""
+    if kind != FOLLOWING_SELECTION_TYPE:
+        unit = entry.get("amountUnitType")
+        quantifier = entry.get("amountQuantifier")
+        determiner = entry.get("toAmountDeterminer")
+        if (
+            unit != SELECTABLE_AMOUNT_UNIT
+            or quantifier not in SELECTABLE_QUANTIFIERS
+            or determiner not in NEUTRAL_TO_AMOUNT_DETERMINERS
+        ):
+            raise _fail(
+                f"template group {kind!r} selection rule counts {quantifier!r} {unit!r} "
+                f"with toAmountDeterminer {determiner!r}, which this build does not model",
+                AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED,
+            )
+    amount = entry.get("amount")
+    if not isinstance(amount, int | float) or isinstance(amount, bool) or amount != int(amount):
+        raise _fail(
+            f"template group selection rule carried a non-integral amount {amount!r}",
+            AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED,
+        )
+    if int(amount) < 1:
+        raise _fail(
+            f"template group selection rule carried amount {amount!r}, expected at least 1",
+            AssistBuildCode.TEMPLATE_SHAPE_UNSUPPORTED,
+        )
+    return int(amount)
 
 
 # --- course rows and the projection gate ------------------------------------

@@ -156,7 +156,9 @@ def test_articulations_round_trip_in_position_order(artifact: Path) -> None:
         ]
         articulations = store.load_articulations(major.agreement_id)
         assert [item.position for item in articulations] == list(range(8))
-        assert articulations[3].receiving_course.course_code == "MATH 20E"
+        receiving = articulations[3].receiving_course
+        assert receiving is not None
+        assert receiving.course_code == "MATH 20E"
         assert articulations[3].sending_expr is not None
     finally:
         db.close()
@@ -174,7 +176,10 @@ def test_requirement_groups_round_trip_with_their_cells(artifact: Path) -> None:
         assert [group.position for group in groups] == [0, 1, 2, 3]
         assert groups[3].conjunction == "Or"
         cells = [cell for section in groups[3].sections for cell in section.cells]
-        assert [cell.course.course_code for cell in cells] == ["CSE 15L", "CSE 29"]
+        assert [cell.course.course_code for cell in cells if cell.course is not None] == [
+            "CSE 15L",
+            "CSE 29",
+        ]
     finally:
         db.close()
 

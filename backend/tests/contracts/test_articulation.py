@@ -38,6 +38,7 @@ def test_model_is_frozen() -> None:
 
 def test_receiving_course_is_frozen() -> None:
     articulation = Articulation.model_validate(valid_payload("math20e_and_series"))
+    assert articulation.receiving_course is not None
     with pytest.raises(ValidationError):
         articulation.receiving_course.title = "Something Else"
 

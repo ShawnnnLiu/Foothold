@@ -110,6 +110,61 @@ def test_stage_all_writes_the_artifact_and_the_report(cache_dir: Path, tmp_path:
     assert document["totals"]["institution_kind_unknown"] == 33
 
 
+def test_the_store_stage_also_writes_the_committed_gzip(cache_dir: Path, tmp_path: Path) -> None:
+    """The COMMITTED artifact is the gzip, not the database: GitHub rejects
+    files over 100 MB and the corridor build is roughly twice that."""
+    _, db_path, _ = run("all", cache_dir, tmp_path)
+    packed = db_path.with_suffix(".db.gz")
+
+    assert packed.exists()
+    assert packed.stat().st_size < db_path.stat().st_size
+
+
+def test_unpacking_the_gzip_restores_the_database_byte_for_byte(
+    cache_dir: Path, tmp_path: Path
+) -> None:
+    """`make unpack-data` is the only way a fresh clone gets a database, since
+    rebuilding needs the 2 GB raw cache that is not committed."""
+    _, db_path, _ = run("all", cache_dir, tmp_path)
+    original = db_path.read_bytes()
+    db_path.unlink()
+
+    restored = build_articulation.unpack_database(db_path)
+
+    assert restored.read_bytes() == original
+
+
+def test_packing_is_a_pure_function_of_the_database(cache_dir: Path, tmp_path: Path) -> None:
+    """`mtime=0`: two packs of one database agree, so a rebuild that changed
+    nothing does not show up as a 25 MB diff."""
+    _, db_path, _ = run("all", cache_dir, tmp_path)
+    first = db_path.with_suffix(".db.gz").read_bytes()
+
+    second = build_articulation.pack_database(db_path).read_bytes()
+
+    assert first == second
+
+
+def test_check_does_not_pack_its_throwaway_rebuild(cache_dir: Path, tmp_path: Path) -> None:
+    """Identity is compared over canonical dumps, never over compressed bytes,
+    so gzipping a temp build that is deleted moments later buys nothing."""
+    code, _, _ = run("all", cache_dir, tmp_path)
+    assert code == 0
+    scratch = tmp_path / "scratch"
+    scratch.mkdir()
+
+    build_articulation.run_build(
+        stage="store",
+        cache_dir=cache_dir,
+        db_path=scratch / "articulation.db",
+        report_path=scratch / "report.json",
+        only_pair=DEMO_PAIR,
+        pack=False,
+    )
+
+    assert not (scratch / "articulation.db.gz").exists()
+
+
 def test_the_built_artifact_holds_the_demo_pairs_rows(cache_dir: Path, tmp_path: Path) -> None:
     _, db_path, _ = run("all", cache_dir, tmp_path)
     connection = sqlite3.connect(db_path)

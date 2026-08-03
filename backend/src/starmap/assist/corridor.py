@@ -33,7 +33,27 @@ from starmap.contracts.reason_codes import AssistBuildCode
 
 BASE_URL = "https://www.assist.org"
 ROOT_URL = f"{BASE_URL}/"
-TARGET_IDS = (7, 39, 117, 120)  # UCSD, SJSU, UCLA, UCI (plan corridor, ids from institutions.json)
+# The receiving side of the corridor: every UC undergraduate campus plus the
+# six largest CSU transfer destinations. Ids verified against the cached
+# `/api/institutions` payload in S9d; UCSF is absent because it enrols no
+# undergraduates and therefore publishes no articulation agreements.
+TARGET_IDS = (
+    7,  # UC San Diego
+    11,  # Cal Poly San Luis Obispo
+    26,  # San Diego State
+    39,  # San Jose State
+    42,  # CSU Northridge
+    46,  # UC Riverside
+    79,  # UC Berkeley
+    81,  # CSU Long Beach
+    89,  # UC Davis
+    117,  # UC Los Angeles
+    120,  # UC Irvine
+    128,  # UC Santa Barbara
+    129,  # CSU Fullerton
+    132,  # UC Santa Cruz
+    144,  # UC Merced
+)
 DEMO_SENDING_ID = 113  # De Anza
 DEMO_RECEIVING_ID = 7  # UCSD
 PINNED_MAJOR_KEYWORDS = ("computer science", "economics", "psychology", "biology", "business")
@@ -42,13 +62,17 @@ PINNED_MAJOR_KEYWORDS = ("computer science", "economics", "psychology", "biology
 # `SendingDepartment`, is out of scope for v1 (`docs/specs/agreement.schema.md`).
 DEPT_KEY_SEGMENT = "Department"
 
-# Keyword matching is substring-based, so one pair can match far more majors
-# than the pinned set suggests: the S9c pilot measured 32 of De Anza's 168
-# UCSD major reports matching, because "business" catches "Business Analytics
-# Minor" and "computer science" catches every CSE specialization. Left
-# uncapped the corridor is ~16,000 requests (~11 hours); capped it is ~3,900.
-# The demo pair is exempt and still takes every major.
-MAX_MAJORS_PER_PAIR = 6
+# Optional per-pair cap on the pinned-keyword selection; None means uncapped.
+#
+# Keyword matching is substring-based, so one pair matches far more majors than
+# the pinned set suggests: 32 of De Anza's 168 UCSD major reports match,
+# because "business" catches "Business Analytics Minor" and "computer science"
+# catches every CSE specialization. S9c capped it at 6 to keep the first live
+# fetch inside one evening. S9d removed the cap: a student's major is either in
+# the artifact or it is not, and a triage that answers "no articulation" only
+# because the build skipped that agreement is worse than a slower build. The
+# cap machinery stays so the corridor can be narrowed again without a redesign.
+MAX_MAJORS_PER_PAIR: int | None = None
 PREFERRED_YEAR_ID = 76  # 2025-2026, latest published (spike doc)
 YEAR_FALLBACK_DEPTH = 2  # try 76, then 75, then 74 per pair
 
@@ -250,14 +274,19 @@ def _first_keyword(label: str) -> int:
     )
 
 
-def select_majors(refs: Iterable[AgreementRef]) -> tuple[AgreementRef, ...]:
-    """The pinned-keyword majors of one pair, capped and deterministic.
+def select_majors(
+    refs: Iterable[AgreementRef], *, limit: int | None = MAX_MAJORS_PER_PAIR
+) -> tuple[AgreementRef, ...]:
+    """The pinned-keyword majors of one pair, deterministic and optionally capped.
 
     Round-robin across the keyword families rather than a flat alphabetical
-    cut: taking the first six labels by name would hand back six psychology
-    specializations and no computer science at all, which is not the corridor
-    the pinned set describes. Within a family the order is by label then key,
-    so the selection is a pure function of the reports list.
+    cut: under a cap, taking the first six labels by name would hand back six
+    psychology specializations and no computer science at all, which is not the
+    corridor the pinned set describes. Uncapped the round-robin no longer
+    changes WHICH agreements are selected, only the order they are fetched in,
+    and it is kept so that re-imposing a cap needs one constant and no rethink.
+    Within a family the order is by label then key, so the selection is a pure
+    function of the reports list.
     """
     families: dict[int, list[AgreementRef]] = {}
     for ref in refs:
@@ -269,7 +298,7 @@ def select_majors(refs: Iterable[AgreementRef]) -> tuple[AgreementRef, ...]:
     selected: list[AgreementRef] = []
     for depth in range(max((len(group) for group in families.values()), default=0)):
         for index in sorted(families):
-            if len(selected) == MAX_MAJORS_PER_PAIR:
+            if limit is not None and len(selected) == limit:
                 return tuple(selected)
             group = families[index]
             if depth < len(group):

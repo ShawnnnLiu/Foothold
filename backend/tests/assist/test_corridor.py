@@ -96,6 +96,41 @@ def test_an_agreement_key_is_fully_percent_encoded() -> None:
 # --- payload readers --------------------------------------------------------
 
 
+def test_every_target_is_a_real_receiving_institution() -> None:
+    """The corridor's receiving side, pinned against the captured institutions
+    payload: nine UC undergraduate campuses (UCSF enrols none) plus the six
+    largest CSU transfer destinations. A typo'd id would otherwise show up as
+    an empty corridor eighteen hours into a fetch.
+    """
+    entries = fixture("institutions.json")
+    assert isinstance(entries, list)
+    by_id = {entry["id"]: entry for entry in entries if isinstance(entry, dict)}
+
+    assert len(TARGET_IDS) == 15
+    assert list(TARGET_IDS) == sorted(TARGET_IDS)
+    codes = [by_id[target]["code"].strip() for target in TARGET_IDS]
+    assert codes == [
+        "UCSD",
+        "CPSLO",
+        "SDSU",
+        "SJSU",
+        "CSUN",
+        "UCR",
+        "UCB",
+        "CSULB",
+        "UCD",
+        "UCLA",
+        "UCI",
+        "UCSB",
+        "CSUFULL",
+        "UCSC",
+        "UCM",
+    ]
+    # category 1 is UC, 0 is CSU; a community college can never be a target.
+    assert sorted(by_id[target]["category"] for target in TARGET_IDS) == [0] * 6 + [1] * 9
+    assert not any(by_id[target]["isCommunityCollege"] for target in TARGET_IDS)
+
+
 def test_community_colleges_come_from_the_flag_sorted_by_id() -> None:
     ids = community_college_ids(fixture("institutions.json"))
 
@@ -299,20 +334,42 @@ def test_the_captured_dept_reports_split_into_fifty_receiving_and_thirty_six_mir
     assert len(select_depts(refs)) == 50
 
 
-def test_major_selection_is_capped_and_spread_across_the_keyword_families() -> None:
-    """Substring matching over-selects (the S9c pilot: 32 of 168 for one pair),
-    so the selection is capped. The cap is round-robin across the pinned
-    families, because a flat alphabetical cut would return six psychology
-    specializations and no computer science at all.
+def test_major_selection_is_uncapped_and_ordered_round_robin() -> None:
+    """S9d removed the cap: every pinned-keyword match is fetched, so a
+    student's major is never missing because the build skipped its agreement.
+    The round-robin across families survives as the fetch ORDER, which is what
+    keeps re-imposing a cap a one-constant change.
     """
     labels = [
         *[f"Psychology B.S. Specialization {index}" for index in range(8)],
         "Computer Science B.S.",
         "Economics B.A.",
     ]
+
+    assert MAX_MAJORS_PER_PAIR is None
     selected = [ref.label for ref in select_majors(major_refs(labels))]
 
-    assert len(selected) == MAX_MAJORS_PER_PAIR
+    assert selected == [
+        "Computer Science B.S.",
+        "Economics B.A.",
+        *[f"Psychology B.S. Specialization {index}" for index in range(8)],
+    ]
+
+
+def test_a_capped_major_selection_spreads_across_the_keyword_families() -> None:
+    """Substring matching over-selects (32 of 168 for the demo pair), so a cap
+    has to be round-robin: a flat alphabetical cut would return six psychology
+    specializations and no computer science at all. The corridor runs uncapped,
+    but this is the behaviour a re-narrowed corridor gets.
+    """
+    labels = [
+        *[f"Psychology B.S. Specialization {index}" for index in range(8)],
+        "Computer Science B.S.",
+        "Economics B.A.",
+    ]
+    selected = [ref.label for ref in select_majors(major_refs(labels), limit=6)]
+
+    assert len(selected) == 6
     assert "Computer Science B.S." in selected
     assert "Economics B.A." in selected
     assert sum(1 for label in selected if label.startswith("Psychology")) == 4

@@ -142,6 +142,41 @@
       ],
       "title": "ReceivingCourse",
       "type": "object"
+    },
+    "ReceivingSeries": {
+      "additionalProperties": false,
+      "description": "Several receiving courses that articulate only as a unit.\n\nASSIST's `Series` articulation type: \"PHYSICS 1A, 1B, 1C, 4AL, 4BL\" is one\nrequirement satisfied by one sending expression, not five separate ones.\nFlattening it into per-course articulations would be a factual error - it\nwould say each receiving course is independently satisfied, when the\nagreement only ever promises the whole sequence.\n\n`conjunction` is `And` in 42,069 of the 42,449 corridor instances and `Or`\nin 380. `name` is ASSIST's own rendering of the sequence, kept verbatim so\nthe UI and a petition letter can quote the agreement rather than rebuild\nthe phrase from the parts.",
+      "properties": {
+        "conjunction": {
+          "enum": [
+            "And",
+            "Or"
+          ],
+          "title": "Conjunction",
+          "type": "string"
+        },
+        "courses": {
+          "items": {
+            "$ref": "#/$defs/ReceivingCourse"
+          },
+          "minItems": 2,
+          "title": "Courses",
+          "type": "array"
+        },
+        "name": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "conjunction",
+        "courses"
+      ],
+      "title": "ReceivingSeries",
+      "type": "object"
     }
   },
   "additionalProperties": false,
@@ -180,7 +215,26 @@
       "type": "integer"
     },
     "receiving_course": {
-      "$ref": "#/$defs/ReceivingCourse"
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReceivingCourse"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "receiving_series": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReceivingSeries"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     },
     "sending_expr": {
       "anyOf": [
@@ -219,8 +273,7 @@
   },
   "required": [
     "agreement_id",
-    "position",
-    "receiving_course"
+    "position"
   ],
   "title": "Articulation",
   "type": "object"

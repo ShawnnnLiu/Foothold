@@ -42,8 +42,19 @@ CORRIDOR_OBSERVED_SHAPES = [
     "MATH 120-S",  # embedded hyphen
 ]
 
+# Shapes the S9c regex still rejected, found by the fifteen-campus S9d corridor.
+S9D_OBSERVED_SHAPES = [
+    "ENGL 1AMCH",  # English 1A Multicultural Honors: a 4-character trailing group
+    "FAM &CS 021",  # Family & Consumer Sciences: a continuation prefix token opening with `&`
+    "PEAC TEN1",  # activity courses numbered by mnemonic: tennis, yoga, ballet
+    "PEAC YOG1",
+    "DANC BAL1",
+]
 
-@pytest.mark.parametrize("code", [*SPIKE_OBSERVED_SHAPES, *CORRIDOR_OBSERVED_SHAPES])
+
+@pytest.mark.parametrize(
+    "code", [*SPIKE_OBSERVED_SHAPES, *CORRIDOR_OBSERVED_SHAPES, *S9D_OBSERVED_SHAPES]
+)
 def test_observed_assist_shapes_pass(code: str) -> None:
     assert normalize_course_code(code) == code
     assert COURSE_CODE_RE.fullmatch(code)
@@ -63,7 +74,8 @@ def test_course_code_from_parts_joins_and_normalizes() -> None:
         "MATH",
         "1A",
         "MATH 12345",  # still rejected: the trailing group cannot start with a digit
-        "MATH 1ABCD",
+        "MATH 1ABCDE",  # 5 trailing letters; 4 became legal in S9d, see below
+        "&FAM CS 021",  # only a CONTINUATION prefix token may open with `&`
         "",
         "MATH 1A EXTRA WORD",  # the suffix token is 1-2 letters, not free text
         "MATH 1A B C",
@@ -71,11 +83,18 @@ def test_course_code_from_parts_joins_and_normalizes() -> None:
     ],
 )
 def test_invalid_codes_raise_naming_the_input(raw: str) -> None:
-    """S9c widened the regex; these prove it did not become a wildcard.
+    """S9c and S9d widened the regex; these prove it did not become a wildcard.
 
     `MATH 12345` is the specific case that motivated requiring the number's
     trailing group to start with a non-digit: allowing digits there (needed for
     `CIST 004B1`) would otherwise have let any 5-digit number through.
+
+    The boundary MOVED in S9d and this is the honest record of what that cost.
+    `MATH 1ABCD` used to be here and is now legal, because the corridor
+    publishes `ENGL 1AMCH` (English 1A, Multicultural Honors) and the two are
+    structurally identical - one digit followed by four letters. No length rule
+    can admit the real code and reject the invented one, so the trailing group
+    grew from 3 characters to 4 and the guard moved out one place, to 5.
     """
     with pytest.raises(ValueError, match="invalid course code"):
         normalize_course_code(raw)
