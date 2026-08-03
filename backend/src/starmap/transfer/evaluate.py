@@ -37,6 +37,7 @@ from starmap.contracts.articulation import Articulation
 from starmap.contracts.articulation_expr import AllOf, AnyOf, ArticulationExpr, CourseLeaf
 from starmap.contracts.evaluation import Citation, Evaluation, Finding, StudentCourse, UnitsSummary
 from starmap.contracts.reason_codes import BUCKET_FOR_CODE, EvaluationFindingCode, TriageBucket
+from starmap.transfer.costs import CostTable
 
 ExprState = Literal["satisfied", "partial", "unsatisfied"]
 
@@ -482,9 +483,12 @@ def build_evaluation(
     bundle: AgreementBundle,
     id_generator: IdGenerator,
     clock: Clock,
+    cost_table: CostTable | None = None,
 ) -> Evaluation:
     """Resolve requests against the `cc_courses` vocabulary (doc 03 step 6),
-    evaluate, and assemble the contract object."""
+    evaluate, and assemble the contract object. Without a cost table (or a
+    target row in it) the dollar fields stay None, the honest "we do not
+    know"."""
     student_courses: list[StudentCourse] = []
     unresolved: list[Finding] = []
     for request in requests:
@@ -508,6 +512,11 @@ def build_evaluation(
             )
         )
     findings = sort_findings([*evaluate_pair(student_courses, bundle), *unresolved])
+    target_rate = (
+        cost_table.target_rate(bundle.major.receiving_institution_id)
+        if cost_table is not None
+        else None
+    )
     return Evaluation(
         evaluation_id=id_generator.new_id("eval"),
         sending_institution_id=bundle.major.sending_institution_id,
@@ -518,17 +527,20 @@ def build_evaluation(
         year_label=bundle.latest_year_label,
         student_courses=student_courses,
         findings=findings,
-        units=units_summary(student_courses, findings),
+        units=units_summary(student_courses, findings, target_rate=target_rate),
         created_at=clock.now(),
     )
 
 
 def units_summary(
-    student_courses: Sequence[StudentCourse], findings: Sequence[Finding]
+    student_courses: Sequence[StudentCourse],
+    findings: Sequence[Finding],
+    target_rate: float | None = None,
 ) -> UnitsSummary:
     """Doc 03 units attribution: each student course counts in exactly one
-    bucket, decided by its first covering finding in bucket-rank order; dollar
-    fields stay None until the S10b cost table exists."""
+    bucket, decided by its first covering finding in bucket-rank order. The
+    dollar fields are the locked formula `units * target_per_unit[receiving]`
+    rounded to 2 places; without a target rate both stay None."""
     totals = {TriageBucket.TRANSFERS_CLEAN: 0.0, TriageBucket.AT_RISK: 0.0}
     for course in student_courses:
         best = next(
@@ -542,20 +554,30 @@ def units_summary(
         )
         if best is not None and best.bucket in totals:
             totals[best.bucket] += course.units
+    no_articulation_units = sum(
+        finding.units
+        for finding in findings
+        if finding.code is EvaluationFindingCode.NO_ARTICULATION
+    )
     return UnitsSummary(
         clean_units=totals[TriageBucket.TRANSFERS_CLEAN],
         at_risk_units=totals[TriageBucket.AT_RISK],
-        no_articulation_units=sum(
-            finding.units
-            for finding in findings
-            if finding.code is EvaluationFindingCode.NO_ARTICULATION
-        ),
+        no_articulation_units=no_articulation_units,
         still_owed_units=sum(
             finding.units
             for finding in findings
             if finding.code is EvaluationFindingCode.STILL_OWED
         ),
+        at_risk_dollars=_dollars(totals[TriageBucket.AT_RISK], target_rate),
+        no_articulation_dollars=_dollars(no_articulation_units, target_rate),
     )
+
+
+def _dollars(units: float, target_rate: float | None) -> float | None:
+    """The locked doc 03 formula; None (not zero) when the rate is unknown."""
+    if target_rate is None:
+        return None
+    return round(units * target_rate, 2)
 
 
 def _finding(

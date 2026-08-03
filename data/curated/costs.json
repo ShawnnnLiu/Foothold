@@ -1,0 +1,100 @@
+{
+  "version": "costs-v1",
+  "sources": [
+    {
+      "url": "https://www.lao.ca.gov/Publications/Report/5005",
+      "note": "cc_per_unit_default: California community college enrollment fee, $46 per unit since summer 2012, no increase proposed for 2025-26 (LAO, The 2025-26 Budget: California Community Colleges); user-confirmed 2026-08-02",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://summersession.ucsd.edu/tuition/tuition.html",
+      "note": "target 7 UC San Diego: $291 per unit, UC undergraduate Summer Session 2026 tuition, same rate regardless of residency",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://summer.ucr.edu/cost-aid",
+      "note": "target 46 UC Riverside: $291 per unit ($265 tuition + $26 Student Services Fee), UC undergraduates, Summer 2026",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://summer.berkeley.edu/tuition-and-fees",
+      "note": "target 79 UC Berkeley: $436 per unit, UC Berkeley undergraduates, 2026 Summer Sessions tuition table",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://financialaid.ucdavis.edu/summer/important-info/coa",
+      "note": "target 89 UC Davis: $291 per unit, Summer 2026 cost of attendance (page dated 2026-05-01; figure taken from a search excerpt of this page because the direct fetch was blocked)",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://summer.ucla.edu/courses/summer-courses/",
+      "note": "target 117 UCLA: $291 per unit, UCLA and visiting UC undergraduates, 2026 Summer Courses",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://summer.uci.edu/fees",
+      "note": "target 120 UC Irvine: $291 per unit, UCI or other UC undergraduates, Summer Session 2026",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://www.summer.ucsb.edu/cost-savings/payment-information",
+      "note": "target 128 UC Santa Barbara: $291 per unit for undergraduates, Summer Sessions (2026 At a Glance schedule published for Summer 2026)",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://summer.ucsc.edu/tuition-aid/",
+      "note": "target 132 UC Santa Cruz: $291 tuition per credit, in-state and out-of-state, Summer Session 2026",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://summersession.ucmerced.edu/dates-cost/fees",
+      "note": "target 144 UC Merced: $436 per unit, undergraduate courses, Summer Session 2026",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://www.sjsu.edu/professional/openuniversity/summer/fee.php",
+      "note": "target 39 San Jose State: $397 per unit, undergraduate, SJSU Summer Session fee page (last updated 2026-07-09)",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://tsengcollege.csun.edu/programs/open-university/fees-payment",
+      "note": "target 42 CSU Northridge: $370 per unit, Tseng College Open University rate (page undated; the published per-unit price for non-matriculated enrollment, including summer)",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://www.csulb.edu/enrollment-services/summer-sessions-for-csulb-students-0/summer-tuition-and-fees",
+      "note": "target 81 CSU Long Beach: $372 per unit, undergraduate summer 2026 tuition schedule",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://afd.calpoly.edu/fees/estimated-fees-summer",
+      "note": "target 11 Cal Poly SLO: NO ROW on purpose; Summer 2026 resident fees are flat tiers (1 unit $305 ... 7+ units $2,150), no published per-unit rate",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://cesblog.sdsu.edu/wp-content/uploads/sites/8/2025/10/2026-Summer-at-SDSU-Calendar-and-Fees.pdf",
+      "note": "target 26 San Diego State: NO ROW on purpose; Summer 2026 publishes a flat $3,500 fee covering 6 units, no per-unit rate",
+      "retrieved": "2026-08-02"
+    },
+    {
+      "url": "https://extension.fullerton.edu/summer/fees.aspx",
+      "note": "target 129 CSU Fullerton: NO ROW on purpose; the fee page defers to per-program listings and publishes no single per-unit rate",
+      "retrieved": "2026-08-02"
+    }
+  ],
+  "cc_per_unit_default": 46.0,
+  "target_per_unit": {
+    "7": 291.0,
+    "39": 397.0,
+    "42": 370.0,
+    "46": 291.0,
+    "79": 436.0,
+    "81": 372.0,
+    "89": 291.0,
+    "117": 291.0,
+    "120": 291.0,
+    "128": 291.0,
+    "132": 291.0,
+    "144": 436.0
+  }
+}

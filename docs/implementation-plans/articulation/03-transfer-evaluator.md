@@ -168,6 +168,17 @@ Measured 2026-08-02 against the committed artifact, because this doc's advisemen
   User decision: an owed group's advisements are carried on its still-owed finding's `advisements` field; a SATISFIED group's advisements do not create or downgrade findings in this increment, and their surfacing is deferred to the Week 2 triage-board group rendering.
   Recorded consequence, deliberately accepted: until Week 2 lands, a satisfied group's grade-minimum text is not visible in the findings object; 48.4% of matched cell-bound articulations sit in such groups, and downgrading them all was rejected as drowning the board.
 
+### S10b addendum, 2026-08-02: board-shape decisions, recorded rather than silent
+
+Made during split S10b; the re-deferral was confirmed by the user in-session, the other two are executor interpretations recorded here so nothing about the board shape is decided silently.
+
+- A SATISFIED group's advisements stay out of the findings object AND out of `TriageBoard`: `triage.py` is the first consumer that could have surfaced them, and the surfacing is explicitly re-deferred to the Week 2 board rendering (user confirmation, 2026-08-02).
+  The locked `TriageBoard` shape has no slot for them, and adding one here would widen a locked view-model mid-split.
+- `TriageBoard.columns` holds the three CREDIT buckets (`transfers_clean`, `at_risk`, `no_articulation`) and `still_owed` is its own field, because this doc lists both fields and duplicating the still-owed findings into a fourth column would make one of them redundant; still-owed findings describe requirements, not the student's credits.
+  Together the four cover every finding exactly once, which `test_board_partitions_findings_in_evaluator_order` pins.
+- A course articulating in both the major and a dept agreement keeps ONE FINDING PER ARTICULATION on the board (this doc's step 3 emits per-articulation by design); grouping them is deferred with the rest of the Week 2 board rendering, not done silently here.
+- The CLI takes a `--costs` flag beyond this doc's flag list, defaulting to `data/curated/costs.json` when that file exists, because the exit criteria require dollar totals and the cost-table location must be explicit.
+
 ### `templateOverrides`: closed, no evaluator impact
 
 Spotchecks section 12 (2026-08-02) proves ASSIST's renderer ignores `templateOverrides` entirely: the variant join does not exist anywhere in the public API surface, the SPA bundle maps and never consumes the field, and both rendered checks show the default rule.

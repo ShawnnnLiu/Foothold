@@ -53,6 +53,9 @@ def test_scenario(path: Path) -> None:
     assert evaluation.units.at_risk_units == expected_units["at_risk_units"]
     assert evaluation.units.no_articulation_units == expected_units["no_articulation_units"]
     assert evaluation.units.still_owed_units == expected_units["still_owed_units"]
+    # The harness passes no cost table, so the dollar fields must stay None
+    # ("we do not know", never zero); the dollar path itself is covered by
+    # test_evaluate_pair and test_triage with an explicit CostTable.
     assert evaluation.units.at_risk_dollars is None
     assert evaluation.units.no_articulation_dollars is None
 
