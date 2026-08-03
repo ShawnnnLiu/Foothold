@@ -66,6 +66,31 @@ export function buildTriageBoard(evaluation: Evaluation): TriageBoard {
   };
 }
 
+// The four evaluation-theater check lines, filled ONLY from the real response
+// (doc 03): resolved counts the courses the evaluator reasoned about, total
+// adds the unresolved findings, so the two always sum to what was submitted.
+export function theaterLines(evaluation: Evaluation): [string, string, string, string] {
+  const resolved = evaluation.student_courses.length;
+  const unresolvedCount = evaluation.findings.filter((f) => f.code === "unresolved").length;
+  const advisementCount = evaluation.findings.filter((f) => f.advisements.length > 0).length;
+  return [
+    `Resolved ${resolved} of ${resolved + unresolvedCount} courses`,
+    `Evaluated ${evaluation.findings.length} articulation findings`,
+    `Checked ${advisementCount} advisements`,
+    `Verdicts locked - agreement year ${evaluation.year_label}`,
+  ];
+}
+
+// course_code -> title for rendering a finding's sending-side titles; the
+// student_courses list is exactly what the evaluator resolved.
+export function studentTitleMap(evaluation: Evaluation): Record<string, string | null> {
+  const titles: Record<string, string | null> = {};
+  for (const course of evaluation.student_courses) {
+    titles[course.course_code] = course.title;
+  }
+  return titles;
+}
+
 export interface WallStep {
   kind: "secure" | "reach" | "owed";
 }

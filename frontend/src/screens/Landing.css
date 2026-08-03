@@ -1,0 +1,129 @@
+@keyframes fh-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 34px;
+  padding: 60px 32px;
+  box-sizing: border-box;
+  animation: fh-fade 0.4s both;
+}
+
+.landing__head {
+  text-align: center;
+}
+
+.landing__head h1 {
+  margin: 0;
+  font-weight: 900;
+  font-size: 54px;
+  line-height: 1.08;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  max-width: 860px;
+  text-wrap: pretty;
+}
+
+.landing__head p {
+  margin: 16px auto 0;
+  font-size: 16px;
+  font-weight: 400;
+  max-width: 640px;
+  line-height: 1.55;
+  color: rgba(39, 43, 49, 0.8);
+}
+
+.landing__pickers {
+  display: flex;
+  align-items: flex-end;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.landing__pick {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.landing__label {
+  font-weight: 900;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+}
+
+.landing__select {
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 13px 14px;
+  background: #fff;
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-offset);
+  cursor: pointer;
+  color: inherit;
+}
+
+.landing__select:disabled {
+  background: rgba(255, 255, 255, 0.5);
+  color: rgba(39, 43, 49, 0.5);
+  box-shadow: none;
+  cursor: default;
+}
+
+.landing__select--cc,
+.landing__select--major {
+  min-width: 230px;
+  max-width: 300px;
+}
+
+.landing__select--target {
+  min-width: 210px;
+  max-width: 280px;
+}
+
+.landing__arrow {
+  font-weight: 800;
+  font-size: 20px;
+  padding-bottom: 12px;
+}
+
+.landing__stats {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.landing__stat {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.landing__gao {
+  box-shadow: inset 0 -6px 0 rgba(217, 119, 6, 0.4);
+}
+
+.landing__gaoref {
+  font-weight: 400;
+  color: rgba(39, 43, 49, 0.6);
+}
+
+.landing__scale {
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 12px;
+  color: rgba(39, 43, 49, 0.55);
+}

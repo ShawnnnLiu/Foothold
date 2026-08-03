@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { Evaluation } from "./api";
 import boardFixture from "./__fixtures__/board.demo.json";
 import evaluationFixture from "./__fixtures__/evaluation.demo.json";
-import { buildTriageBoard, wallSteps } from "./evaluation";
+import { buildTriageBoard, studentTitleMap, theaterLines, wallSteps } from "./evaluation";
 import type { TriageHeader } from "./evaluation";
 
 const demoEvaluation = evaluationFixture as unknown as Evaluation;
@@ -31,6 +31,40 @@ describe("buildTriageBoard", () => {
     expect(board.still_owed).toStrictEqual(
       demoEvaluation.findings.filter((finding) => finding.bucket === "still_owed"),
     );
+  });
+});
+
+describe("theaterLines", () => {
+  it("pins the demo evaluation's four lines (numbers from the response, never placeholders)", () => {
+    expect(theaterLines(demoEvaluation)).toStrictEqual([
+      "Resolved 9 of 9 courses",
+      "Evaluated 21 articulation findings",
+      "Checked 0 advisements",
+      "Verdicts locked - agreement year 2025-2026",
+    ]);
+  });
+
+  it("counts unresolved findings into the course total and advisement-bearing findings into line 3", () => {
+    const altered = structuredClone(demoEvaluation);
+    const first = altered.findings[0]!;
+    altered.findings.push({
+      ...first,
+      code: "unresolved",
+      bucket: "at_risk",
+      citation: null,
+      student_course_codes: ["PHYS 4A"],
+    });
+    first.advisements = ["Must complete entire series"];
+    expect(theaterLines(altered)[0]).toBe("Resolved 9 of 10 courses");
+    expect(theaterLines(altered)[2]).toBe("Checked 1 advisements");
+  });
+});
+
+describe("studentTitleMap", () => {
+  it("maps every resolved course code to its title", () => {
+    const titles = studentTitleMap(demoEvaluation);
+    expect(titles["MATH 1A"]).toBe("Calculus I");
+    expect(Object.keys(titles)).toHaveLength(demoEvaluation.student_courses.length);
   });
 });
 

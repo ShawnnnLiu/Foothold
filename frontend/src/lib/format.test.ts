@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest";
 import type { Evaluation } from "./api";
 import evaluationFixture from "./__fixtures__/evaluation.demo.json";
 import { buildTriageBoard } from "./evaluation";
-import { citationLabel, formatDollars, formatUnits, REASON_TAGS, wallCaption } from "./format";
+import {
+  citationLabel,
+  countLine,
+  formatDollars,
+  formatUnits,
+  REASON_TAGS,
+  wallCaption,
+} from "./format";
 
 const demoEvaluation = evaluationFixture as unknown as Evaluation;
 const MAJOR_KEY = "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4";
@@ -51,6 +58,16 @@ describe("citationLabel", () => {
         MAJOR_KEY,
       ),
     ).toBe("DEPT. AGREEMENT 2025-2026 - ARTICULATION #0");
+  });
+});
+
+describe("countLine", () => {
+  it("renders the plural row-header line", () => {
+    expect(countLine(14, 34)).toBe("14 COURSES · 34 UNITS");
+  });
+
+  it("renders the singular at exactly one course", () => {
+    expect(countLine(1, 4.5)).toBe("1 COURSE · 4.5 UNITS");
   });
 });
 

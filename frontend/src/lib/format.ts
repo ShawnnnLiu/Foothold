@@ -29,6 +29,11 @@ export function wallCaption(header: TriageHeader): [string, string] {
   ];
 }
 
+// Row-header count line: "14 COURSES · 34 UNITS", singular at one.
+export function countLine(count: number, units: number): string {
+  return `${count} COURSE${count === 1 ? "" : "S"} · ${formatUnits(units)} UNITS`;
+}
+
 // The `majorKey` parameter is part of the locked doc-02 signature (reserved
 // for future grouping); the branch itself is on the citation's own key.
 export function citationLabel(citation: Citation, _majorKey: string): string {

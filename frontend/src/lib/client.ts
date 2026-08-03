@@ -21,6 +21,15 @@ export class ApiError extends Error {
   }
 }
 
+// The one banner-text rule (doc 03): an API error renders its `error_body.error`
+// text; anything else (network failure, JSON parse) renders its message.
+export function errorText(error: unknown): string {
+  if (error instanceof ApiError) {
+    return error.body.error;
+  }
+  return error instanceof Error ? error.message : String(error);
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(path, init);
   if (!response.ok) {

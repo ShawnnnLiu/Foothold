@@ -9,7 +9,9 @@ import {
   loadSample,
   popChip,
   removeChip,
+  SAMPLE_COURSES,
   setInput,
+  suggestions,
 } from "./courses";
 
 function hit(code: string): CourseHit {
@@ -117,5 +119,51 @@ Total units earned: 43.5  GPA 3.72
 
   it("returns an empty array when nothing matches", () => {
     expect(extractCourseCodes("no codes here")).toStrictEqual([]);
+  });
+});
+
+describe("SAMPLE_COURSES", () => {
+  it("pins the nine demo-student codes from deanza_ucsd_cs.json", () => {
+    expect(SAMPLE_COURSES).toStrictEqual([
+      "MATH 1A",
+      "MATH 1B",
+      "MATH 1C",
+      "MATH 2A",
+      "MATH 2B",
+      "MATH 22",
+      "CIS 22B",
+      "CIS 22C",
+      "CIS 36B",
+    ]);
+  });
+});
+
+describe("suggestions", () => {
+  const hit = (code: string): CourseHit => ({
+    course_code: code,
+    title: code,
+    units_min: 4,
+    units_max: 4,
+  });
+
+  it("preserves server order, hides codes already chipped, caps at 8", () => {
+    const hits = Array.from({ length: 10 }, (_, i) => hit(`MATH ${i}`));
+    const state = addChip(EMPTY_CHIP_STATE, hit("MATH 3"));
+    const shown = suggestions(hits, state);
+    expect(shown.map((s) => s.course_code)).toStrictEqual([
+      "MATH 0",
+      "MATH 1",
+      "MATH 2",
+      "MATH 4",
+      "MATH 5",
+      "MATH 6",
+      "MATH 7",
+      "MATH 8",
+    ]);
+  });
+
+  it("returns all hits unchanged when nothing is chipped and under the cap", () => {
+    const hits = [hit("CIS 22A"), hit("CIS 22B")];
+    expect(suggestions(hits, EMPTY_CHIP_STATE)).toStrictEqual(hits);
   });
 });

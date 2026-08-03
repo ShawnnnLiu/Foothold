@@ -1,0 +1,30 @@
+.wordmark {
+  display: flex;
+  align-items: flex-end;
+}
+
+.wordmark--lg {
+  gap: 14px;
+}
+
+.wordmark--sm {
+  gap: 8px;
+}
+
+.wordmark--link {
+  cursor: pointer;
+}
+
+.wordmark__text {
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.wordmark--lg .wordmark__text {
+  font-size: 42px;
+}
+
+.wordmark--sm .wordmark__text {
+  font-size: 19px;
+}

@@ -1,0 +1,114 @@
+/* Full-width card (clean / no-articulation rows). */
+.card {
+  background: #fff;
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-offset);
+  padding: 13px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.card:hover {
+  box-shadow: 6px 6px 0 var(--slate);
+  transform: translate(-1px, -1px);
+}
+
+.card--still_owed {
+  background: var(--chalk);
+  border: 2px dashed var(--slate);
+  box-shadow: none;
+}
+
+.card--still_owed:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.card__body {
+  flex: 1;
+}
+
+.card__line {
+  font-size: 14px;
+}
+
+.card__line b {
+  font-weight: 800;
+}
+
+.card__cite {
+  margin-top: 6px;
+}
+
+.card__units {
+  font-weight: 800;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* At-risk grid cell. */
+.cell {
+  padding: 12px 16px;
+}
+
+.cell:hover {
+  background: #fbf4e4;
+}
+
+.cell__line {
+  font-size: 13px;
+}
+
+.cell__line b {
+  font-weight: 800;
+}
+
+.cell__tags {
+  margin-top: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.cell__note {
+  font-size: 11.5px;
+  color: rgba(39, 43, 49, 0.75);
+}
+
+.cell__fix {
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.cell__foot {
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.cell__units {
+  font-weight: 800;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.cell__muted {
+  color: rgba(39, 43, 49, 0.5);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cell__line .cell__muted {
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: normal;
+  color: rgba(39, 43, 49, 0.6);
+}

@@ -65,6 +65,16 @@ The triage header renders progress as elevation: N-of-M units drawn as ascending
 It is a pure function of the deterministic triage header totals (clean units over total evaluated units); absent data means the chart is omitted, never fabricated.
 Scope note: this deliberately reverses part of the earlier "any atlas/sky visualization" cut; the elevation chart is a small triage summary graphic, not the pre-pivot Mode C pathway atlas, which stays cut.
 
+## Foil CTA exception (amendment, 2026-08-03)
+
+A deliberate, bounded exception to the flat-surface rules above, confirmed by the user at the doc-03 split kickoff per `docs/implementation-plans/frontend/00-overview.md` rule 2.
+
+- Exactly three buttons render as gradient "foil": the landing CTA (Check my credits), the evaluate CTA (Evaluate against ASSIST), and the draft-petition CTA (Draft petition letter).
+- The finish is fixed to Gold (`#FDEBBE #EDAD3F #CE8412 #A96606 #EBB856`, ink `#38220A`) with the Prism lines texture; there is no runtime finish switching.
+- The sheen is pointer-driven only: every sheen parameter is a pure function of cursor position relative to the button.
+  The prototype's PRNG idle-flash loop is dropped entirely, per the determinism axiom.
+- Every other surface stays flat chalk/slate; this exception does not extend to new buttons.
+
 ## Citations
 
 Every finding's citation (agreement key, articulation position, year) is always rendered, per the citation axiom in `CLAUDE.md`.

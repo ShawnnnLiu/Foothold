@@ -57,6 +57,30 @@ export function loadSample(sample: CourseHit[]): ChipState {
   return { chips, input: "" };
 }
 
+// The nine demo-student codes (data/curated/demo_students/deanza_ucsd_cs.json),
+// pinned per doc 03; each is still resolved through the autocomplete API
+// before becoming a chip, so a sample chip is never fabricated client-side.
+export const SAMPLE_COURSES: readonly string[] = [
+  "MATH 1A",
+  "MATH 1B",
+  "MATH 1C",
+  "MATH 2A",
+  "MATH 2B",
+  "MATH 22",
+  "CIS 22B",
+  "CIS 22C",
+  "CIS 36B",
+];
+
+// Suggestion-dropdown projection: server order preserved, chips already added
+// are hidden, capped at the doc-03 maximum of 8.
+export const MAX_SUGGESTIONS = 8;
+
+export function suggestions(hits: CourseHit[], state: ChipState): CourseHit[] {
+  const taken = new Set(state.chips.map((chip) => chip.course_code));
+  return hits.filter((hit) => !taken.has(hit.course_code)).slice(0, MAX_SUGGESTIONS);
+}
+
 // The locked course-code pattern for the deterministic paste path; every
 // candidate is then confirmed against the autocomplete API before it can
 // become a chip (nothing enters chips unconfirmed).
