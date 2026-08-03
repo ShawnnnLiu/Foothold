@@ -4,11 +4,13 @@ agreements, and the fixture cost table."""
 
 from typing import Any
 
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import ValidationError
 
 from starmap.app.web.config import AppConfig
 from starmap.common.sqlite import SqliteDatabase
+from starmap.contracts.arbitrage import ArbitrageRow
 from starmap.contracts.evaluation import Evaluation
 from starmap.retrieval.index import CourseIndex
 from tests.app.conftest import (
@@ -180,6 +182,88 @@ def test_get_with_an_unknown_id_is_a_404(client: TestClient) -> None:
     response = client.get("/api/evaluations/eval_0000000000000000")
     assert response.status_code == 404
     assert response.json() == {
+        "error": "evaluation not found",
+        "type": "not_found",
+        "reason_code": None,
+    }
+
+
+# --- arbitrage ---------------------------------------------------------------
+
+
+def _create_evaluation_id(client: TestClient) -> str:
+    created = client.post("/api/evaluations", json=demo_body())
+    assert created.status_code == 200
+    return str(created.json()["evaluation_id"])
+
+
+def test_arbitrage_round_trip_on_the_fixture_store(client: TestClient) -> None:
+    """The fixture student against the captured major agreement: every row's
+    dollars are exactly `units * (291 - 46)`, equal savings tie-break on
+    position, and the partial series sells only its missing member."""
+    evaluation_id = _create_evaluation_id(client)
+    response = client.get("/api/arbitrage", params={"evaluation_id": evaluation_id})
+    assert response.status_code == 200
+    payload = response.json()
+    assert set(payload.keys()) == {"rows", "omitted_no_rate", "cc_per_unit", "target_per_unit"}
+    assert payload["omitted_no_rate"] == 0
+    assert payload["cc_per_unit"] == 46.0
+    assert payload["target_per_unit"] == 291.0
+
+    rows = [ArbitrageRow.model_validate(entry) for entry in payload["rows"]]
+    assert [
+        (row.missing_course_codes, row.receiving_course_code, row.citation.position) for row in rows
+    ] == [
+        (["MATH 2A"], "MATH 20D", 0),
+        (["MATH 2B"], "MATH 18", 2),
+        (["MATH 1D"], "MATH 20E", 3),
+        (["MATH 1D"], "MATH 20C", 4),
+    ]
+    for row in rows:
+        assert row.savings_dollars == row.units * (291.0 - 46.0)
+
+
+def test_arbitrage_ranking_is_server_truth(client: TestClient) -> None:
+    """The wire order IS the ranking: dollar rows descending with position
+    tie-break, exactly what the client renders without re-sorting."""
+    evaluation_id = _create_evaluation_id(client)
+    payload = client.get("/api/arbitrage", params={"evaluation_id": evaluation_id}).json()
+    keys = [
+        (
+            row["savings_dollars"] is None,
+            -(row["savings_dollars"] or 0.0),
+            row["citation"]["position"],
+        )
+        for row in payload["rows"]
+    ]
+    assert keys == sorted(keys)
+
+
+def test_arbitrage_with_an_unknown_id_is_a_404(client: TestClient) -> None:
+    response = client.get("/api/arbitrage", params={"evaluation_id": "eval_0000000000000000"})
+    assert response.status_code == 404
+    assert response.json() == {
+        "error": "evaluation not found",
+        "type": "not_found",
+        "reason_code": None,
+    }
+
+
+def test_arbitrage_requires_the_evaluation_id_query(client: TestClient) -> None:
+    assert client.get("/api/arbitrage").status_code == 422
+
+
+def test_sessions_cannot_read_each_others_arbitrage(app: FastAPI) -> None:
+    session_a = TestClient(app)
+    session_b = TestClient(app)
+    evaluation_id = _create_evaluation_id(session_a)
+
+    assert (
+        session_a.get("/api/arbitrage", params={"evaluation_id": evaluation_id}).status_code == 200
+    )
+    denied = session_b.get("/api/arbitrage", params={"evaluation_id": evaluation_id})
+    assert denied.status_code == 404
+    assert denied.json() == {
         "error": "evaluation not found",
         "type": "not_found",
         "reason_code": None,

@@ -20,7 +20,8 @@ from starmap.app.web.bundles import load_bundle
 from starmap.app.web.errors import error_body
 from starmap.contracts.dedup import find_duplicates
 from starmap.contracts.evaluation import Evaluation
-from starmap.transfer.evaluate import CourseRequest, build_evaluation
+from starmap.transfer.arbitrage import build_arbitrage
+from starmap.transfer.evaluate import AgreementBundle, CourseRequest, build_evaluation
 
 router = APIRouter(prefix="/api")
 
@@ -131,15 +132,22 @@ def autocomplete_courses(
     }
 
 
+def _cached_bundle(state: Any, sending: int, receiving: int, major_key: str) -> AgreementBundle:
+    """The DBs are read-only, so the cache never invalidates (doc 01)."""
+    key = (sending, receiving, major_key)
+    bundle: AgreementBundle | None = state.bundles.get(key)
+    if bundle is None:
+        bundle = load_bundle(state.articulation, *key)
+        state.bundles[key] = bundle
+    return bundle
+
+
 @router.post("/evaluations")
 def create_evaluation(request: Request, body: EvaluationRequestBody) -> dict[str, Any]:
     state = request.app.state
-    key = (body.sending_institution_id, body.receiving_institution_id, body.major_key)
-    bundle = state.bundles.get(key)
-    if bundle is None:
-        # The DBs are read-only, so the cache never invalidates (doc 01).
-        bundle = load_bundle(state.articulation, *key)
-        state.bundles[key] = bundle
+    bundle = _cached_bundle(
+        state, body.sending_institution_id, body.receiving_institution_id, body.major_key
+    )
     projection = {
         row.course_code: row
         for row in state.articulation.load_cc_courses(body.sending_institution_id)
@@ -164,6 +172,39 @@ def create_evaluation(request: Request, body: EvaluationRequestBody) -> dict[str
     )
     state.evaluations.put(request.state.sid, evaluation)
     return evaluation.model_dump(mode="json")
+
+
+@router.get("/arbitrage", response_model=None)
+def get_arbitrage(
+    request: Request, evaluation_id: Annotated[str, Query(min_length=1)]
+) -> Response | dict[str, Any]:
+    """Mode B over a stored evaluation: rebuild the bundle from the stored
+    pair + major key, rank server-side; the client never re-sorts."""
+    state = request.app.state
+    evaluation: Evaluation | None = state.evaluations.get(request.state.sid, evaluation_id)
+    if evaluation is None:
+        # Uniform across unknown ids and other sessions' ids (doc 01).
+        return JSONResponse(
+            status_code=404, content=error_body("evaluation not found", "not_found")
+        )
+    bundle = _cached_bundle(
+        state,
+        evaluation.sending_institution_id,
+        evaluation.receiving_institution_id,
+        evaluation.major_key,
+    )
+    rows, omitted_no_rate = build_arbitrage(evaluation, bundle, state.costs)
+    target_rate = (
+        state.costs.target_rate(evaluation.receiving_institution_id)
+        if state.costs is not None
+        else None
+    )
+    return {
+        "rows": [row.model_dump(mode="json") for row in rows],
+        "omitted_no_rate": omitted_no_rate,
+        "cc_per_unit": state.costs.cc_per_unit_default if state.costs is not None else None,
+        "target_per_unit": target_rate,
+    }
 
 
 @router.get("/evaluations/{evaluation_id}", response_model=None)

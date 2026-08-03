@@ -1,0 +1,13 @@
+{
+  "missing_course_codes": ["CIS 22A"],
+  "receiving_course_code": "CSE 8A",
+  "receiving_course_title": "Introduction to Programming and Computational Problem Solving I",
+  "receiving_series_name": null,
+  "units": 4.0,
+  "savings_dollars": 980.0,
+  "citation": {
+    "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+    "position": 6,
+    "year_label": "2025-2026"
+  }
+}

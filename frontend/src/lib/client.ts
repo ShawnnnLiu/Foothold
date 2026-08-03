@@ -2,6 +2,7 @@
 // The `sid` cookie rides along automatically (same-origin requests).
 
 import type {
+  ArbitrageResponse,
   CourseHit,
   ErrorBody,
   Evaluation,
@@ -66,4 +67,8 @@ export function createEvaluation(body: EvaluationRequestBody): Promise<Evaluatio
 
 export function fetchEvaluation(evaluationId: string): Promise<Evaluation> {
   return request(`/api/evaluations/${encodeURIComponent(evaluationId)}`);
+}
+
+export function fetchArbitrage(evaluationId: string): Promise<ArbitrageResponse> {
+  return request(`/api/arbitrage?evaluation_id=${encodeURIComponent(evaluationId)}`);
 }

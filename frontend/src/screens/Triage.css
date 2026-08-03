@@ -134,16 +134,26 @@
   border: var(--border);
   border-radius: var(--radius);
   background: var(--chalk);
+  cursor: pointer;
 }
 
 .triage__tab--active {
   background: var(--slate);
   color: var(--chalk);
+  cursor: default;
 }
 
-.triage__tab--disabled {
-  opacity: 0.45;
-  cursor: default;
+.triage__arbstatus {
+  padding: 26px 40px 36px 28px;
+  max-width: 1000px;
+}
+
+.triage__arbstatus--loading {
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(39, 43, 49, 0.6);
 }
 
 .triage__edit {

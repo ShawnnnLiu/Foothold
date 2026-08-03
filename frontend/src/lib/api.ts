@@ -82,6 +82,34 @@ export interface Evaluation {
   created_at: string;
 }
 
+// One Mode B row (`GET /api/arbitrage`), mirrored from
+// backend/schemas/arbitrage.schema.json. Invariants a consumer may rely on:
+// - exactly one of `receiving_course_code` and `receiving_series_name` is
+//   non-null, and `receiving_course_title` rides with the code;
+// - `citation` is always present: Mode B never emits an uncited row;
+// - `savings_dollars` is null when the target publishes no per-unit rate;
+//   render null as absent, never $0.
+export interface ArbitrageRow {
+  missing_course_codes: string[];
+  receiving_course_code: string | null;
+  receiving_course_title: string | null;
+  receiving_series_name: string | null;
+  units: number;
+  savings_dollars: number | null;
+  citation: Citation;
+}
+
+// `rows` arrive pre-ranked by the server (savings descending, unrankable
+// rows after all dollar rows) and are never re-sorted client-side.
+// `omitted_no_rate` counts the rows shown without a savings figure; the
+// per-unit rates echo the curated cost table (null when uncurated).
+export interface ArbitrageResponse {
+  rows: ArbitrageRow[];
+  omitted_no_rate: number;
+  cc_per_unit: number | null;
+  target_per_unit: number | null;
+}
+
 // Doc-01 route row shapes.
 
 export interface InstitutionRow {

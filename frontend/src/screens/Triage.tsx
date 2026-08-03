@@ -1,10 +1,15 @@
+import { useCallback, useState } from "react";
+
+import ArbitragePanel from "../components/ArbitragePanel";
 import CourseCard from "../components/CourseCard";
+import ErrorBanner from "../components/ErrorBanner";
 import FoilButton from "../components/FoilButton";
 import HoldTile from "../components/HoldTile";
 import { useCountUp, roundTenth } from "../components/useCountUp";
 import WallChart from "../components/WallChart";
 import Wordmark from "../components/Wordmark";
-import type { Evaluation } from "../lib/api";
+import type { ArbitrageResponse, Evaluation } from "../lib/api";
+import { errorText, fetchArbitrage } from "../lib/client";
 import { buildTriageBoard, studentTitleMap, wallSteps } from "../lib/evaluation";
 import { countLine, formatDollars, formatUnits, wallCaption } from "../lib/format";
 import type { RouteContext } from "../lib/route";
@@ -37,6 +42,26 @@ export default function Triage({
   const steps = wallSteps(board.header);
   const [captionTop, captionBottom] = wallCaption(board.header);
   const majorKey = evaluation.major_key;
+
+  // The arbitrage tab fetches on first activation and caches in component
+  // state for the session (doc 04); the server ranking is rendered as-is.
+  const [tab, setTab] = useState<"board" | "arbitrage">("board");
+  const [arbitrage, setArbitrage] = useState<ArbitrageResponse | null>(null);
+  const [arbitrageError, setArbitrageError] = useState<string | null>(null);
+
+  const loadArbitrage = useCallback(() => {
+    setArbitrageError(null);
+    fetchArbitrage(evaluation.evaluation_id)
+      .then(setArbitrage)
+      .catch((e: unknown) => setArbitrageError(errorText(e)));
+  }, [evaluation.evaluation_id]);
+
+  const openArbitrage = () => {
+    setTab("arbitrage");
+    if (arbitrage === null && arbitrageError === null) {
+      loadArbitrage();
+    }
+  };
 
   const clean = useCountUp(board.header.clean_units);
   const risk = useCountUp(board.header.at_risk_units);
@@ -131,14 +156,39 @@ export default function Triage({
 
       <div className="triage__board">
         <div className="triage__tabs">
-          <div className="triage__tab triage__tab--active">TRIAGE BOARD</div>
-          <div className="triage__tab triage__tab--disabled" title="Arbitrage arrives next">
+          <div
+            className={`triage__tab ${tab === "board" ? "triage__tab--active" : ""}`}
+            onClick={() => setTab("board")}
+          >
+            TRIAGE BOARD
+          </div>
+          <div
+            className={`triage__tab ${tab === "arbitrage" ? "triage__tab--active" : ""}`}
+            onClick={openArbitrage}
+          >
             ARBITRAGE
           </div>
           <div className="triage__edit" onClick={onEditCourses}>
             ← EDIT COURSES
           </div>
         </div>
+        {tab === "arbitrage" ? (
+          arbitrageError !== null ? (
+            <div className="triage__arbstatus">
+              <ErrorBanner message={arbitrageError} onRetry={loadArbitrage} />
+            </div>
+          ) : arbitrage === null ? (
+            <div className="triage__arbstatus triage__arbstatus--loading">
+              Ranking open courses…
+            </div>
+          ) : (
+            <ArbitragePanel
+              sendingName={route.sending.name}
+              majorKey={majorKey}
+              data={arbitrage}
+            />
+          )
+        ) : (
         <div className="triage__rows">
           <div
             className="triage__row"
@@ -244,6 +294,7 @@ export default function Triage({
             </div>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
