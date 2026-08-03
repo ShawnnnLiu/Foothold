@@ -22,6 +22,10 @@ SDK_IMPORT_SITE = "llm/transport_anthropic.py"
 URLLIB_IMPORT_SITES = {"assist/http.py", "assist/corridor.py"}
 # The two regions every other region is allowed to depend on.
 SHARED_REGIONS = frozenset({"common", "contracts"})
+# The composition root (CLAUDE.md architecture boundaries): `app` wires the
+# other regions together, so the sibling-region rule does not bind it. It
+# still may not import the LLM SDK directly (rule 1 covers that).
+COMPOSITION_ROOT = "app"
 
 
 def imported_root_modules(path: Path) -> set[str]:
@@ -80,7 +84,8 @@ def test_regions_do_not_import_sibling_regions() -> None:
             imported_regions(path) - SHARED_REGIONS - {region_of(path)}
         )
         for path in sorted(SRC_ROOT.rglob("*.py"))
-        if imported_regions(path) - SHARED_REGIONS - {region_of(path)}
+        if region_of(path) != COMPOSITION_ROOT
+        and imported_regions(path) - SHARED_REGIONS - {region_of(path)}
     }
     assert violations == {}
 

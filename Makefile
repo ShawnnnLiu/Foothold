@@ -1,4 +1,8 @@
-.PHONY: test lint typecheck schema-check check build-data build-check unpack-data
+.PHONY: test lint typecheck schema-check check build-data build-check unpack-data run
+
+# The dev server over the committed artifacts (`make unpack-data` first).
+run:
+	cd backend && uv run uvicorn starmap.app.web.app:dev_app --reload --port 8000
 
 test:
 	cd backend && uv run pytest

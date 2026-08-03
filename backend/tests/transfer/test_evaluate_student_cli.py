@@ -10,6 +10,7 @@ from typing import Any
 
 import pytest
 
+from starmap.app.web.errors import UnknownAgreementError
 from starmap.assist.corridor import (
     academic_years_url,
     agreement_url,
@@ -162,7 +163,9 @@ def test_cli_renders_the_board_and_exits_zero(
 
 
 def test_cli_rejects_an_unknown_major_key(db_path: Path, student_path: Path) -> None:
-    with pytest.raises(ValueError, match="no agreement with key"):
+    # Typed since the F1 bundles move: the shared loader raises the same
+    # message as the old ValueError, as the 409 precondition error.
+    with pytest.raises(UnknownAgreementError, match="no agreement with key"):
         evaluate_student.run(
             db_path=db_path,
             student_path=student_path,

@@ -1,10 +1,10 @@
 """Evaluate a demo student file against the committed artifact (doc 03 CLI).
 
-The Week 1 milestone composition root: load the agreement bundle through the
-`assist/store.py` read surface, resolve the student file's courses against the
-`cc_courses` projection (exact match only at this increment; fuzzy arrives
-with increment 7), build the evaluation, and print the triage board as plain
-text with citations.
+The Week 1 milestone composition root: load the agreement bundle through
+`starmap.app.web.bundles` (shared with the web app since increment F1),
+resolve the student file's courses against the `cc_courses` projection (exact
+match only at this increment; fuzzy arrives with increment 7), build the
+evaluation, and print the triage board as plain text with citations.
 
 Everything here is deterministic given the database and the student file; the
 only non-injected values are the minted evaluation id and the timestamp,
@@ -22,6 +22,7 @@ import json
 import sys
 from pathlib import Path
 
+from starmap.app.web.bundles import load_bundle
 from starmap.assist.store import ArticulationStore
 from starmap.common.clock import SystemClock
 from starmap.common.ids import UuidIdGenerator
@@ -29,12 +30,7 @@ from starmap.common.sqlite import SqliteDatabase
 from starmap.contracts.evaluation import Evaluation, Finding
 from starmap.contracts.reason_codes import TriageBucket
 from starmap.transfer.costs import CostTable, load_cost_table
-from starmap.transfer.evaluate import (
-    AgreementBundle,
-    CourseRequest,
-    DeptAgreement,
-    build_evaluation,
-)
+from starmap.transfer.evaluate import CourseRequest, build_evaluation
 from starmap.transfer.triage import CREDIT_BUCKETS, TriageBoard, build_triage_board
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -63,36 +59,6 @@ def load_requests(path: Path) -> list[CourseRequest]:
         CourseRequest(course_code=entry["course_code"], units=entry["units"])
         for entry in document["courses"]
     ]
-
-
-def load_bundle(
-    store: ArticulationStore, sending: int, receiving: int, major_key: str
-) -> AgreementBundle:
-    agreements = store.load_agreements_for_pair(sending, receiving)
-    majors = [item for item in agreements if item.assist_key == major_key]
-    if not majors:
-        raise ValueError(
-            f"no agreement with key {major_key!r} exists for pair {sending} -> {receiving}"
-        )
-    major = majors[0]
-    latest_year_id = store.latest_year_for_pair(sending, receiving)
-    assert latest_year_id is not None  # the pair has at least the major agreement
-    labels = {year.year_id: year.label for year in store.load_academic_years()}
-    return AgreementBundle(
-        major=major,
-        major_articulations=tuple(store.load_articulations(major.agreement_id)),
-        requirement_groups=tuple(store.load_requirements(major.agreement_id)),
-        dept_agreements=tuple(
-            DeptAgreement(
-                agreement=item,
-                articulations=tuple(store.load_articulations(item.agreement_id)),
-            )
-            for item in agreements
-            if item.category == "dept"
-        ),
-        latest_year_id=latest_year_id,
-        latest_year_label=labels[latest_year_id],
-    )
 
 
 def render_finding(finding: Finding) -> list[str]:

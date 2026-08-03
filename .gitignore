@@ -11,6 +11,11 @@ data/build/
 # corridor builds to ~319 MB (35 MB gzipped). `make unpack-data` restores the
 # database from the gzip; `make build-data` rebuilds both from the raw cache.
 data/articulation.db
+
+# The runtime session database: the only mutable database, minted by the web
+# app on first write and never committed.
+data/sessions.db*
+
 backend/.venv/
 __pycache__/
 *.pyc
