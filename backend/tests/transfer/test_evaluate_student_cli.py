@@ -76,6 +76,7 @@ def db_path(tmp_path: Path) -> Path:
         stage="all",
         cache_dir=cache_dir,
         db_path=path,
+        corpus_path=tmp_path / "corpus.db",
         report_path=tmp_path / "reports" / "assist_build_report.json",
         only_pair=(DE_ANZA, UCSD),
     )

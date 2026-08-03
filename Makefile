@@ -22,7 +22,8 @@ build-data:
 # The LOCAL committed-artifact gate: rebuild from the same cache and compare
 # canonical dumps. It needs the raw cache, which is gitignored and far too
 # large to commit, so this is deliberately NOT wired into CI; run it before
-# any commit that touches `data/articulation.db` or the build report.
+# any commit that touches `data/articulation.db`, `data/corpus.db`, or the
+# build report.
 build-check:
 	cd backend && uv run python scripts/build_articulation.py --check
 

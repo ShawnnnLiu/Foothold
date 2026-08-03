@@ -28,6 +28,8 @@ from starmap.assist.corridor import (
 )
 from starmap.assist.fetch import cache_key
 from starmap.common.dbdump import canonical_dump
+from starmap.common.sqlite import SqliteDatabase
+from starmap.retrieval.index import CourseIndex
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = BACKEND_ROOT / "scripts" / "build_articulation.py"
@@ -89,11 +91,16 @@ def run(stage: str, cache_dir: Path, tmp_path: Path, **kwargs: Any) -> tuple[int
         stage=stage,
         cache_dir=cache_dir,
         db_path=db_path,
+        corpus_path=corpus_path_for(tmp_path),
         report_path=report_path,
         only_pair=DEMO_PAIR,
         **kwargs,
     )
     return code, db_path, report_path
+
+
+def corpus_path_for(tmp_path: Path) -> Path:
+    return tmp_path / "corpus.db"
 
 
 # --- the stages -------------------------------------------------------------
@@ -157,6 +164,7 @@ def test_check_does_not_pack_its_throwaway_rebuild(cache_dir: Path, tmp_path: Pa
         stage="store",
         cache_dir=cache_dir,
         db_path=scratch / "articulation.db",
+        corpus_path=scratch / "corpus.db",
         report_path=scratch / "report.json",
         only_pair=DEMO_PAIR,
         pack=False,
@@ -247,7 +255,11 @@ def test_check_passes_on_a_freshly_built_artifact(
 ) -> None:
     _, db_path, report_path = run("all", cache_dir, tmp_path)
     code = build_articulation.run_check(
-        cache_dir=cache_dir, db_path=db_path, report_path=report_path, only_pair=DEMO_PAIR
+        cache_dir=cache_dir,
+        db_path=db_path,
+        corpus_path=corpus_path_for(tmp_path),
+        report_path=report_path,
+        only_pair=DEMO_PAIR,
     )
     assert code == 0
     assert "regenerate identically" in capsys.readouterr().out
@@ -264,7 +276,11 @@ def test_check_fails_after_a_row_is_mutated(
     finally:
         connection.close()
     code = build_articulation.run_check(
-        cache_dir=cache_dir, db_path=db_path, report_path=report_path, only_pair=DEMO_PAIR
+        cache_dir=cache_dir,
+        db_path=db_path,
+        corpus_path=corpus_path_for(tmp_path),
+        report_path=report_path,
+        only_pair=DEMO_PAIR,
     )
     assert code == 1
     assert f"out of date: {db_path}" in capsys.readouterr().out
@@ -280,7 +296,11 @@ def test_check_fails_after_the_report_is_edited(
     document["totals"]["agreements_stored"] = 99
     report_path.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n")
     code = build_articulation.run_check(
-        cache_dir=cache_dir, db_path=db_path, report_path=report_path, only_pair=DEMO_PAIR
+        cache_dir=cache_dir,
+        db_path=db_path,
+        corpus_path=corpus_path_for(tmp_path),
+        report_path=report_path,
+        only_pair=DEMO_PAIR,
     )
     assert code == 1
     assert f"out of date: {report_path}" in capsys.readouterr().out
@@ -292,6 +312,7 @@ def test_check_reports_a_missing_artifact(
     code = build_articulation.run_check(
         cache_dir=cache_dir,
         db_path=tmp_path / "absent.db",
+        corpus_path=tmp_path / "absent_corpus.db",
         report_path=tmp_path / "absent.json",
         only_pair=DEMO_PAIR,
     )
@@ -314,6 +335,153 @@ def test_a_rebuild_never_merges_into_an_older_artifact(cache_dir: Path, tmp_path
         connection.close()
     run("all", cache_dir, tmp_path)
     assert canonical_dump(db_path) == before
+
+
+# --- the corpus stage ---------------------------------------------------------
+
+
+def test_stage_all_ends_with_the_corpus_artifact(cache_dir: Path, tmp_path: Path) -> None:
+    code, db_path, _ = run("all", cache_dir, tmp_path)
+    assert code == 0
+    corpus_path = corpus_path_for(tmp_path)
+    assert corpus_path.exists()
+
+    connection = sqlite3.connect(corpus_path)
+    try:
+        builds = connection.execute(
+            "SELECT institution_id, course_count FROM index_builds ORDER BY institution_id"
+        ).fetchall()
+    finally:
+        connection.close()
+    articulation = sqlite3.connect(db_path)
+    try:
+        expected = articulation.execute(
+            "SELECT institution_id, COUNT(*) FROM cc_courses "
+            "GROUP BY institution_id ORDER BY institution_id"
+        ).fetchall()
+    finally:
+        articulation.close()
+    assert builds == expected
+
+
+def test_stage_corpus_alone_is_a_pure_function_of_the_articulation_artifact(
+    cache_dir: Path, tmp_path: Path
+) -> None:
+    """No cache, no network: after `store`, the corpus stage runs from the
+    database alone, which is what lets a fresh clone rebuild it after
+    `make unpack-data`."""
+    code, _, _ = run("store", cache_dir, tmp_path)
+    assert code == 0
+    cold = tmp_path / "cold-cache"
+    cold.mkdir()
+
+    code, _, _ = run("corpus", cold, tmp_path)
+
+    assert code == 0
+    assert corpus_path_for(tmp_path).exists()
+
+
+def test_stage_corpus_without_the_articulation_artifact_fails_loudly(
+    cache_dir: Path, tmp_path: Path
+) -> None:
+    """Opening the missing path would silently create an empty database and a
+    valid-looking empty corpus; the stage must refuse instead."""
+    code, _, _ = run("corpus", cache_dir, tmp_path)
+    assert code == 1
+    assert not corpus_path_for(tmp_path).exists()
+
+
+def test_cc_course_rows_equal_the_cc_courses_projection_exactly(
+    cache_dir: Path, tmp_path: Path
+) -> None:
+    """The vocabulary-gate test: one projection, two consumers, never a
+    re-derivation. Every row in `corpus.db` is field-for-field the
+    `cc_courses` payload from `articulation.db`, and nothing more."""
+    _, db_path, _ = run("all", cache_dir, tmp_path)
+
+    articulation = sqlite3.connect(db_path)
+    try:
+        projection = sorted(
+            (
+                payload["institution_id"],
+                payload["course_code"],
+                payload["prefix"],
+                payload["number"],
+                payload["title"],
+                payload["units_min"],
+                payload["units_max"],
+            )
+            for (raw,) in articulation.execute("SELECT payload FROM cc_courses").fetchall()
+            for payload in [json.loads(raw)]
+        )
+    finally:
+        articulation.close()
+    corpus = sqlite3.connect(corpus_path_for(tmp_path))
+    try:
+        rows = sorted(
+            corpus.execute(
+                "SELECT institution_id, course_code, prefix, number, title, units_min, units_max "
+                "FROM cc_course_rows"
+            ).fetchall()
+        )
+    finally:
+        corpus.close()
+    assert [tuple(row) for row in rows] == projection
+
+
+def test_the_fts_join_survives_the_finalizing_vacuum(cache_dir: Path, tmp_path: Path) -> None:
+    """`cc_course_rows` has a composite primary key, so its rowids are implicit
+    and VACUUM may renumber them; the FTS tables store those rowids as their
+    join key. The build writes append-only into a fresh file, which keeps the
+    numbering consecutive and VACUUM-stable, and this pins it."""
+    run("all", cache_dir, tmp_path)
+    corpus = sqlite3.connect(corpus_path_for(tmp_path))
+    try:
+        institution_id, course_code, title = corpus.execute(
+            "SELECT institution_id, course_code, title FROM cc_course_rows "
+            "ORDER BY institution_id, course_code LIMIT 1"
+        ).fetchone()
+    finally:
+        corpus.close()
+
+    db = SqliteDatabase(corpus_path_for(tmp_path))
+    try:
+        hits = CourseIndex(db).search(institution_id, f"{course_code} {title}", k=50)
+    finally:
+        db.close()
+    assert course_code in {hit.course_code for hit in hits}
+
+
+def test_check_fails_after_a_corpus_row_is_mutated(
+    cache_dir: Path, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    _, db_path, report_path = run("all", cache_dir, tmp_path)
+    corpus_path = corpus_path_for(tmp_path)
+    connection = sqlite3.connect(corpus_path)
+    try:
+        connection.execute("UPDATE cc_course_rows SET title = 'Edited By Hand' WHERE rowid = 1")
+        connection.commit()
+    finally:
+        connection.close()
+    code = build_articulation.run_check(
+        cache_dir=cache_dir,
+        db_path=db_path,
+        corpus_path=corpus_path,
+        report_path=report_path,
+        only_pair=DEMO_PAIR,
+    )
+    assert code == 1
+    assert f"out of date: {corpus_path}" in capsys.readouterr().out
+
+
+def test_two_corpus_builds_from_one_articulation_db_are_identical(
+    cache_dir: Path, tmp_path: Path
+) -> None:
+    run("all", cache_dir, tmp_path / "first")
+    run("all", cache_dir, tmp_path / "second")
+    assert canonical_dump(corpus_path_for(tmp_path / "first")) == canonical_dump(
+        corpus_path_for(tmp_path / "second")
+    )
 
 
 # --- the command line -------------------------------------------------------
