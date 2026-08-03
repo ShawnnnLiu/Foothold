@@ -33,10 +33,46 @@ from starmap.contracts.reason_codes import AssistBuildCode
 
 BASE_URL = "https://www.assist.org"
 ROOT_URL = f"{BASE_URL}/"
-TARGET_IDS = (7, 39, 117, 120)  # UCSD, SJSU, UCLA, UCI (plan corridor, ids from institutions.json)
+# The receiving side of the corridor: every UC undergraduate campus plus the
+# six largest CSU transfer destinations. Ids verified against the cached
+# `/api/institutions` payload in S9d; UCSF is absent because it enrols no
+# undergraduates and therefore publishes no articulation agreements.
+TARGET_IDS = (
+    7,  # UC San Diego
+    11,  # Cal Poly San Luis Obispo
+    26,  # San Diego State
+    39,  # San Jose State
+    42,  # CSU Northridge
+    46,  # UC Riverside
+    79,  # UC Berkeley
+    81,  # CSU Long Beach
+    89,  # UC Davis
+    117,  # UC Los Angeles
+    120,  # UC Irvine
+    128,  # UC Santa Barbara
+    129,  # CSU Fullerton
+    132,  # UC Santa Cruz
+    144,  # UC Merced
+)
 DEMO_SENDING_ID = 113  # De Anza
 DEMO_RECEIVING_ID = 7  # UCSD
 PINNED_MAJOR_KEYWORDS = ("computer science", "economics", "psychology", "biology", "business")
+
+# The key segment of a receiving-side department agreement. Its mirror,
+# `SendingDepartment`, is out of scope for v1 (`docs/specs/agreement.schema.md`).
+DEPT_KEY_SEGMENT = "Department"
+
+# Optional per-pair cap on the pinned-keyword selection; None means uncapped.
+#
+# Keyword matching is substring-based, so one pair matches far more majors than
+# the pinned set suggests: 32 of De Anza's 168 UCSD major reports match,
+# because "business" catches "Business Analytics Minor" and "computer science"
+# catches every CSE specialization. S9c capped it at 6 to keep the first live
+# fetch inside one evening. S9d removed the cap: a student's major is either in
+# the artifact or it is not, and a triage that answers "no articulation" only
+# because the build skipped that agreement is worse than a slower build. The
+# cap machinery stays so the corridor can be narrowed again without a redesign.
+MAX_MAJORS_PER_PAIR: int | None = None
 PREFERRED_YEAR_ID = 76  # 2025-2026, latest published (spike doc)
 YEAR_FALLBACK_DEPTH = 2  # try 76, then 75, then 74 per pair
 
@@ -110,6 +146,7 @@ class PairScope:
     major_reports: int = 0
     major_selected: int = 0
     dept_reports: int = 0
+    dept_selected: int = 0
     agreements: tuple[AgreementRef, ...] = ()
     fetch_failures: tuple[FetchFailure, ...] = ()
     scope_error: str | None = None
@@ -203,6 +240,72 @@ def matches_pinned_keyword(label: str) -> bool:
     return any(keyword in folded for keyword in PINNED_MAJOR_KEYWORDS)
 
 
+def select_depts(refs: Iterable[AgreementRef]) -> tuple[AgreementRef, ...]:
+    """Receiving-side department agreements only.
+
+    ASSIST publishes each department agreement twice: once owned by the
+    receiving institution (`.../Department/<int>`) and once by the sending one
+    (`.../SendingDepartment/<int>`). `agreement.schema.md` calls the sending
+    direction out of scope for v1 and says the fetcher never requests it, but
+    until S9c nothing enforced that, so all 86 of the demo pair's dept reports
+    were fetched and the 36 mirror ones then failed `assist_key` validation as
+    `envelope_invalid` noise.
+
+    Verified against the S9c capture before this filter landed: the 36 sending
+    agreements contribute 120 articulation pairs, every one of which the 50
+    receiving agreements already publish, and those publish 329 more besides.
+    Filtering here therefore drops duplicates, never transfer rules.
+    """
+    return tuple(ref for ref in refs if _key_segment(ref.assist_key) == DEPT_KEY_SEGMENT)
+
+
+def _key_segment(assist_key: str) -> str:
+    """The key's fifth segment, which names the agreement's owning side."""
+    segments = assist_key.split("/")
+    return segments[4] if len(segments) > 4 else ""
+
+
+def _first_keyword(label: str) -> int:
+    """Which pinned keyword owns this label: the earliest one that matches."""
+    folded = label.casefold()
+    return next(
+        (index for index, keyword in enumerate(PINNED_MAJOR_KEYWORDS) if keyword in folded),
+        len(PINNED_MAJOR_KEYWORDS),
+    )
+
+
+def select_majors(
+    refs: Iterable[AgreementRef], *, limit: int | None = MAX_MAJORS_PER_PAIR
+) -> tuple[AgreementRef, ...]:
+    """The pinned-keyword majors of one pair, deterministic and optionally capped.
+
+    Round-robin across the keyword families rather than a flat alphabetical
+    cut: under a cap, taking the first six labels by name would hand back six
+    psychology specializations and no computer science at all, which is not the
+    corridor the pinned set describes. Uncapped the round-robin no longer
+    changes WHICH agreements are selected, only the order they are fetched in,
+    and it is kept so that re-imposing a cap needs one constant and no rethink.
+    Within a family the order is by label then key, so the selection is a pure
+    function of the reports list.
+    """
+    families: dict[int, list[AgreementRef]] = {}
+    for ref in refs:
+        if matches_pinned_keyword(ref.label):
+            families.setdefault(_first_keyword(ref.label), []).append(ref)
+    for group in families.values():
+        group.sort(key=lambda ref: (ref.label, ref.assist_key))
+
+    selected: list[AgreementRef] = []
+    for depth in range(max((len(group) for group in families.values()), default=0)):
+        for index in sorted(families):
+            if limit is not None and len(selected) == limit:
+                return tuple(selected)
+            group = families[index]
+            if depth < len(group):
+                selected.append(group[depth])
+    return tuple(selected)
+
+
 # --- the walk ---------------------------------------------------------------
 
 
@@ -255,15 +358,17 @@ def _walk_pair(fetcher: AssistFetcher, sending_id: int, receiving_id: int) -> Pa
         majors = _reports(fetcher, sending_id, receiving_id, year_id, "major")
     except AssistFetchError as error:
         return PairScope(sending_id, receiving_id, year_id, scope_error=_isolate(error))
-    selected = majors if is_demo else tuple(r for r in majors if matches_pinned_keyword(r.label))
+    selected = majors if is_demo else select_majors(majors)
 
     # Department depth beyond the demo pair is cuttable major-depth per the plan;
     # the sending-CC breadth never is.
+    dept_reports: tuple[AgreementRef, ...] = ()
     depts: tuple[AgreementRef, ...] = ()
     scope_error: str | None = None
     if is_demo:
         try:
-            depts = _reports(fetcher, sending_id, receiving_id, year_id, "dept")
+            dept_reports = _reports(fetcher, sending_id, receiving_id, year_id, "dept")
+            depts = select_depts(dept_reports)
         except AssistFetchError as error:
             scope_error = _isolate(error)
 
@@ -289,7 +394,8 @@ def _walk_pair(fetcher: AssistFetcher, sending_id: int, receiving_id: int) -> Pa
         year_id=year_id,
         major_reports=len(majors),
         major_selected=len(selected),
-        dept_reports=len(depts),
+        dept_reports=len(dept_reports),
+        dept_selected=len(depts),
         agreements=tuple(agreements),
         fetch_failures=tuple(failures),
         scope_error=scope_error,

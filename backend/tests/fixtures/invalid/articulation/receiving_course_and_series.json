@@ -1,0 +1,45 @@
+{
+  "agreement_id": "agr_2d6204abcea837f3",
+  "position": 3,
+  "template_cell_id": "d7f5eee6-92d2-4ccb-0b3b-08ddd3b241bf",
+  "receiving_course": {
+    "course_code": "MATH 20E",
+    "prefix": "MATH",
+    "number": "20E",
+    "title": "Vector Calculus",
+    "units_min": 4.0,
+    "units_max": 4.0
+  },
+  "sending_expr": {
+    "all": [
+      {
+        "course": "MATH 1C"
+      },
+      {
+        "course": "MATH 1D"
+      }
+    ]
+  },
+  "receiving_series": {
+    "name": "PHYSICS 1A, PHYSICS 1B",
+    "conjunction": "And",
+    "courses": [
+      {
+        "course_code": "PHYSICS 1A",
+        "prefix": "PHYSICS",
+        "number": "1A",
+        "title": "Physics for Scientists and Engineers: Mechanics",
+        "units_min": 5.0,
+        "units_max": 5.0
+      },
+      {
+        "course_code": "PHYSICS 1B",
+        "prefix": "PHYSICS",
+        "number": "1B",
+        "title": "Physics for Scientists and Engineers: Oscillations",
+        "units_min": 5.0,
+        "units_max": 5.0
+      }
+    ]
+  }
+}

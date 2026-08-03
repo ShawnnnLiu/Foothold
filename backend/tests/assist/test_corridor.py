@@ -13,6 +13,7 @@ import pytest
 from starmap.assist.corridor import (
     DEMO_RECEIVING_ID,
     DEMO_SENDING_ID,
+    MAX_MAJORS_PER_PAIR,
     PREFERRED_YEAR_ID,
     ROOT_URL,
     TARGET_IDS,
@@ -26,6 +27,8 @@ from starmap.assist.corridor import (
     institutions_url,
     major_category_has_reports,
     matches_pinned_keyword,
+    select_depts,
+    select_majors,
     walk_corridor,
 )
 from starmap.assist.errors import AssistFetchError
@@ -93,6 +96,41 @@ def test_an_agreement_key_is_fully_percent_encoded() -> None:
 # --- payload readers --------------------------------------------------------
 
 
+def test_every_target_is_a_real_receiving_institution() -> None:
+    """The corridor's receiving side, pinned against the captured institutions
+    payload: nine UC undergraduate campuses (UCSF enrols none) plus the six
+    largest CSU transfer destinations. A typo'd id would otherwise show up as
+    an empty corridor eighteen hours into a fetch.
+    """
+    entries = fixture("institutions.json")
+    assert isinstance(entries, list)
+    by_id = {entry["id"]: entry for entry in entries if isinstance(entry, dict)}
+
+    assert len(TARGET_IDS) == 15
+    assert list(TARGET_IDS) == sorted(TARGET_IDS)
+    codes = [by_id[target]["code"].strip() for target in TARGET_IDS]
+    assert codes == [
+        "UCSD",
+        "CPSLO",
+        "SDSU",
+        "SJSU",
+        "CSUN",
+        "UCR",
+        "UCB",
+        "CSULB",
+        "UCD",
+        "UCLA",
+        "UCI",
+        "UCSB",
+        "CSUFULL",
+        "UCSC",
+        "UCM",
+    ]
+    # category 1 is UC, 0 is CSU; a community college can never be a target.
+    assert sorted(by_id[target]["category"] for target in TARGET_IDS) == [0] * 6 + [1] * 9
+    assert not any(by_id[target]["isCommunityCollege"] for target in TARGET_IDS)
+
+
 def test_community_colleges_come_from_the_flag_sorted_by_id() -> None:
     ids = community_college_ids(fixture("institutions.json"))
 
@@ -153,7 +191,10 @@ def test_the_demo_pair_walk_matches_the_captured_corridor(harness: Harness) -> N
     pair = scope.pairs[0]
     assert (pair.sending_id, pair.receiving_id, pair.year_id) == (113, 7, 76)
     assert (pair.major_reports, pair.major_selected, pair.dept_reports) == (168, 168, 86)
-    assert len(pair.agreements) == 168 + 86
+    # 50 of the 86 dept reports are receiving-side; the other 36 are their
+    # `SendingDepartment` mirrors, which the spec puts out of scope for v1.
+    assert pair.dept_selected == 50
+    assert len(pair.agreements) == 168 + 50
     assert pair.fetch_failures == ()
     assert pair.scope_error is None
 
@@ -249,6 +290,107 @@ def test_a_non_demo_pair_keeps_only_the_pinned_keyword_majors(harness: Harness) 
     ]
     # Department depth is demo-pair only.
     assert not any("categoryCode=dept" in url for url in transport.urls)
+
+
+def major_refs(labels: list[str]) -> tuple[AgreementRef, ...]:
+    return tuple(
+        AgreementRef(
+            assist_key=f"76/114/to/7/Major/{index}",
+            category="major",
+            label=label,
+            sending_id=OTHER_CC,
+            receiving_id=7,
+            year_id=PREFERRED_YEAR_ID,
+        )
+        for index, label in enumerate(labels)
+    )
+
+
+def test_sending_department_mirrors_are_never_selected() -> None:
+    """`agreement.schema.md` puts the sending-side direction out of scope for
+    v1 and says the fetcher never requests it. Measured against the S9c
+    capture: the mirrors add 120 articulation pairs, all 120 already published
+    by the receiving-side agreements, so this drops duplicates only.
+    """
+    refs = (
+        *major_refs([]),
+        AgreementRef("76/113/to/7/Department/8952", "dept", "Mathematics", 113, 7, 76),
+        AgreementRef("76/113/to/7/SendingDepartment/9040", "dept", "Mathematics", 113, 7, 76),
+    )
+
+    selected = select_depts(refs)
+
+    assert [ref.assist_key for ref in selected] == ["76/113/to/7/Department/8952"]
+
+
+def test_the_captured_dept_reports_split_into_fifty_receiving_and_thirty_six_mirrors() -> None:
+    """The split is a fact of the capture, not an assumption of the filter."""
+    reports = reports_of(fixture("agreement_reports_dept_113_to_7_y76.json"))
+    refs = tuple(
+        AgreementRef(entry["key"], "dept", entry["label"], 113, 7, 76) for entry in reports
+    )
+
+    assert len(refs) == 86
+    assert len(select_depts(refs)) == 50
+
+
+def test_major_selection_is_uncapped_and_ordered_round_robin() -> None:
+    """S9d removed the cap: every pinned-keyword match is fetched, so a
+    student's major is never missing because the build skipped its agreement.
+    The round-robin across families survives as the fetch ORDER, which is what
+    keeps re-imposing a cap a one-constant change.
+    """
+    labels = [
+        *[f"Psychology B.S. Specialization {index}" for index in range(8)],
+        "Computer Science B.S.",
+        "Economics B.A.",
+    ]
+
+    assert MAX_MAJORS_PER_PAIR is None
+    selected = [ref.label for ref in select_majors(major_refs(labels))]
+
+    assert selected == [
+        "Computer Science B.S.",
+        "Economics B.A.",
+        *[f"Psychology B.S. Specialization {index}" for index in range(8)],
+    ]
+
+
+def test_a_capped_major_selection_spreads_across_the_keyword_families() -> None:
+    """Substring matching over-selects (32 of 168 for the demo pair), so a cap
+    has to be round-robin: a flat alphabetical cut would return six psychology
+    specializations and no computer science at all. The corridor runs uncapped,
+    but this is the behaviour a re-narrowed corridor gets.
+    """
+    labels = [
+        *[f"Psychology B.S. Specialization {index}" for index in range(8)],
+        "Computer Science B.S.",
+        "Economics B.A.",
+    ]
+    selected = [ref.label for ref in select_majors(major_refs(labels), limit=6)]
+
+    assert len(selected) == 6
+    assert "Computer Science B.S." in selected
+    assert "Economics B.A." in selected
+    assert sum(1 for label in selected if label.startswith("Psychology")) == 4
+
+
+def test_major_selection_is_a_pure_function_of_the_reports_list() -> None:
+    """Order stability: the same reports in a different order select the same
+    agreements, so two builds of one corridor cannot disagree."""
+    labels = [
+        "Business Analytics Minor",
+        "Computer Science B.S.",
+        "Economics B.A.",
+        "General Biology B.S.",
+        "Psychology B.S.",
+        "Cognitive Psychology B.S.",
+        "Marine Biology B.S.",
+    ]
+    forward = select_majors(major_refs(labels))
+    shuffled = select_majors(sorted(major_refs(labels), key=lambda ref: ref.label, reverse=True))
+
+    assert [ref.label for ref in forward] == [ref.label for ref in shuffled]
 
 
 def test_a_year_without_reports_steps_down_to_the_next(harness: Harness) -> None:

@@ -1,7 +1,7 @@
 [project]
 name = "starmap"
 version = "0.1.0"
-description = "Astrolabe: California transfer credit navigator (Stellic Pathfinders entry)"
+description = "Foothold: California transfer credit navigator (Stellic Pathfinders entry)"
 requires-python = ">=3.12"
 dependencies = [
     "pydantic>=2.7",

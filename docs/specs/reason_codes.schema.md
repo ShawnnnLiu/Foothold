@@ -9,7 +9,7 @@ Adding a member updates this spec in the same commit.
 ## The one-time pivot exception (2026-07-31)
 
 The append-only-forever rule exists so that a persisted or logged code can never dangle.
-On 2026-07-31 the product pivoted from the Columbia course-selection helper to Astrolabe, and three families were removed: `PrereqExtractionCode`, `BuildCode`, and `CorpusCode`.
+On 2026-07-31 the product pivoted from the Columbia course-selection helper to Foothold, and three families were removed: `PrereqExtractionCode`, `BuildCode`, and `CorpusCode`.
 The rule was not violated, because its premise never held for them: none of the three ever shipped a producer, no artifact or log row anywhere carries their values, and the consumers that would have emitted them (bulletin fetch/parse, prereq extraction, the document-registry corpus stack) were retired by the pivot before they were ever built.
 `LlmReasonCode` was untouched: its consumer, the LLM backbone, is alive.
 This is a recorded one-time exception under the pivot approval, not a precedent; append-only binds normally from here.
@@ -49,14 +49,15 @@ Every finding the deterministic evaluator emits carries exactly one of these.
 
 ## TriageBucket
 
-Producer: `transfer/triage.py`; the four columns of the triage board.
+Producer: `transfer/triage.py`; the four rows of the triage board.
+Rendering (colors, icons, labels) is defined by the Ascent design spec, `docs/design/ASCENT.md`.
 
 | Value | Meaning |
 | --- | --- |
-| `transfers_clean` | Green: the credit transfers with nothing to act on. |
+| `transfers_clean` | Teal: the credit transfers with nothing to act on. |
 | `at_risk` | Amber: the credit needs attention, whether from the agreement's own hedges or from input quality. |
 | `no_articulation` | Red: the agreement asserts no articulation exists. |
-| `still_owed` | Requirements the student has not yet covered. |
+| `still_owed` | Requirements the student has not yet covered; dashed "route ahead" treatment, no hold color. |
 
 ## BUCKET_FOR_CODE
 

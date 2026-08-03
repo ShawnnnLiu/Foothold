@@ -20,6 +20,7 @@ from starmap.contracts.articulation import (
     GUID_PATTERN,
     AdvisementText,
     ReceivingCourse,
+    ReceivingSeries,
 )
 from starmap.contracts.base import FROZEN, reject_control_chars
 
@@ -140,7 +141,19 @@ class TemplateCell(BaseModel):
     model_config = FROZEN
 
     cell_id: str = Field(pattern=GUID_PATTERN)
-    course: ReceivingCourse
+    course: ReceivingCourse | None = None
+    series: ReceivingSeries | None = None
+
+    @model_validator(mode="after")
+    def _check_exactly_one_subject(self) -> "TemplateCell":
+        """A cell lays out one course or one series, mirroring `Articulation`:
+        a template row that named both, or neither, could not be rendered."""
+        if (self.course is None) == (self.series is None):
+            raise ValueError(
+                "template cell needs exactly one of course and series, "
+                f"got course={self.course is not None} series={self.series is not None}"
+            )
+        return self
 
 
 class TemplateSection(BaseModel):
@@ -163,5 +176,26 @@ class RequirementGroupAsset(BaseModel):
     group_id: str = Field(pattern=GUID_PATTERN)
     position: int = Field(ge=0)
     conjunction: Literal["And", "Or"]
+    select_courses: int | None = Field(default=None, ge=1)
     sections: list[TemplateSection] = Field(min_length=1)
     advisements: list[AdvisementText] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _selection_is_disjunctive(self) -> "RequirementGroupAsset":
+        """A course-counting selection is one disjunctive pool.
+
+        `select_courses = N` means "complete at least N courses drawn from all
+        of the group's sections as one pool" (a satisfied series cell counts as
+        one), which is what ASSIST renders as "Complete 1 course from A, B, or
+        C". That pool is a choice set, so the pair is pinned to `Or`: allowing
+        `And` alongside it would give the same group two contradictory
+        readings, and the one payload where `And` is semantically live (an
+        `NFromConjunction` area conjunction over several sections) is excluded
+        by the normalizer as ambiguous rather than stored.
+        """
+        if self.select_courses is not None and self.conjunction != "Or":
+            raise ValueError(
+                f"select_courses={self.select_courses} needs conjunction 'Or', "
+                f"got {self.conjunction!r}"
+            )
+        return self

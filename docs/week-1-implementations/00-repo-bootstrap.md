@@ -37,6 +37,8 @@ Makefile                         # repo root
 
 ## pyproject.toml (locked content)
 
+Historical locked content: the project was renamed to Foothold on 2026-08-01 and the live description differs.
+
 ```toml
 [project]
 name = "starmap"

@@ -30,7 +30,7 @@ Fallback boundary: kernel green without `dbdump.py` (land it in S2b if squeezed)
 
 Kickoff:
 
-> Read `CLAUDE.md`, `AGENTS.md`, `docs/STARMAP_TECH_REFERENCE.md` section 4.3 and 4.5, and `docs/week-1-implementations/02-common-kernel-and-contracts.md` parts 1-2.
+> Read `CLAUDE.md`, `AGENTS.md`, `docs/FOOTHOLD_TECH_REFERENCE.md` section 4.3 and 4.5, and `docs/week-1-implementations/02-common-kernel-and-contracts.md` parts 1-2.
 > Implement the kernel and contracts machinery exactly as locked; do not add generality the doc does not name.
 > Gate: `make check` green including the kernel test list.
 > End with one commit: `Add common kernel and contracts machinery`.
@@ -87,7 +87,7 @@ Fallback boundary: registry + chunking + index green with their full TR test lis
 
 Kickoff:
 
-> Read `CLAUDE.md`, `AGENTS.md`, tech reference section 1 including the Starmap deltas, and `docs/week-1-implementations/06-corpus-retrieval.md`.
+> Read `CLAUDE.md`, `AGENTS.md`, tech reference section 1 including the Foothold deltas, and `docs/week-1-implementations/06-corpus-retrieval.md`.
 > Implement the retrieval stack and build stage 5 exactly as locked; author the evalset against the real corpus; measure and pin floors.
 > Gates: `make check` green including `retrieval-eval --strict`; `corpus.db` `--check` proven.
 > End with one commit: `Add corpus store, FTS5 retrieval, and eval harness`.

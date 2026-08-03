@@ -1,7 +1,8 @@
 """The ASSIST fetcher against a scripted transport. No network, ever.
 
 Everything below the transport seam is real: the session bootstrap, the 400
-refresh rule, the pacing arithmetic, the on-disk cache, and the manifest.
+refresh rule, the 429 session-renewal rule, the pacing arithmetic, the on-disk
+cache, and the manifest.
 """
 
 import json
@@ -11,7 +12,12 @@ import pytest
 
 from starmap.assist.corridor import ROOT_URL
 from starmap.assist.errors import AssistFetchError
-from starmap.assist.fetch import XSRF_COOKIE_NAME, cache_key
+from starmap.assist.fetch import (
+    MAX_SESSION_RENEWALS,
+    SESSION_REQUEST_BUDGET,
+    XSRF_COOKIE_NAME,
+    cache_key,
+)
 from starmap.assist.http import USER_AGENT
 from starmap.common.ids import sha256_hex
 from starmap.contracts.reason_codes import AssistBuildCode
@@ -89,6 +95,62 @@ def test_another_non_200_fails_typed_naming_url_and_status(harness: Harness) -> 
     assert API_URL in caught.value.message
     # A 500 is not a session problem, so it never triggers a re-bootstrap.
     assert transport.urls.count(ROOT_URL) == 1
+
+
+def test_a_429_renews_the_session_and_retries(harness: Harness) -> None:
+    """ASSIST meters per session, so a 429 is answered with a NEW session.
+
+    Measured live at the S9c gate: the exhausted session kept answering 429
+    while a fresh one succeeded immediately with no idle period.
+    """
+    transport = harness.transport({API_URL: [status(429), json_ok(PAYLOAD)]})
+
+    assert harness.fetcher(transport).fetch_json(API_URL) == PAYLOAD
+
+    assert transport.urls == [ROOT_URL, API_URL, ROOT_URL, API_URL]
+    # Two bootstraps, each of which emptied the jar first: a renewal, not a reuse.
+    assert transport.clears == 2
+
+
+def test_a_persistent_429_fails_typed_after_bounded_renewals(harness: Harness) -> None:
+    """A 429 surviving fresh sessions is not a quota problem; it must not
+    become a retry storm."""
+    transport = harness.transport({API_URL: [status(429)] * (MAX_SESSION_RENEWALS + 1)})
+
+    with pytest.raises(AssistFetchError) as caught:
+        harness.fetcher(transport).fetch_json(API_URL)
+
+    assert caught.value.assist_reason_code is AssistBuildCode.AGREEMENT_FETCH_FAILED
+    assert "429" in caught.value.message
+    assert API_URL in caught.value.message
+    assert transport.urls.count(ROOT_URL) == 1 + MAX_SESSION_RENEWALS
+
+
+def test_the_session_renews_before_the_quota_is_spent(harness: Harness) -> None:
+    """Proactive renewal: the walk asks for a new session before ASSIST refuses
+    the old one, so the corridor run spends requests on payloads rather than on
+    rejections."""
+    urls = [f"{API_URL}?page={index}" for index in range(SESSION_REQUEST_BUDGET + 1)]
+    transport = harness.transport({url: json_ok(PAYLOAD) for url in urls})
+    fetcher = harness.fetcher(transport)
+
+    for url in urls:
+        assert fetcher.fetch_json(url) == PAYLOAD
+
+    # One bootstrap to start, one more when the budget ran out: no 429 needed.
+    assert transport.urls.count(ROOT_URL) == 2
+    assert transport.urls[-2:] == [ROOT_URL, urls[-1]]
+
+
+def test_a_renewed_session_echoes_the_new_token(harness: Harness) -> None:
+    """The jar is emptied before the re-bootstrap, so the token the fetcher
+    echoes afterwards is the one the NEW session set."""
+    transport = harness.transport({API_URL: [status(429), json_ok(PAYLOAD)]})
+
+    harness.fetcher(transport).fetch_json(API_URL)
+
+    assert transport.requests[-1][1][XSRF_COOKIE_NAME] == XSRF_TOKEN
+    assert transport.cookies[XSRF_COOKIE_NAME] == XSRF_TOKEN
 
 
 def test_a_non_json_body_fails_typed(harness: Harness) -> None:

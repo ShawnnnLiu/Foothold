@@ -1,7 +1,7 @@
 # Increment 4: LLM Backbone
 
 Goal: the generation engine, call log, transports, and prompt-pinning scaffold, fully tested against FakeTransport with zero network.
-Binding mechanism reference: TR 4.1 (engine), TR 4.2 (call log), TR 4.6 (FakeTransport, prompt pins), with the Starmap deltas from "Starmap deltas (kernels)".
+Binding mechanism reference: TR 4.1 (engine), TR 4.2 (call log), TR 4.6 (FakeTransport, prompt pins), with the Foothold deltas from "Foothold deltas (kernels)".
 Nothing in this increment makes a live API call.
 
 ## `llm/errors.py`
@@ -12,7 +12,7 @@ Nothing in this increment makes a live API call.
 
 ## `llm/engine.py`
 
-Implement TR 4.1 exactly; restated here only where Starmap deviates or the table is load-bearing.
+Implement TR 4.1 exactly; restated here only where Foothold deviates or the table is load-bearing.
 
 - Transport Protocol: `complete(*, model_name, max_tokens, system, user_prompt, output_contract, repair_suffix=None, timeout_seconds=300.0) -> TransportResult`.
 - `TransportResult` frozen: `payload: dict | None`, `raw_text: str`, `stop_reason: str`, `input_tokens: int`, `output_tokens: int`, `cache_creation_tokens: int = 0`, `cache_read_tokens: int = 0`.
@@ -21,7 +21,7 @@ Implement TR 4.1 exactly; restated here only where Starmap deviates or the table
   Caps live in field constraints, never clamped.
 - Engine constructor: `(node_name, output_contract, config, transport, call_log_store, clock, id_generator, debug_raw_sink=None, sleeper=time.sleep, attempt_recorder=None)`.
   `node_name` is validated against the closed node enum (`prereq_extractor`, `pathway_proposer`).
-- Outer loop `generate(*, run_id, system, user_prompt, post_validate=None)` per TR 4.1 (no `plan_version`: Starmap delta).
+- Outer loop `generate(*, run_id, system, user_prompt, post_validate=None)` per TR 4.1 (no `plan_version`: Foothold delta).
   Repair suffix wording exactly as TR 4.1's sketch; `user_prompt` byte-identical across attempts (cache stability), suffix travels as the separate kwarg.
 - Inner loop outcome table, binding verbatim from TR 4.1:
 

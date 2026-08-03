@@ -82,7 +82,7 @@ Recursive discriminated union `PrereqExpr = AllOf | AnyOf | CourseLeaf | NoteLea
 - `AnyOf`: `any: list[PrereqExpr]`, min length 1.
 
 Model validator on the group types: nesting depth <= 3, where a bare leaf is depth 1 and each group level adds 1; the error message quotes the offending depth.
-Serialization must round-trip the plan's example verbatim (`docs/STARMAP_PATHFINDERS_PLAN.md` example block); make that a valid fixture.
+Serialization must round-trip the plan's example verbatim (`docs/FOOTHOLD_PATHFINDERS_PLAN.md` example block); make that a valid fixture.
 Discriminator note: these are structurally discriminated (distinct required keys), so use a pydantic `Union` with `model_validator` dispatch or tagged parsing helper `parse_prereq_expr(data: dict) -> PrereqExpr`; lock: implement `parse_prereq_expr` in the same module and have `Course.prereq_expr` typed as the union with a `BeforeValidator` calling it.
 
 ### `contracts/course.py` (spec: `docs/specs/course.schema.md`)
@@ -103,7 +103,7 @@ Kind-conditional validator: `choose_n` requires `choose_n` in 1..len(member_cour
 
 ### `contracts/corpus_document.py` (spec: `docs/specs/corpus_document.schema.md`)
 
-Per TR 1.1 with the Starmap deltas: drop `track_tags` entirely.
+Per TR 1.1 with the Foothold deltas: drop `track_tags` entirely.
 Fields: `doc_id` (`^doc_[0-9a-f]{16}$`), `source_url` (non-empty), `source_type: Literal["bulletin_course", "bulletin_requirement"]`, `license_note` (non-empty), `date_collected: date`, `source_published_date: date | None`, `content_hash` (`^[0-9a-f]{64}$`), `title` (non-empty).
 Model validators: `doc_id` equals `derive_doc_id(source_url, date_collected)` (formula per TR 1.1, implemented in `retrieval/`, re-implemented inline in the validator via `sha256_hex`); `source_published_date <= date_collected`.
 Document text is not a field (TR 1.1 rationale).

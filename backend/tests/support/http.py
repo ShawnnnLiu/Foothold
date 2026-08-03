@@ -13,7 +13,10 @@ response: an unscripted url is a loud test failure, not a silent empty answer.
 
 `cookies` is mutable so a test can script an absent `X-XSRF-TOKEN`, and
 `requests` records `(url, headers)` per call, which is what proves the header
-echo and the exact re-bootstrap request order.
+echo and the exact re-bootstrap request order. `clear_cookies` empties the jar
+and counts the call, so a test can prove the fetcher starts a NEW session
+rather than reusing the exhausted one; a subsequent 200 refills the jar, the
+way the real `GET /` does.
 """
 
 import json
@@ -47,6 +50,8 @@ class FakeHttpTransport:
         }
         self.cookies = cookies if cookies is not None else {}
         self.requests: list[tuple[str, dict[str, str]]] = []
+        self.clears = 0
+        self._initial_cookies = dict(self.cookies)
 
     def get(self, url: str, headers: dict[str, str]) -> HttpResponse:
         self.requests.append((url, dict(headers)))
@@ -57,10 +62,19 @@ class FakeHttpTransport:
             scripted = scripted.pop(0)
         if isinstance(scripted, Exception):
             raise scripted
+        if scripted.status == 200:
+            # The real server sets the session cookie on a successful response,
+            # which is what refills the jar after a `clear_cookies()`.
+            self.cookies.update(self._initial_cookies)
         return scripted
 
     def cookie_value(self, name: str) -> str | None:
         return self.cookies.get(name)
+
+    def clear_cookies(self) -> None:
+        """The jar IS the session, so emptying it starts a new one."""
+        self.clears += 1
+        self.cookies.clear()
 
     @property
     def urls(self) -> list[str]:

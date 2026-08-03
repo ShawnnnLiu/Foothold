@@ -11,6 +11,14 @@ Four behaviours, all locked by doc 02:
   `X-XSRF-TOKEN` cookie whose value every API request echoes as a header. The
   bootstrap is lazy (nothing happens until the first cache miss) and a 400 mid
   run re-bootstraps exactly ONCE and retries the request once.
+- Session quota. ASSIST meters requests PER SESSION, not per unit time: the
+  S9c pilot measured ~50-55 requests before every further request answered 429,
+  and a fresh session succeeded immediately with no idle period, while the
+  exhausted one stayed shut. So a bootstrap starts a NEW session (the jar is
+  emptied first), the fetcher renews proactively every
+  `SESSION_REQUEST_BUDGET` requests, and a 429 renews reactively up to
+  `MAX_SESSION_RENEWALS` times before failing typed. Pacing is unchanged: this
+  is about session identity, not about going faster.
 - Politeness. At least `MIN_REQUEST_INTERVAL_SECONDS` between consecutive
   NETWORK requests, measured with `clock.monotonic()` and enforced through the
   injected sleeper. Cache hits neither sleep nor touch the network.
@@ -45,6 +53,18 @@ XSRF_COOKIE_NAME = "X-XSRF-TOKEN"
 MANIFEST_NAME = "manifest.jsonl"
 CACHE_KEY_LENGTH = 16
 SESSION_REFRESH_STATUS = 400
+RATE_LIMIT_STATUS = 429
+
+# Measured at the S9c permission gate against live ASSIST: one session served
+# 55 requests and another 50 before answering 429 to everything after. 40 sits
+# below the smaller observation with room to spare, so the corridor walk renews
+# before it is refused rather than after, and ASSIST sees fewer rejected
+# requests rather than more (politeness axiom).
+SESSION_REQUEST_BUDGET = 40
+
+# Bounded like every other repair in this codebase: a 429 that survives three
+# fresh sessions is not a quota problem and must not become a retry storm.
+MAX_SESSION_RENEWALS = 3
 
 
 def cache_key(url: str) -> str:
@@ -71,6 +91,7 @@ class AssistFetcher:
         self._offline = offline
         self._token: str | None = None
         self._last_request_monotonic: float | None = None
+        self._session_requests = 0
 
     def fetch_json(self, url: str) -> object:
         """The single entry point: cached JSON for `url`, or a typed failure."""
@@ -101,21 +122,43 @@ class AssistFetcher:
         return self._cache_dir / MANIFEST_NAME
 
     def _get_with_session_refresh(self, url: str) -> HttpResponse:
-        """One API request, with the locked "400 refreshes the session once" rule."""
-        if self._token is None:
+        """One API request, with both locked session rules.
+
+        A 400 means the anti-forgery pair went stale: re-bootstrap once, retry
+        once. A 429 means this session spent its quota: renew and retry, up to
+        `MAX_SESSION_RENEWALS`. The 400 retry feeds into the 429 rule, since a
+        refreshed session can still turn out to be an exhausted one.
+        """
+        if self._token is None or self._session_requests >= SESSION_REQUEST_BUDGET:
             self._bootstrap()
-        response = self._request(
-            url, self._api_headers(), reason_code=AssistBuildCode.AGREEMENT_FETCH_FAILED
-        )
-        if response.status != SESSION_REFRESH_STATUS:
-            return response
-        self._bootstrap()
+        response = self._api_request(url)
+        if response.status == SESSION_REFRESH_STATUS:
+            self._bootstrap()
+            response = self._api_request(url)
+        for _ in range(MAX_SESSION_RENEWALS):
+            if response.status != RATE_LIMIT_STATUS:
+                break
+            self._bootstrap()
+            response = self._api_request(url)
+        return response
+
+    def _api_request(self, url: str) -> HttpResponse:
+        """One metered API call: everything ASSIST counts against the session."""
+        self._session_requests += 1
         return self._request(
             url, self._api_headers(), reason_code=AssistBuildCode.AGREEMENT_FETCH_FAILED
         )
 
     def _bootstrap(self) -> None:
-        """`GET /` to fill the cookie jar, then capture the token to echo."""
+        """Start a NEW session: empty the jar, `GET /` to refill it, capture the token.
+
+        Emptying first is what makes this a renewal rather than a refresh.
+        ASSIST meters per session, so carrying the old cookies forward would
+        inherit the exhausted quota and every retry would answer 429 again.
+        """
+        self._transport.clear_cookies()
+        self._token = None
+        self._session_requests = 0
         response = self._request(
             self._root_url,
             {"User-Agent": USER_AGENT},

@@ -64,7 +64,7 @@ Locked surface:
 - `AllOf` / `AnyOf`: unchanged shapes over `ArticulationExprField`.
 - `ArticulationExpr = AllOf | AnyOf | CourseLeaf | NoteLeaf`; `ArticulationExprField = Annotated[ArticulationExpr, BeforeValidator(parse_articulation_expr)]`; `ArticulationExprRoot(RootModel[ArticulationExprField])`.
 
-Spec example and the `plan_example.json` valid fixture: the plan's sending-side example verbatim (`docs/STARMAP_PATHFINDERS_PLAN.md`, "Example sending-side expression"), i.e. the MATH 1A/1B honors `any`-of-`all` tree with its note leaf.
+Spec example and the `plan_example.json` valid fixture: the plan's sending-side example verbatim (`docs/FOOTHOLD_PATHFINDERS_PLAN.md`, "Example sending-side expression"), i.e. the MATH 1A/1B honors `any`-of-`all` tree with its note leaf.
 The spec keeps the round-trip clause: `model_dump(mode="json", exclude_defaults=True)` of the parsed example equals the example object.
 
 Fixtures (new directories `valid/articulation_expr/`, `invalid/articulation_expr/`):

@@ -18,7 +18,7 @@ This contract holds the NORMALIZED row; the projection algorithm (walking every 
 | `institution_id` | int | `gt=0`; the ASSIST institution id of the community college this course belongs to. |
 | `course_code` | str | Normalized via `normalize_course_code`; must match `COURSE_CODE_RE`. |
 | `prefix` | str | 1..16 chars, pattern `COURSE_PREFIX_PATTERN`. |
-| `number` | str | 1..8 chars, pattern `COURSE_NUMBER_PATTERN`. |
+| `number` | str | 1..10 chars, pattern `COURSE_NUMBER_PATTERN`. |
 | `title` | str | 1..300 chars; control-character hygiene. |
 | `units_min` | float | `gt=0`, `le=20`. |
 | `units_max` | float | `le=20`. |
@@ -50,9 +50,11 @@ Valid, transcribed from the captures (De Anza College, ASSIST institution 113):
 | --- | --- |
 | `math_1a.json` | MATH 1A, Calculus I, 5.0 units; the demo pair's most-cited sending course. |
 | `stat_c1000h.json` | STAT C1000H, the letter-prefixed, honors-suffixed number that motivated the ASSIST-shaped regex. |
+| `bus2_90_campus_suffix.json` | BUS2 90 F: a digit inside the prefix token AND a trailing campus-suffix token, the two shapes that cost 1,344 articulations before S9c widened the regex. |
 | `cis_22c.json` | CIS 22C, 4.5 units; a non-integer unit count, which the dollar arithmetic in increment 6 must survive. |
 
-Invalid: `institution_id_zero`, `bad_course_code`, `bad_prefix`, `bad_number`, `title_empty`, `title_control_char`, `title_too_long`, `units_min_zero`, `units_above_max`, `units_max_below_min`, `code_parts_mismatch`.
+Invalid: `institution_id_zero`, `bad_course_code`, `bad_prefix`, `bad_number`, `padded_number`, `title_empty`, `title_control_char`, `title_too_long`, `units_min_zero`, `units_above_max`, `units_max_below_min`, `code_parts_mismatch`.
+`padded_number` is the one that proves the contract still refuses ASSIST's padded values (`"C1000H "`); the normalizer collapses them first, so a padded value reaching a contract means the normalizer stopped doing that.
 
 Doc 01 locks five of these (`institution_id_zero`, `code_parts_mismatch`, `units_max_below_min`, `units_min_zero`, `title_empty`).
 The other six are added because the increment's exit criteria require a named fixture proving every field constraint fires, and the code, prefix, number, title-length, title-hygiene, and unit-ceiling constraints would otherwise have none.

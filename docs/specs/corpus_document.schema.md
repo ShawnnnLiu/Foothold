@@ -2,7 +2,7 @@
 
 Canonical module: `backend/src/starmap/contracts/corpus_document.py`.
 
-Registry metadata for one corpus document, per tech reference 1.1 with the Starmap deltas: `track_tags` is dropped entirely.
+Registry metadata for one corpus document, per tech reference 1.1 with the Foothold deltas: `track_tags` is dropped entirely.
 Document text is deliberately not a field; text lives in the registry beside the record so the metadata schema stays small and exportable.
 
 ## Fields

@@ -20,6 +20,9 @@ ASSIST_DIR = Path(__file__).resolve().parents[1] / "fixtures" / "assist"
 
 MAJOR = "agreement_major_cse_cs_113_to_7_y76.json"
 DEPT = "agreement_dept_math_113_to_7_y76.json"
+# Captured in S9c from the live corridor, because the two spike captures below
+# are empty at every attribute level and could never pin the populated shape.
+ADVISEMENTS = "agreement_with_advisements_4_to_39_y76.json"
 
 
 def load_result(name: str) -> dict[str, Any]:
@@ -143,13 +146,10 @@ def test_dept_agreements_carry_no_template_assets() -> None:
 
 
 @pytest.mark.parametrize("name", [MAJOR, DEPT])
-def test_no_attributes_list_carries_content_at_any_of_the_four_levels(name: str) -> None:
-    """The advisement fixture-pending precondition: `advisement_texts` may raise
-    on any non-empty list precisely because none exists yet.
-
-    REMOVE this test when split S9c lands an advisement-bearing fixture and
-    pins the real shape.
-    """
+def test_the_two_spike_captures_carry_no_attribute_content(name: str) -> None:
+    """Why the advisement shape stayed unpinned until a live corridor fetch:
+    both spike captures are empty at every level, so no amount of reading them
+    could have revealed what a populated attribute entry looks like."""
     for entry in decode_articulations(name):
         articulation = inner(entry)
         for key in ("attributes", "courseAttributes", "receivingAttributes"):
@@ -162,6 +162,55 @@ def test_no_attributes_list_carries_content_at_any_of_the_four_levels(name: str)
             assert group["attributes"] == []
             for course in group["items"]:
                 assert course["attributes"] == []
+
+
+def test_the_advisement_capture_pins_the_populated_attribute_shape() -> None:
+    """The S9c capture, and the reason `advisement_texts` maps what it maps.
+
+    A text advisement is exactly `{"content": str, "position": int}`. This is
+    the fact the normalizer's mapping rests on, asserted against the untouched
+    payload rather than against the normalizer.
+    """
+    entries = decode_articulations(ADVISEMENTS)
+    populated = [
+        attribute
+        for entry in entries
+        for group in (inner(entry)["sendingArticulation"] or {}).get("items", [])
+        for course in group["items"]
+        for attribute in course["attributes"]
+    ]
+
+    assert populated, "the capture is only useful if it still carries advisements"
+    for attribute in populated:
+        assert set(attribute) == {"content", "position"}
+        assert isinstance(attribute["content"], str)
+        assert isinstance(attribute["position"], int)
+        assert 1 <= len(attribute["content"].strip()) <= 2000
+
+
+def test_the_advisement_capture_has_no_group_this_build_can_model() -> None:
+    """Every requirement group in the capture carries an `NFromArea` or
+    `Following` instruction, so all five are excluded as
+    `template_shape_unsupported` and the group-level advisement goes with them.
+
+    This is the measured cost of deferring N-from semantics, pinned so the
+    increment that models them can see what it buys back.
+
+    The structured selection shape itself (`{"type": "NFollowing", "amount":
+    2.0, "selectionType": "Select", ...}`, which shares the `advisements` field
+    name with the prose) is asserted in `tests/assist/test_normalize.py`
+    against the keys observed corridor-wide; no committed capture carries both
+    it and populated prose, and a second 134 KB payload is not worth pinning a
+    shape this build deliberately does not model.
+    """
+    instructions = {
+        asset["instruction"]["type"]
+        for asset in json.loads(load_result(ADVISEMENTS)["templateAssets"])
+        if asset["type"] == "RequirementGroup"
+    }
+
+    assert instructions <= {"NFromArea", "Following"}
+    assert "Conjunction" not in instructions
 
 
 def test_articulation_level_attribute_lists_are_null_exactly_on_no_articulation_rows() -> None:
