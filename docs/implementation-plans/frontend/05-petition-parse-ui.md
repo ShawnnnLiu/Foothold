@@ -34,7 +34,8 @@ Poll shape, session-scoped like evaluations:
 
 ### `POST /api/transcript/parse`
 
-- Body `{"text": str}` (min 1, max 20000 chars); 202 `{"parse_id": "parse_..."}`; poll `GET /api/transcript/{parse_id}`.
+- Body `{"text": str, "sending_institution_id": int}` (text min 1, max 20000 chars; id > 0, the CC whose `cc_courses` vocabulary resolves the chips); 202 `{"parse_id": "parse_..."}`; poll `GET /api/transcript/{parse_id}`.
+  (Amended 2026-08-03 by `docs/implementation-plans/llm-nodes/00-overview.md`: the original `{"text"}`-only body was unimplementable because resolution requires the institution; the UI already knows the CC from the landing screen.)
 - Poll result: `status`/`reason_code` as above plus `chips: [{course_code, title, units_min, units_max, resolution: "exact" | "fuzzy_match"}]` and `unresolved: [{proposed_code, proposed_title}]`.
 - Chips come pre-resolved through the same `cc_courses` vocabulary the autocomplete serves (the vocabulary gate); `unresolved` entries surface for manual fixing and never become chips automatically.
 
