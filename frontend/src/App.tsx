@@ -2,7 +2,8 @@ import { useCallback, useState } from "react";
 
 import type { Evaluation } from "./lib/api";
 import { createEvaluation, errorText } from "./lib/client";
-import { type ChipState, EMPTY_CHIP_STATE } from "./lib/courses";
+import { type ChipState, EMPTY_CHIP_STATE, loadSample } from "./lib/courses";
+import type { DemoStart } from "./lib/demo";
 import type { RouteContext } from "./lib/route";
 import Entry from "./screens/Entry";
 import Landing from "./screens/Landing";
@@ -26,6 +27,16 @@ export default function App() {
       route && route.sending.assist_id === next.sending.assist_id ? prev : EMPTY_CHIP_STATE,
     );
     setRoute(next);
+    setEvaluation(null);
+    setEntryError(null);
+    setScreen("entry");
+  };
+
+  // The demo button's entry: unlike startRoute, the preset chips always
+  // replace whatever was typed before, so every roll is a fresh transcript.
+  const startDemo = (demo: DemoStart) => {
+    setChipState(() => loadSample(demo.chips));
+    setRoute(demo.route);
     setEvaluation(null);
     setEntryError(null);
     setScreen("entry");
@@ -81,5 +92,5 @@ export default function App() {
       />
     );
   }
-  return <Landing onStart={startRoute} />;
+  return <Landing onStart={startRoute} onDemo={startDemo} />;
 }
