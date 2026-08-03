@@ -1,0 +1,73 @@
+{
+  "comment": "Half of an And pair: partial, at-risk, missing named in detail.",
+  "bundle": {
+    "major": {
+      "agreement_id": "agr_2d6204abcea837f3",
+      "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+      "category": "major",
+      "sending_institution_id": 113,
+      "receiving_institution_id": 7,
+      "academic_year_id": 76,
+      "academic_year_label": "2025-2026",
+      "label": "Mathematics/Computer Science B.S.",
+      "publish_date": "2026-06-08T23:04:32.5510019"
+    },
+    "major_articulations": [
+      {
+        "agreement_id": "agr_2d6204abcea837f3",
+        "position": 0,
+        "template_cell_id": null,
+        "receiving_course": {
+          "course_code": "MATH 20E",
+          "prefix": "MATH",
+          "number": "20E",
+          "title": "Vector Calculus",
+          "units_min": 4.0,
+          "units_max": 4.0
+        },
+        "receiving_series": null,
+        "sending_expr": {
+          "all": [
+            {
+              "course": "MATH 1C"
+            },
+            {
+              "course": "MATH 1D"
+            }
+          ]
+        },
+        "no_articulation_reason": null,
+        "advisements": []
+      }
+    ],
+    "requirement_groups": [],
+    "dept_agreements": [],
+    "latest_year_id": 76,
+    "latest_year_label": "2025-2026"
+  },
+  "requests": [
+    {
+      "course_code": "MATH 1C",
+      "units": 5.0,
+      "resolution": "exact"
+    }
+  ],
+  "expected_findings": [
+    {
+      "code": "partial_series",
+      "bucket": "at_risk",
+      "student_course_codes": [
+        "MATH 1C"
+      ],
+      "receiving_course_code": "MATH 20E",
+      "units": 5.0,
+      "citation_present": true
+    }
+  ],
+  "expected_units": {
+    "clean_units": 0.0,
+    "at_risk_units": 5.0,
+    "no_articulation_units": 0.0,
+    "still_owed_units": 0.0
+  }
+}

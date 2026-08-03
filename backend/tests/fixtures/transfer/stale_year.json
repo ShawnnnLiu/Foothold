@@ -1,0 +1,81 @@
+{
+  "comment": "A dept agreement one year behind the pair's latest published year.",
+  "bundle": {
+    "major": {
+      "agreement_id": "agr_2d6204abcea837f3",
+      "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+      "category": "major",
+      "sending_institution_id": 113,
+      "receiving_institution_id": 7,
+      "academic_year_id": 76,
+      "academic_year_label": "2025-2026",
+      "label": "Mathematics/Computer Science B.S.",
+      "publish_date": "2026-06-08T23:04:32.5510019"
+    },
+    "major_articulations": [],
+    "requirement_groups": [],
+    "dept_agreements": [
+      {
+        "agreement": {
+          "agreement_id": "agr_ee697d64769f38e6",
+          "assist_key": "75/113/to/7/Department/8952",
+          "category": "dept",
+          "sending_institution_id": 113,
+          "receiving_institution_id": 7,
+          "academic_year_id": 75,
+          "academic_year_label": "2024-2025",
+          "label": "Mathematics",
+          "publish_date": "2026-06-08T23:04:32.5510019"
+        },
+        "articulations": [
+          {
+            "agreement_id": "agr_ee697d64769f38e6",
+            "position": 0,
+            "template_cell_id": null,
+            "receiving_course": {
+              "course_code": "MATH 15A",
+              "prefix": "MATH",
+              "number": "15A",
+              "title": "Introduction to Discrete Mathematics",
+              "units_min": 4.0,
+              "units_max": 4.0
+            },
+            "receiving_series": null,
+            "sending_expr": {
+              "course": "CIS 22C"
+            },
+            "no_articulation_reason": null,
+            "advisements": []
+          }
+        ]
+      }
+    ],
+    "latest_year_id": 76,
+    "latest_year_label": "2025-2026"
+  },
+  "requests": [
+    {
+      "course_code": "CIS 22C",
+      "units": 4.5,
+      "resolution": "exact"
+    }
+  ],
+  "expected_findings": [
+    {
+      "code": "stale_year",
+      "bucket": "at_risk",
+      "student_course_codes": [
+        "CIS 22C"
+      ],
+      "receiving_course_code": "MATH 15A",
+      "units": 4.5,
+      "citation_present": true
+    }
+  ],
+  "expected_units": {
+    "clean_units": 0.0,
+    "at_risk_units": 4.5,
+    "no_articulation_units": 0.0,
+    "still_owed_units": 0.0
+  }
+}
