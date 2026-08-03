@@ -52,6 +52,23 @@ def test_a_course_counts_in_exactly_one_bucket() -> None:
     assert summary.at_risk_units == 0.0
 
 
+def test_units_summary_dollars_use_the_target_rate_with_rounding() -> None:
+    """The locked doc 03 formula: units * target rate, rounded to 2 places;
+    zero at-risk units price to 0.0 (a real answer), never None."""
+    students, findings = scenario_findings("no_articulation")
+    summary = units_summary(students, findings, target_rate=33.3333)
+    assert summary.no_articulation_units == 4.0
+    assert summary.no_articulation_dollars == 133.33
+    assert summary.at_risk_dollars == 0.0
+
+
+def test_units_summary_without_a_rate_leaves_dollars_none() -> None:
+    students, findings = scenario_findings("no_articulation")
+    summary = units_summary(students, findings)
+    assert summary.at_risk_dollars is None
+    assert summary.no_articulation_dollars is None
+
+
 def test_double_count_cites_the_first_involved_articulation() -> None:
     _, findings = scenario_findings("double_count_risk")
     finding = by_code(findings, EvaluationFindingCode.DOUBLE_COUNT_RISK)

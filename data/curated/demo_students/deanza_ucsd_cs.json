@@ -1,0 +1,15 @@
+{
+  "version": "demo-student-v1",
+  "comment": "De Anza College CS transfer student aimed at UC San Diego, Mathematics/Computer Science B.S. (major key 76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4). Composition per doc 03 as amended: the honors-or-regular clean matches (MATH 1A/1B/2A, CIS 22C, CIS 36B) plus MATH 2B and MATH 22, exactly one half-series (MATH 1C without MATH 1D -> partial_series on MATH 20C and MATH 20E), and one no-articulation course picked by querying the built artifact: CIS 22B articulates at eight other corridor targets (SJSU CS 46A, UCLA COM SCI 31, UC Davis ECS 036A/B, Cal Poly SLO CSC 202, CSUN, CSULB, UCR, UCI) but appears in no De Anza -> UCSD sending expression. Units are De Anza catalog units as stored in the cc_courses projection.",
+  "courses": [
+    {"course_code": "MATH 1A", "units": 5.0},
+    {"course_code": "MATH 1B", "units": 5.0},
+    {"course_code": "MATH 1C", "units": 5.0},
+    {"course_code": "MATH 2A", "units": 5.0},
+    {"course_code": "MATH 2B", "units": 5.0},
+    {"course_code": "MATH 22", "units": 5.0},
+    {"course_code": "CIS 22B", "units": 4.5},
+    {"course_code": "CIS 22C", "units": 4.5},
+    {"course_code": "CIS 36B", "units": 4.5}
+  ]
+}

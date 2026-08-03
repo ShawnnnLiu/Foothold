@@ -1,0 +1,30 @@
+{
+  "comment": "Resolver threshold semantics, pinned. Institution 113 is the working vocabulary; institution 20 exists for the candidate tie-break case. Two deviations from the doc 04 prose examples, both mechanical: 'diferential equasions' (BOTH tokens misspelled) can never produce an FTS5 candidate because token matching is exact, so the misspelled-title case keeps one correct token; and 'MATH 2 AH' normalizes to 'MATH 2 AH', which is not the stored 'MATH 2AH', so it cannot hit the exact gate and instead pins the unresolved-with-ratio path ('math  1a' pins the normalizes-exact intent). The three boundary cases were computed against the STAT 10 row: ratios 0.6061, 0.6000 exactly (accepted, proving >=), and 0.5946.",
+  "courses": [
+    {"institution_id": 113, "prefix": "MATH", "number": "1A", "title": "Calculus", "units": 5.0},
+    {"institution_id": 113, "prefix": "MATH", "number": "1B", "title": "Calculus", "units": 5.0},
+    {"institution_id": 113, "prefix": "MATH", "number": "2A", "title": "Differential Equations", "units": 5.0},
+    {"institution_id": 113, "prefix": "MATH", "number": "2AH", "title": "Differential Equations Honors", "units": 5.0},
+    {"institution_id": 113, "prefix": "MATH", "number": "22", "title": "Discrete Mathematics", "units": 5.0},
+    {"institution_id": 113, "prefix": "CIS", "number": "22C", "title": "Data Abstraction and Structures", "units": 4.5},
+    {"institution_id": 113, "prefix": "STAT", "number": "10", "title": "Statistics", "units": 4.0},
+    {"institution_id": 20, "prefix": "PE", "number": "1A", "title": "Hatha Yoga", "units": 1.0},
+    {"institution_id": 20, "prefix": "PE", "number": "1B", "title": "Hatha Yoga", "units": 1.0}
+  ],
+  "cases": [
+    {"name": "exact_code_hit", "institution_id": 113, "code": "MATH 1A", "title": null, "expected_status": "exact", "expected_course_code": "MATH 1A"},
+    {"name": "exact_wins_even_when_fuzzy_would_match_something_else", "institution_id": 113, "code": "MATH 1A", "title": "Differential Equations", "expected_status": "exact", "expected_course_code": "MATH 1A"},
+    {"name": "misspelled_title_resolves", "institution_id": 113, "code": null, "title": "diferential equations", "expected_status": "fuzzy_match", "expected_course_code": "MATH 2A"},
+    {"name": "spacing_and_case_typo_normalizes_exact", "institution_id": 113, "code": "math  1a", "title": null, "expected_status": "exact", "expected_course_code": "MATH 1A"},
+    {"name": "suffix_split_by_a_space_goes_fuzzy_and_misses", "institution_id": 113, "code": "MATH 2 AH", "title": null, "expected_status": "unresolved", "expected_course_code": null},
+    {"name": "code_typo_alone_is_below_threshold", "institution_id": 113, "code": "MTH 2A", "title": null, "expected_status": "unresolved", "expected_course_code": null},
+    {"name": "code_typo_with_title_resolves", "institution_id": 113, "code": "MTH 2A", "title": "Differential Equations", "expected_status": "fuzzy_match", "expected_course_code": "MATH 2A"},
+    {"name": "boundary_just_above_the_ratio", "institution_id": 113, "code": null, "title": "stat 10 methods", "expected_status": "fuzzy_match", "expected_course_code": "STAT 10"},
+    {"name": "boundary_exactly_at_the_ratio_is_accepted", "institution_id": 113, "code": null, "title": "stat statistics with probability", "expected_status": "fuzzy_match", "expected_course_code": "STAT 10"},
+    {"name": "boundary_just_below_the_ratio", "institution_id": 113, "code": null, "title": "stat 10 probability", "expected_status": "unresolved", "expected_course_code": null},
+    {"name": "garbage_input_is_unresolved", "institution_id": 113, "code": "zzzz", "title": "qqqq wwww", "expected_status": "unresolved", "expected_course_code": null},
+    {"name": "empty_inputs_are_unresolved", "institution_id": 113, "code": null, "title": null, "expected_status": "unresolved", "expected_course_code": null},
+    {"name": "whitespace_only_inputs_are_unresolved", "institution_id": 113, "code": "", "title": "   ", "expected_status": "unresolved", "expected_course_code": null},
+    {"name": "candidate_tie_resolves_by_course_code", "institution_id": 20, "code": null, "title": "hatha yoga", "expected_status": "fuzzy_match", "expected_course_code": "PE 1A"}
+  ]
+}

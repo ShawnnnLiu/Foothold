@@ -1,8 +1,16 @@
-"""Build `data/articulation.db` and the committed build report from ASSIST.
+"""Build `data/articulation.db`, `data/corpus.db`, and the committed build report.
 
-Four stages, cumulative: `fetch` walks the corridor and warms the on-disk
+Five stages, cumulative: `fetch` walks the corridor and warms the on-disk
 cache, `normalize` turns the cached payloads into contracts, `store` writes the
-artifact, and `all` (the default) does the lot.
+articulation artifact, `corpus` derives the retrieval artifact from it, and
+`all` (the default) does the lot with `corpus` running last.
+
+The corpus stage never touches ASSIST or the cache: it is a pure function of
+`articulation.db`, reading every institution's `cc_courses` through the store's
+read surface and indexing them per institution. That wiring is the vocabulary
+gate: `cc_course_rows` in `corpus.db` IS the projection served to autocomplete
+AND consumed by the transcript resolver, never a second extraction at request
+time.
 
 Network access is opt-in twice over: the fetcher defaults to offline, and only
 `--stage fetch` or `--stage all` under `--allow-network` may pass that default.
@@ -60,13 +68,15 @@ from starmap.contracts.cc_course import CcCourse
 from starmap.contracts.institution import Institution
 from starmap.contracts.reason_codes import AssistBuildCode
 from starmap.contracts.target_course import TargetCourse
+from starmap.retrieval.index import CourseIndex
 
-Stage = Literal["fetch", "normalize", "store", "all"]
+Stage = Literal["fetch", "normalize", "store", "corpus", "all"]
 STAGES: tuple[str, ...] = get_args(Stage)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_CACHE_DIR = REPO_ROOT / "data" / "raw" / "assist"
 DEFAULT_DB_PATH = REPO_ROOT / "data" / "articulation.db"
+DEFAULT_CORPUS_PATH = REPO_ROOT / "data" / "corpus.db"
 DEFAULT_REPORT_PATH = REPO_ROOT / "data" / "reports" / "assist_build_report.json"
 
 # SQLite's WAL sidecars belong to the file they sit beside; a rebuild that left
@@ -198,11 +208,56 @@ def reset_database_file(path: Path) -> None:
         path.with_name(path.name + suffix).unlink(missing_ok=True)
 
 
+def write_corpus(corpus_path: Path, articulation_path: Path) -> None:
+    """Derive `corpus.db` from the articulation artifact; never from ASSIST.
+
+    Institutions index in sorted `assist_id` order (the store's read order);
+    an institution with no `cc_courses` rows gets no table, so the corpus
+    carries exactly the sending-side vocabulary and nothing else.
+    """
+    reset_database_file(corpus_path)
+    corpus_path.parent.mkdir(parents=True, exist_ok=True)
+    articulation_db = SqliteDatabase(articulation_path)
+    try:
+        store = ArticulationStore(articulation_db)
+        corpus_db = SqliteDatabase(corpus_path)
+        try:
+            index = CourseIndex(corpus_db)
+            for institution in store.load_institutions():
+                courses = store.load_cc_courses(institution.assist_id)
+                if courses:
+                    index.build(institution.assist_id, courses)
+            index.vacuum()
+        finally:
+            corpus_db.close()
+    finally:
+        articulation_db.close()
+
+
+def run_corpus_stage(corpus_path: Path, articulation_path: Path) -> int:
+    """The corpus stage as the build runs it: fail loudly on a missing input.
+
+    Opening a missing SQLite path would silently create an empty database and
+    an empty (but valid-looking) corpus; the existence check keeps that
+    failure typed and immediate instead.
+    """
+    if not articulation_path.exists():
+        print(
+            f"missing: {articulation_path} (run --stage store or make unpack-data first)",
+            file=sys.stderr,
+        )
+        return 1
+    write_corpus(corpus_path, articulation_path)
+    print(f"wrote {corpus_path} ({corpus_path.stat().st_size / 1_048_576:.1f} MB)")
+    return 0
+
+
 def run_build(
     *,
     stage: Stage,
     cache_dir: Path,
     db_path: Path,
+    corpus_path: Path,
     report_path: Path,
     only_pair: tuple[int, int] | None = None,
     allow_network: bool = False,
@@ -215,6 +270,11 @@ def run_build(
     and artifact identity is compared over canonical dumps rather than over
     compressed bytes, so gzipping a throwaway build buys nothing.
     """
+    # The corpus stage alone is a pure function of the articulation artifact:
+    # no fetcher, no cache, no corridor walk.
+    if stage == "corpus":
+        return run_corpus_stage(corpus_path, db_path)
+
     # Network is reachable from the fetch stages only; normalize and store are
     # pure functions of the cache by construction, not by discipline.
     offline = not (allow_network and stage in {"fetch", "all"})
@@ -238,6 +298,10 @@ def run_build(
         if pack:
             packed = pack_database(db_path)
             print(f"wrote {packed} ({packed.stat().st_size / 1_048_576:.1f} MB)")
+    if stage == "all":
+        exit_code = run_corpus_stage(corpus_path, db_path)
+        if exit_code != 0:
+            return exit_code
     print_summary(outcome.report)
     return 0
 
@@ -292,11 +356,16 @@ def run_check(
     *,
     cache_dir: Path,
     db_path: Path,
+    corpus_path: Path,
     report_path: Path,
     only_pair: tuple[int, int] | None = None,
 ) -> int:
-    """Rebuild from the same cache into a temp directory and compare artifacts."""
-    missing = [path for path in (db_path, report_path) if not path.exists()]
+    """Rebuild from the same cache into a temp directory and compare artifacts.
+
+    The corpus candidate derives from the REBUILT articulation candidate, so
+    the check proves the whole chain regenerates, not just each file alone.
+    """
+    missing = [path for path in (db_path, corpus_path, report_path) if not path.exists()]
     for path in missing:
         print(f"missing: {path}")
     if missing:
@@ -305,21 +374,27 @@ def run_check(
     with tempfile.TemporaryDirectory() as directory:
         scratch = Path(directory)
         candidate_db = scratch / db_path.name
+        candidate_corpus = scratch / corpus_path.name
         candidate_report = scratch / report_path.name
         exit_code = run_build(
             stage="store",
             cache_dir=cache_dir,
             db_path=candidate_db,
+            corpus_path=candidate_corpus,
             report_path=candidate_report,
             only_pair=only_pair,
             pack=False,
         )
         if exit_code != 0:
             return exit_code
+        exit_code = run_corpus_stage(candidate_corpus, candidate_db)
+        if exit_code != 0:
+            return exit_code
         drifted = [
             path
             for path, committed, rebuilt in (
                 (db_path, canonical_dump(db_path), canonical_dump(candidate_db)),
+                (corpus_path, canonical_dump(corpus_path), canonical_dump(candidate_corpus)),
                 (
                     report_path,
                     report_path.read_text(encoding="utf-8"),
@@ -358,6 +433,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--db", type=Path, default=DEFAULT_DB_PATH, help="artifact path")
     parser.add_argument(
+        "--corpus-db", type=Path, default=DEFAULT_CORPUS_PATH, help="corpus artifact path"
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help="rebuild from cache and verify the committed artifacts are identical",
@@ -379,6 +457,7 @@ def main(argv: list[str] | None = None) -> int:
         return run_check(
             cache_dir=DEFAULT_CACHE_DIR,
             db_path=args.db,
+            corpus_path=args.corpus_db,
             report_path=DEFAULT_REPORT_PATH,
             only_pair=args.pair,
         )
@@ -387,6 +466,7 @@ def main(argv: list[str] | None = None) -> int:
             stage=stage,
             cache_dir=DEFAULT_CACHE_DIR,
             db_path=args.db,
+            corpus_path=args.corpus_db,
             report_path=DEFAULT_REPORT_PATH,
             only_pair=args.pair,
             allow_network=args.allow_network,
