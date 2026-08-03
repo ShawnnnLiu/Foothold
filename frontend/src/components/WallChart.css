@@ -1,0 +1,115 @@
+@keyframes fh-stepin {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes fh-rise {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes fh-sweep {
+  from {
+    background-position:
+      -150% 0,
+      0 0;
+  }
+  to {
+    background-position:
+      250% 0,
+      0 0;
+  }
+}
+
+.wall--sidebar {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 4px;
+}
+
+.wall--sidebar .wall__step {
+  width: 96px;
+  height: 22px;
+  border-radius: 2px;
+  box-sizing: border-box;
+  transform-origin: left;
+  animation-name: fh-stepin;
+  animation-duration: 0.35s;
+  animation-fill-mode: both;
+}
+
+.wall--theater {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 190px;
+}
+
+.wall--theater .wall__step {
+  border-radius: 3px;
+  box-sizing: border-box;
+  transform-origin: bottom;
+  animation-name: fh-rise;
+  animation-duration: 0.45s;
+  animation-fill-mode: both;
+}
+
+/* Secure: teal fill; the one-shot white sweep rides as the first background
+   layer, second animation slot. */
+.wall__step--secure {
+  border: 2px solid var(--slate);
+  background:
+    linear-gradient(
+        105deg,
+        rgba(255, 255, 255, 0) 30%,
+        rgba(255, 255, 255, 0.55) 50%,
+        rgba(255, 255, 255, 0) 70%
+      )
+      no-repeat -150% 0 / 250% 100%,
+    var(--hold-teal);
+}
+
+.wall--sidebar .wall__step--secure {
+  border-color: var(--chalk);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wall__step--secure {
+    animation-name: fh-stepin, fh-sweep;
+    animation-duration: 0.35s, 1.2s;
+    animation-timing-function: ease, ease-in-out;
+    animation-fill-mode: both, both;
+  }
+
+  .wall--theater .wall__step--secure {
+    animation-name: fh-rise, fh-sweep;
+    animation-duration: 0.45s, 1.2s;
+  }
+}
+
+/* Reach: the doc-00 rule-3 translation, chalk fill with a 2px amber border
+   (the prototype's chrome gradient never ships). */
+.wall__step--reach {
+  border: 2px solid var(--hold-amber);
+  background: var(--chalk);
+}
+
+/* Owed: dashed outline, no fill. */
+.wall__step--owed {
+  border: 2px dashed var(--slate);
+  background: none;
+}
+
+.wall--sidebar .wall__step--owed {
+  border-color: rgba(243, 241, 236, 0.8);
+}

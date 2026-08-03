@@ -1,0 +1,371 @@
+{
+  "columns": {
+    "at_risk": [
+      {
+        "advisements": [],
+        "bucket": "at_risk",
+        "citation": {
+          "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+          "position": 4,
+          "year_label": "2025-2026"
+        },
+        "code": "partial_series",
+        "detail": "matched MATH 1C; missing MATH 1D",
+        "receiving_course_code": "MATH 20C",
+        "receiving_course_title": "Calculus and Analytic Geometry for Science and Engineering",
+        "student_course_codes": [
+          "MATH 1C"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "at_risk",
+        "citation": {
+          "assist_key": "76/113/to/7/Department/8952",
+          "position": 8,
+          "year_label": "2025-2026"
+        },
+        "code": "partial_series",
+        "detail": "matched MATH 1C; missing MATH 1D",
+        "receiving_course_code": "MATH 20C",
+        "receiving_course_title": "Calculus and Analytic Geometry for Science and Engineering",
+        "student_course_codes": [
+          "MATH 1C"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "at_risk",
+        "citation": {
+          "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+          "position": 3,
+          "year_label": "2025-2026"
+        },
+        "code": "partial_series",
+        "detail": "matched MATH 1C; missing MATH 1D",
+        "receiving_course_code": "MATH 20E",
+        "receiving_course_title": "Vector Calculus",
+        "student_course_codes": [
+          "MATH 1C"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "at_risk",
+        "citation": {
+          "assist_key": "76/113/to/7/Department/8952",
+          "position": 10,
+          "year_label": "2025-2026"
+        },
+        "code": "partial_series",
+        "detail": "matched MATH 1C; missing MATH 1D",
+        "receiving_course_code": "MATH 20E",
+        "receiving_course_title": "Vector Calculus",
+        "student_course_codes": [
+          "MATH 1C"
+        ],
+        "units": 5.0
+      }
+    ],
+    "no_articulation": [
+      {
+        "advisements": [],
+        "bucket": "no_articulation",
+        "citation": null,
+        "code": "no_articulation",
+        "detail": null,
+        "receiving_course_code": null,
+        "receiving_course_title": null,
+        "student_course_codes": [
+          "CIS 22B"
+        ],
+        "units": 4.5
+      }
+    ],
+    "transfers_clean": [
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+          "position": 6,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "CSE 11",
+        "receiving_course_title": "Introduction to Programming and Computational Problem Solving - Accelerated Pace",
+        "student_course_codes": [
+          "CIS 36B"
+        ],
+        "units": 4.5
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Department/3276",
+          "position": 0,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "CSE 11",
+        "receiving_course_title": "Introduction to Programming and Computational Problem Solving - Accelerated Pace",
+        "student_course_codes": [
+          "CIS 36B"
+        ],
+        "units": 4.5
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+          "position": 7,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "CSE 12",
+        "receiving_course_title": "Basic Data Structures and Object-Oriented Design",
+        "student_course_codes": [
+          "CIS 22C"
+        ],
+        "units": 4.5
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Department/3276",
+          "position": 1,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "CSE 12",
+        "receiving_course_title": "Basic Data Structures and Object-Oriented Design",
+        "student_course_codes": [
+          "CIS 22C"
+        ],
+        "units": 4.5
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Department/3276",
+          "position": 3,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "CSE 20",
+        "receiving_course_title": "Discrete Mathematics",
+        "student_course_codes": [
+          "MATH 22"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Department/8952",
+          "position": 4,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "MATH 15A",
+        "receiving_course_title": "Discrete Mathematics",
+        "student_course_codes": [
+          "MATH 22"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+          "position": 2,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "MATH 18",
+        "receiving_course_title": "Linear Algebra",
+        "student_course_codes": [
+          "MATH 2B"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Department/8952",
+          "position": 5,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "MATH 18",
+        "receiving_course_title": "Linear Algebra",
+        "student_course_codes": [
+          "MATH 2B"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+          "position": 5,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "MATH 20A",
+        "receiving_course_title": "Calculus for Science and Engineering",
+        "student_course_codes": [
+          "MATH 1A"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Department/8952",
+          "position": 6,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "MATH 20A",
+        "receiving_course_title": "Calculus for Science and Engineering",
+        "student_course_codes": [
+          "MATH 1A"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+          "position": 1,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "MATH 20B",
+        "receiving_course_title": "Calculus for Science and Engineering",
+        "student_course_codes": [
+          "MATH 1B"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Department/8952",
+          "position": 7,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "MATH 20B",
+        "receiving_course_title": "Calculus for Science and Engineering",
+        "student_course_codes": [
+          "MATH 1B"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+          "position": 0,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "MATH 20D",
+        "receiving_course_title": "Introduction to Differential Equations",
+        "student_course_codes": [
+          "MATH 2A"
+        ],
+        "units": 5.0
+      },
+      {
+        "advisements": [],
+        "bucket": "transfers_clean",
+        "citation": {
+          "assist_key": "76/113/to/7/Department/8952",
+          "position": 9,
+          "year_label": "2025-2026"
+        },
+        "code": "transfers_clean",
+        "detail": null,
+        "receiving_course_code": "MATH 20D",
+        "receiving_course_title": "Introduction to Differential Equations",
+        "student_course_codes": [
+          "MATH 2A"
+        ],
+        "units": 5.0
+      }
+    ]
+  },
+  "header": {
+    "at_risk_dollars": 1455.0,
+    "at_risk_units": 5.0,
+    "clean_units": 34.0,
+    "course_count": 9,
+    "finding_count": 21,
+    "no_articulation_dollars": 1309.5,
+    "no_articulation_units": 4.5,
+    "still_owed_units": 10.0
+  },
+  "still_owed": [
+    {
+      "advisements": [],
+      "bucket": "still_owed",
+      "citation": {
+        "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+        "position": 4,
+        "year_label": "2025-2026"
+      },
+      "code": "still_owed",
+      "detail": "MATH 20C and MATH 20E",
+      "receiving_course_code": null,
+      "receiving_course_title": null,
+      "student_course_codes": [],
+      "units": 8.0
+    },
+    {
+      "advisements": [],
+      "bucket": "still_owed",
+      "citation": {
+        "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+        "position": 0,
+        "year_label": "2025-2026"
+      },
+      "code": "still_owed",
+      "detail": "CSE 15L or CSE 29",
+      "receiving_course_code": null,
+      "receiving_course_title": null,
+      "student_course_codes": [],
+      "units": 2.0
+    }
+  ]
+}

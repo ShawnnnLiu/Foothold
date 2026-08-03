@@ -33,7 +33,7 @@ from typing import Literal
 from starmap.common.clock import Clock
 from starmap.common.ids import IdGenerator
 from starmap.contracts.agreement import Agreement, RequirementGroupAsset, TemplateCell
-from starmap.contracts.articulation import Articulation
+from starmap.contracts.articulation import Articulation, ReceivingCourse, ReceivingSeries
 from starmap.contracts.articulation_expr import AllOf, AnyOf, ArticulationExpr, CourseLeaf
 from starmap.contracts.evaluation import Citation, Evaluation, Finding, StudentCourse, UnitsSummary
 from starmap.contracts.reason_codes import BUCKET_FOR_CODE, EvaluationFindingCode, TriageBucket
@@ -434,14 +434,20 @@ def _group_finding(
     )
 
 
+def receiving_units(course: ReceivingCourse | None, series: ReceivingSeries | None) -> float:
+    """The one receiving-side units accounting, shared with `arbitrage.py`.
+
+    Series units: sum for `And`, minimum for `Or` (the cheapest honest
+    completion, amendment); a course is its own `units_min`."""
+    if course is not None:
+        return course.units_min
+    assert series is not None  # the contracts require exactly one
+    course_units = [item.units_min for item in series.courses]
+    return min(course_units) if series.conjunction == "Or" else sum(course_units)
+
+
 def _cell_units(cell: TemplateCell) -> float:
-    """Series units: sum for `And`, minimum for `Or` (the cheapest honest
-    completion, amendment); a course cell is its own `units_min`."""
-    if cell.course is not None:
-        return cell.course.units_min
-    assert cell.series is not None  # the contract requires exactly one
-    course_units = [course.units_min for course in cell.series.courses]
-    return min(course_units) if cell.series.conjunction == "Or" else sum(course_units)
+    return receiving_units(cell.course, cell.series)
 
 
 def _cell_label(cell: TemplateCell) -> str:

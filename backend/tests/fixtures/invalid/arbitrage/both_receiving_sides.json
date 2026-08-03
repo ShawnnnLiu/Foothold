@@ -1,0 +1,13 @@
+{
+  "missing_course_codes": ["PHYS 4A", "PHYS 4B"],
+  "receiving_course_code": "PHYSICS 1A",
+  "receiving_course_title": "Physics for Scientists and Engineers: Mechanics",
+  "receiving_series_name": "PHYSICS 1A, PHYSICS 1B",
+  "units": 10.0,
+  "savings_dollars": 2450.0,
+  "citation": {
+    "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+    "position": 9,
+    "year_label": "2025-2026"
+  }
+}

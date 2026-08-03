@@ -1,4 +1,8 @@
-.PHONY: test lint typecheck schema-check check build-data build-check unpack-data
+.PHONY: test lint typecheck schema-check fixtures-check check build-data build-check unpack-data run
+
+# The dev server over the committed artifacts (`make unpack-data` first).
+run:
+	cd backend && uv run uvicorn starmap.app.web.app:dev_app --reload --port 8000
 
 test:
 	cd backend && uv run pytest
@@ -12,7 +16,13 @@ typecheck:
 schema-check:
 	cd backend && uv run python scripts/generate_schemas.py --check
 
-check: lint typecheck test schema-check
+# The cross-language parity pin: recompute the demo evaluation + board and
+# compare against the committed frontend fixtures. Restores articulation.db
+# from the committed gzip when absent, so it stays green on a fresh clone.
+fixtures-check:
+	cd backend && uv run python scripts/dump_demo_fixtures.py --check
+
+check: lint typecheck test schema-check fixtures-check
 
 # Offline and cache-driven: every stage reads `data/raw/assist/`, and live
 # ASSIST requests need `--allow-network`, which is a user permission gate.

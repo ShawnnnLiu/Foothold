@@ -1,0 +1,111 @@
+{
+  "$defs": {
+    "Citation": {
+      "additionalProperties": false,
+      "description": "The ground-truth pointer a finding carries; a partial citation is none.",
+      "properties": {
+        "assist_key": {
+          "pattern": "^[0-9]+/[0-9]+/to/[0-9]+/(Major|Department)/.+$",
+          "title": "Assist Key",
+          "type": "string"
+        },
+        "position": {
+          "minimum": 0,
+          "title": "Position",
+          "type": "integer"
+        },
+        "year_label": {
+          "pattern": "^[0-9]{4}-[0-9]{4}$",
+          "title": "Year Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "assist_key",
+        "position",
+        "year_label"
+      ],
+      "title": "Citation",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "One ranked row: the CC courses to take, the receiving requirement they\ncomplete, and the tuition delta; `savings_dollars` is None (never zero)\nwhen the target publishes no per-unit rate.",
+  "properties": {
+    "citation": {
+      "$ref": "#/$defs/Citation"
+    },
+    "missing_course_codes": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Missing Course Codes",
+      "type": "array"
+    },
+    "receiving_course_code": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Receiving Course Code"
+    },
+    "receiving_course_title": {
+      "anyOf": [
+        {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Receiving Course Title"
+    },
+    "receiving_series_name": {
+      "anyOf": [
+        {
+          "maxLength": 300,
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Receiving Series Name"
+    },
+    "savings_dollars": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Savings Dollars"
+    },
+    "units": {
+      "exclusiveMinimum": 0,
+      "title": "Units",
+      "type": "number"
+    }
+  },
+  "required": [
+    "missing_course_codes",
+    "units",
+    "citation"
+  ],
+  "title": "ArbitrageRow",
+  "type": "object"
+}

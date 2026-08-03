@@ -1,0 +1,138 @@
+/* The Gold finish and Prism lines texture are fixed by the ASCENT.md foil
+   amendment; values translated from the prototype's FOILS/TEX tables. */
+
+.foil {
+  --rx: 0deg;
+  --ry: 0deg;
+  --mx: 50%;
+  --my: 50%;
+  --ga: 100deg;
+  --ft: 0.45s;
+  position: relative;
+  transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry));
+  transform-style: preserve-3d;
+  transition: transform var(--ft) ease-out;
+  background: linear-gradient(
+    180deg,
+    #fdebbe 0%,
+    #edad3f 16%,
+    #ce8412 48%,
+    #a96606 80%,
+    #ebb856 100%
+  );
+  color: #38220a;
+  font-family: inherit;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 2px solid var(--slate);
+  border-radius: var(--radius);
+  box-shadow:
+    5px 5px 0 var(--slate),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1px rgba(255, 244, 214, 0.5),
+    inset 0 -3px 5px rgba(80, 40, 0, 0.35);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.foil:active:not(:disabled) {
+  transform: perspective(700px) rotateX(var(--rx)) rotateY(var(--ry)) scale(0.96);
+}
+
+.foil--lg {
+  font-size: 15px;
+  padding: 15px 26px;
+}
+
+.foil--md {
+  font-size: 14px;
+  padding: 14px 24px;
+}
+
+.foil--sm {
+  font-size: 13px;
+  padding: 14px 16px;
+  width: 100%;
+  text-align: center;
+}
+
+.foil--chalk {
+  border-color: var(--chalk);
+  box-shadow:
+    4px 4px 0 var(--chalk),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1px rgba(255, 244, 214, 0.5),
+    inset 0 -3px 5px rgba(80, 40, 0, 0.45);
+}
+
+.foil__sheen,
+.foil__glare,
+.foil__tex {
+  position: absolute;
+  inset: 0;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.foil__sheen {
+  mix-blend-mode: color-dodge;
+  opacity: 0.35;
+  background: linear-gradient(
+    var(--ga),
+    rgba(255, 0, 170, 0) calc(var(--mx) - 45%),
+    rgba(255, 0, 170, 0.4) calc(var(--mx) - 22%),
+    rgba(0, 255, 255, 0.45) var(--mx),
+    rgba(255, 215, 0, 0.4) calc(var(--mx) + 22%),
+    rgba(255, 0, 170, 0) calc(var(--mx) + 45%)
+  );
+}
+
+.foil__glare {
+  mix-blend-mode: overlay;
+  opacity: 0.5;
+  background: radial-gradient(
+    circle at var(--mx) var(--my),
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0) 55%
+  );
+}
+
+.foil__tex {
+  mix-blend-mode: overlay;
+  opacity: 0.7;
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.35) 0px,
+    rgba(255, 255, 255, 0.35) 1px,
+    rgba(255, 255, 255, 0) 1px,
+    rgba(255, 255, 255, 0) 4px
+  );
+}
+
+.foil__label {
+  position: relative;
+  display: block;
+  transform: translateZ(16px);
+  text-shadow: 0 1px 0 rgba(255, 248, 225, 0.5);
+}
+
+.foil:disabled {
+  background: rgba(39, 43, 49, 0.15);
+  color: rgba(39, 43, 49, 0.5);
+  border-color: rgba(39, 43, 49, 0.3);
+  box-shadow: none;
+  transform: none;
+  cursor: default;
+}
+
+.foil--chalk:disabled {
+  background: rgba(243, 241, 236, 0.15);
+  color: rgba(243, 241, 236, 0.5);
+  border-color: rgba(243, 241, 236, 0.3);
+}
+
+.foil:disabled .foil__label {
+  transform: none;
+  text-shadow: none;
+}

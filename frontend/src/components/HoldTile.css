@@ -1,0 +1,46 @@
+.holdtile {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  border: 2px solid var(--slate);
+  box-sizing: border-box;
+}
+
+.holdtile--chalk {
+  border-color: var(--chalk);
+}
+
+.holdtile--shadow {
+  box-shadow: 3px 3px 0 var(--slate);
+}
+
+.holdtile--transfers_clean {
+  background: var(--hold-teal);
+}
+
+.holdtile--at_risk {
+  background: var(--hold-amber);
+}
+
+.holdtile--no_articulation {
+  background: var(--hold-red);
+}
+
+.holdtile--still_owed {
+  background: var(--chalk);
+  border-style: dashed;
+  box-shadow: none;
+}
+
+.holdtile--still_owed.holdtile--chalk {
+  background: none;
+}
+
+.holdtile__bang {
+  color: #f3f1ec;
+  font-weight: 900;
+  font-size: 17px;
+  line-height: 1;
+}

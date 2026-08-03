@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "exactly one of receiving_course_code and receiving_series_name",
+    "code=True series=True"
+  ]
+}

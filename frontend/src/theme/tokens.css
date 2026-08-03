@@ -1,0 +1,28 @@
+/* Ascent design tokens, exactly from docs/design/ASCENT.md. */
+
+:root {
+  --chalk: #F3F1EC;
+  --slate: #272B31;
+  --hold-teal: #0E8A6D;
+  --hold-amber: #D97706;
+  --hold-red: #B3372E;
+
+  --radius: 4px;
+  --border: 2px solid var(--slate);
+  --shadow-offset: 4px 4px 0 var(--slate);
+}
+
+body {
+  margin: 0;
+  background: var(--chalk);
+  color: var(--slate);
+  font-family: 'Archivo', sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
+  }
+}

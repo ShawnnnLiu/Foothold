@@ -9,6 +9,7 @@ SCHEMAS_DIR = BACKEND_ROOT / "schemas"
 
 EXPECTED_CONTRACTS = {
     "agreement",
+    "arbitrage",
     "articulation",
     "articulation_expr",
     "cc_course",

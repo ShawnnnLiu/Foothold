@@ -13,6 +13,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from starmap.contracts.agreement import Agreement
+from starmap.contracts.arbitrage import ArbitrageRow
 from starmap.contracts.articulation import Articulation
 from starmap.contracts.articulation_expr import ArticulationExprRoot
 from starmap.contracts.cc_course import CcCourse
@@ -32,6 +33,7 @@ from starmap.contracts.target_course import TargetCourse
 # stands.
 CONTRACTS: dict[str, type[BaseModel]] = {
     "agreement": Agreement,
+    "arbitrage": ArbitrageRow,
     "articulation": Articulation,
     "articulation_expr": ArticulationExprRoot,
     "cc_course": CcCourse,
