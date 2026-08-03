@@ -10,7 +10,7 @@ REGION_MODULES = [
     "starmap.retrieval",
     "starmap.llm",
     "starmap.assist",
-    "starmap.prereqs",
+    "starmap.transfer",
     "starmap.pathways",
     "starmap.app.web",
 ]

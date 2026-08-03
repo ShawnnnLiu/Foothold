@@ -378,3 +378,50 @@ Still open, deliberately: `templateOverrides` (about 1,526 payloads), the `Serie
 | Groups carrying advisement text | - | 48,249 |
 | `data/articulation.db` (gitignored) | 316 MB | 319 MB |
 | `data/articulation.db.gz` (committed) | 35 MB | 34.5 MB |
+
+## 12. S10a verification: `templateOverrides` is authoring residue the renderer ignores
+
+Split S10a (2026-08-02) resolved the open `templateOverrides` question from section 11 before implementing the evaluator, because doc 03's hand-verification protocol depends on the stored `sending_expr` being the rule the rendered page shows.
+The answer: it always is.
+ASSIST's public renderer provably never applies an override, so the artifact as committed already matches the rendered ground truth, and the mechanism is closed as verified-vestigial with the user's 2026-08-02 decision.
+
+### The population, measured against the stored artifact
+
+A full sweep of the raw cache (34,771 files; the 1,526-payload figure from section 11 reproduced exactly) joined against the stored artifact by `(agreement_id, position)`:
+
+| | |
+|---|---|
+| Stored articulations carrying a non-empty override | 1,689 (0.48% of 352,024) |
+| Of those, carrying two overrides | 13 (the rest carry one) |
+| Override objects total | 1,702 |
+| Override objects whose rule DIFFERS from the default (ids stripped) | 1,366 |
+| Differing rows where the default is "No Course Articulated" | 865 |
+| Distinct stored agreements affected | 1,520 (4.9% of 31,236) |
+
+The differing rows concentrate at three campuses: CSU Northridge 1,346, CSU Fullerton 14, UC Davis 4.
+
+### Why the renderer cannot apply them: the variant join does not exist
+
+An override is scoped by `variantIds`, a list of GUIDs.
+Across every one of the 34,771 cached files, those GUIDs occur at exactly one JSON path: `articulations[].articulation.templateOverrides[].variantIds[]`.
+They appear in no template asset, no agreements-list report, and no envelope field, so no payload identifies which variant the fetched major IS, and the applying side of the join is simply absent from the public API surface.
+
+The SPA confirms this from the code side.
+A rendered agreement page fetches only the six endpoints the corridor build already caches (verified live with network capture on 2026-08-02): appsettings, institutions, AcademicYears, categories, the agreements list, and the agreement payload itself.
+In the app bundle (`main.7ffdf5991193db15.js`), `variantIds` occurs exactly twice, both inside payload-deserialization mappers; no code consumes `templateOverrides` after mapping, and the other three bundles (runtime, polyfills, scripts) never mention either name.
+
+### Rendered confirmation, both directions
+
+| Sending | Receiving, major | Receiving course | Default rule | Override rule | Page renders |
+|---|---|---|---|---|---|
+| Evergreen Valley College | CSUN, Biology B.S. Cell and Molecular | MATH 255B | No Course Articulated | MATH 072 | **No Course Articulated** |
+| El Camino College | CSUN, Psychology B.A. | MATH 140 | STAT C1000 or STAT C1000H or BUS 116 | adds PSYC 109A | **the default three-way Or** |
+
+The Psychology check contains a trap worth recording: PSYC 109A does appear on the rendered page, but as the sending side of a separate `Requirement`-type row ("Other Acceptable Statistics", articulation position 3, its own default rule `SOCI 109A or PSYC 109A`), not inside the MATH 140 row.
+A text search that stopped at "PSYC 109A is on the page" would have concluded the override applies; reading the row structure shows it does not.
+
+### Consequence for the evaluator and for hand-verification
+
+The stored `sending_expr` is the rendered rule, everywhere, including all 1,689 override-carrying rows.
+Evaluator hand-verification needs no override avoidance, and modeling overrides would make the artifact DISAGREE with what a student sees on assist.org, inverting the citation axiom.
+The 865 "default says No Course Articulated, override has a rule" rows are not under-reporting: the rendered page says No Course Articulated too.

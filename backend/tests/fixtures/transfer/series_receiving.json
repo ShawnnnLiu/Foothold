@@ -1,0 +1,93 @@
+{
+  "comment": "A satisfied Series receiving side: one finding for the whole sequence.",
+  "bundle": {
+    "major": {
+      "agreement_id": "agr_2d6204abcea837f3",
+      "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+      "category": "major",
+      "sending_institution_id": 113,
+      "receiving_institution_id": 7,
+      "academic_year_id": 76,
+      "academic_year_label": "2025-2026",
+      "label": "Mathematics/Computer Science B.S.",
+      "publish_date": "2026-06-08T23:04:32.5510019"
+    },
+    "major_articulations": [
+      {
+        "agreement_id": "agr_2d6204abcea837f3",
+        "position": 0,
+        "template_cell_id": null,
+        "receiving_course": null,
+        "receiving_series": {
+          "name": "PHYSICS 2A, PHYSICS 2B",
+          "conjunction": "And",
+          "courses": [
+            {
+              "course_code": "PHYSICS 2A",
+              "prefix": "PHYSICS",
+              "number": "2A",
+              "title": "Physics - Mechanics",
+              "units_min": 4.0,
+              "units_max": 4.0
+            },
+            {
+              "course_code": "PHYSICS 2B",
+              "prefix": "PHYSICS",
+              "number": "2B",
+              "title": "Physics - Electricity and Magnetism",
+              "units_min": 4.0,
+              "units_max": 4.0
+            }
+          ]
+        },
+        "sending_expr": {
+          "all": [
+            {
+              "course": "PHYS 4A"
+            },
+            {
+              "course": "PHYS 4B"
+            }
+          ]
+        },
+        "no_articulation_reason": null,
+        "advisements": []
+      }
+    ],
+    "requirement_groups": [],
+    "dept_agreements": [],
+    "latest_year_id": 76,
+    "latest_year_label": "2025-2026"
+  },
+  "requests": [
+    {
+      "course_code": "PHYS 4A",
+      "units": 4.5,
+      "resolution": "exact"
+    },
+    {
+      "course_code": "PHYS 4B",
+      "units": 4.5,
+      "resolution": "exact"
+    }
+  ],
+  "expected_findings": [
+    {
+      "code": "transfers_clean",
+      "bucket": "transfers_clean",
+      "student_course_codes": [
+        "PHYS 4A",
+        "PHYS 4B"
+      ],
+      "receiving_course_code": null,
+      "units": 9.0,
+      "citation_present": true
+    }
+  ],
+  "expected_units": {
+    "clean_units": 9.0,
+    "at_risk_units": 0.0,
+    "no_articulation_units": 0.0,
+    "still_owed_units": 0.0
+  }
+}

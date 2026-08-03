@@ -108,3 +108,68 @@ CLI: run against a temp db built from the captured fixtures (doc 02 store), asse
 - `make check` green; one named fixture per finding code proven.
 - The curated demo student evaluates at the CLI against the demo pair; every finding hand-verified against the live assist.org agreement and recorded in `docs/notes/evaluator_verification.md` (S10b).
 - Units and dollar totals verified by hand against the curated cost table.
+
+## Amendment, 2026-08-02 (S10a): reconciling this plan with the S9d/S9e artifact
+
+This doc was authored 2026-07-31 against contracts that no longer exist in that shape.
+The S9d/S9e splits added `ReceivingSeries` (42,242 stored articulations, 12% of the artifact), made `TemplateCell.course` nullable in favour of a course-or-series choice, added `RequirementGroupAsset.select_courses` (26,121 stored groups), and populated advisements at volume (19,149 articulations, 48,249 groups).
+The sections above are left as written (history is not rewritten); where this amendment contradicts them, the amendment wins.
+Every semantics decision below that the specs did not already lock was made by the user on 2026-08-02, not by an executor.
+
+### Series receiving sides in classification
+
+Step 2 is unchanged: every articulation with a non-null `sending_expr` is evaluated, series rows included, since the sending side is one expression either way.
+Step 3's finding fields change for a series articulation, because `Articulation.receiving_course` is None there:
+
+- `receiving_course_code` = None (a sequence has no single code; the `Finding` contract already allows this).
+- `receiving_course_title` = `receiving_series.name`, ASSIST's own rendering, verbatim (the normalizer already stripped it).
+- Everything else (units from matched student courses, citation, the at-risk priority chain) is unchanged.
+
+The locked ordering key in step 8 is unchanged; a series finding contributes `""` for `receiving_course_code or ""`, and ties beyond the key preserve evaluation order because every sort in the evaluator must be stable (Python's `sorted` is; do not replace it with a non-stable sort).
+
+### Series template cells in still-owed
+
+Step 7's cell-satisfaction join (`template_cell_id == cell.cell_id`, expression `satisfied`, notes do not block) is unchanged and applies to series cells identically.
+What changes is cell units and cell display, since `TemplateCell.course` may be None:
+
+- `cell_units(cell)` = `course.units_min` for a course cell; for a series cell, the sum of the series courses' `units_min` when `conjunction == "And"`, and the MINIMUM over the series courses' `units_min` when `conjunction == "Or"` (user decision: the cheapest honest completion, mirroring this doc's locked Or-section rule; 380 stored Or-series exist).
+- `cell_label(cell)` = the course code for a course cell, `series.name` for a series cell; labels are used in `detail` enumerations.
+- A still-owed finding whose single owed cell is a series carries `receiving_course_code` = None and `receiving_course_title` = `series.name`.
+
+### `select_courses` groups: satisfaction and the still-owed line
+
+Group satisfaction is now three-way (the first two are this doc's original rules):
+
+- `conjunction == "And"`: every section satisfied (every cell satisfied).
+- `conjunction == "Or"`, `select_courses` None: at least one section fully satisfied.
+- `select_courses == N`: at least N SATISFIED cells across the union of the group's sections, one pool; a satisfied series cell counts as one (locked in `docs/specs/agreement.schema.md` and spotchecks section 11).
+
+A `partial` expression outcome contributes NOTHING to any of the three: not to section completion, not to the pool count (user decision).
+The partial surfaces exclusively as its at-risk `partial_series` finding, and the cell still counts as owed.
+
+An unsatisfied `select_courses` group emits ONE still-owed finding (user decision), never one per owed cell:
+
+- `detail` = `complete {K} more from: {labels}` where `K = select_courses - satisfied_cell_count` and the labels are the owed cells' `cell_label`s in template order (sections by `position`, cells in list order), joined by `" or "`.
+- Enumeration cap, locked: at most 8 labels; when more cells are owed, append `" or {remaining} more options"`.
+  Pools run 2 to 33 cells in the corridor and `Finding.detail` caps at 500 characters; the cap is deterministic and applied by count, not by character length.
+- `units` = the sum of the K SMALLEST owed-cell `cell_units` values (user decision: the cheapest completion, deterministic; ties broken by template order).
+- `receiving_course_code`/`title` follow the existing rule: set only when exactly one cell is owed.
+- `citation` follows the existing rule: the first owed cell's articulation position when one exists, else position 0.
+
+For `And` groups the owed units stay "sum of owed cells' `cell_units`", and for plain `Or` groups "minimum over sections of that section's owed-cell `cell_units` sum", both now series-aware via `cell_units`.
+
+### Advisements at volume: the downgrade stands, group texts ride still-owed
+
+Measured 2026-08-02 against the committed artifact, because this doc's advisement rules were written when advisements were rare:
+
+- The step 3 at-risk trigger (articulation `advisements` plus path notes) fires on 29,954 of 323,848 expr-bearing articulations (9.2%); the demo pair carries exactly 2 such rows.
+  The board does not drown; the downgrade chain in step 3 stands exactly as written.
+- `RequirementGroupAsset.advisements` (48,249 groups, including the 41,246 flattened cell-level grade minimums) is read by NOTHING in this doc's algorithm.
+  User decision: an owed group's advisements are carried on its still-owed finding's `advisements` field; a SATISFIED group's advisements do not create or downgrade findings in this increment, and their surfacing is deferred to the Week 2 triage-board group rendering.
+  Recorded consequence, deliberately accepted: until Week 2 lands, a satisfied group's grade-minimum text is not visible in the findings object; 48.4% of matched cell-bound articulations sit in such groups, and downgrading them all was rejected as drowning the board.
+
+### `templateOverrides`: closed, no evaluator impact
+
+Spotchecks section 12 (2026-08-02) proves ASSIST's renderer ignores `templateOverrides` entirely: the variant join does not exist anywhere in the public API surface, the SPA bundle maps and never consumes the field, and both rendered checks show the default rule.
+The stored `sending_expr` IS the rendered rule for all 352,024 rows, including the 1,689 override-carrying ones.
+No contract change, no rebuild, no evaluator handling, and hand-verification needs no override avoidance.

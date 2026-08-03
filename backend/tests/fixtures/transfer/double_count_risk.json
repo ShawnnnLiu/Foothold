@@ -1,0 +1,107 @@
+{
+  "comment": "One course satisfying two articulations, one advisement-laden.",
+  "bundle": {
+    "major": {
+      "agreement_id": "agr_2d6204abcea837f3",
+      "assist_key": "76/113/to/7/Major/d2dfb7a8-d505-4e70-f33c-08ddd3b241a4",
+      "category": "major",
+      "sending_institution_id": 113,
+      "receiving_institution_id": 7,
+      "academic_year_id": 76,
+      "academic_year_label": "2025-2026",
+      "label": "Mathematics/Computer Science B.S.",
+      "publish_date": "2026-06-08T23:04:32.5510019"
+    },
+    "major_articulations": [
+      {
+        "agreement_id": "agr_2d6204abcea837f3",
+        "position": 0,
+        "template_cell_id": null,
+        "receiving_course": {
+          "course_code": "MATH 20A",
+          "prefix": "MATH",
+          "number": "20A",
+          "title": "Calculus for Science and Engineering",
+          "units_min": 4.0,
+          "units_max": 4.0
+        },
+        "receiving_series": null,
+        "sending_expr": {
+          "course": "MATH 1A"
+        },
+        "no_articulation_reason": null,
+        "advisements": []
+      },
+      {
+        "agreement_id": "agr_2d6204abcea837f3",
+        "position": 1,
+        "template_cell_id": null,
+        "receiving_course": {
+          "course_code": "MATH 4",
+          "prefix": "MATH",
+          "number": "4",
+          "title": "Financial Mathematics",
+          "units_min": 4.0,
+          "units_max": 4.0
+        },
+        "receiving_series": null,
+        "sending_expr": {
+          "course": "MATH 1A"
+        },
+        "no_articulation_reason": null,
+        "advisements": [
+          "Credit for articulated courses in one series only"
+        ]
+      }
+    ],
+    "requirement_groups": [],
+    "dept_agreements": [],
+    "latest_year_id": 76,
+    "latest_year_label": "2025-2026"
+  },
+  "requests": [
+    {
+      "course_code": "MATH 1A",
+      "units": 5.0,
+      "resolution": "exact"
+    }
+  ],
+  "expected_findings": [
+    {
+      "code": "transfers_clean",
+      "bucket": "transfers_clean",
+      "student_course_codes": [
+        "MATH 1A"
+      ],
+      "receiving_course_code": "MATH 20A",
+      "units": 5.0,
+      "citation_present": true
+    },
+    {
+      "code": "advisement_note",
+      "bucket": "at_risk",
+      "student_course_codes": [
+        "MATH 1A"
+      ],
+      "receiving_course_code": "MATH 4",
+      "units": 5.0,
+      "citation_present": true
+    },
+    {
+      "code": "double_count_risk",
+      "bucket": "at_risk",
+      "student_course_codes": [
+        "MATH 1A"
+      ],
+      "receiving_course_code": null,
+      "units": 5.0,
+      "citation_present": true
+    }
+  ],
+  "expected_units": {
+    "clean_units": 5.0,
+    "at_risk_units": 0.0,
+    "no_articulation_units": 0.0,
+    "still_owed_units": 0.0
+  }
+}
