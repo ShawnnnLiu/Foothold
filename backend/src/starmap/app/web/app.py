@@ -11,6 +11,8 @@ attribute access while importing `create_app` (as every test does) opens no
 database.
 """
 
+import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -22,16 +24,31 @@ from starmap.app.web.config import AppConfig, load_config
 from starmap.app.web.errors import register_exception_handlers
 from starmap.app.web.routes import router
 from starmap.app.web.session import SidMiddleware
-from starmap.app.web.store import EvaluationStore
+from starmap.app.web.store import EvaluationStore, PetitionStore, TranscriptParseStore
 from starmap.assist.store import ArticulationStore
 from starmap.common.clock import SystemClock
 from starmap.common.ids import UuidIdGenerator
 from starmap.common.sqlite import SqliteDatabase
+from starmap.contracts.petition import PetitionDraft
+from starmap.contracts.transcript_parse import TranscriptProposal
+from starmap.llm.call_log import SqliteCallLogStore
+from starmap.llm.engine import GenerationEngine, Transport
+from starmap.llm.petition_writer import PETITION_WRITER_CONFIG
+from starmap.llm.transcript_parser import TRANSCRIPT_PARSER_CONFIG
+from starmap.llm.transport_anthropic import AnthropicTransport, build_client
 from starmap.retrieval.index import CourseIndex
 from starmap.transfer.costs import load_cost_table
 
 
-def create_app(config: AppConfig) -> FastAPI:
+@dataclass(frozen=True, slots=True)
+class LlmServices:
+    """The two node engines; absent as a whole when no transport exists."""
+
+    transcript_engine: GenerationEngine[TranscriptProposal]
+    petition_engine: GenerationEngine[PetitionDraft]
+
+
+def create_app(config: AppConfig, *, llm_transport: Transport | None = None) -> FastAPI:
     for artifact in (config.articulation_db, config.corpus_db):
         if not artifact.exists():
             raise FileNotFoundError(
@@ -48,10 +65,50 @@ def create_app(config: AppConfig) -> FastAPI:
     # A missing cost table means dollar fields stay None, the honest
     # "we do not know" (never zero); an invalid one fails loudly here.
     app.state.costs = load_cost_table(config.costs_path) if config.costs_path.exists() else None
-    app.state.evaluations = EvaluationStore(SqliteDatabase(config.sessions_db))
     app.state.ids = UuidIdGenerator()
     app.state.clock = SystemClock()
     app.state.bundles = {}
+
+    # One shared `sessions.db` connection (decision 7): all four session-file
+    # stores share one lock and one WAL file, which is what serializes the
+    # background job writer against request readers.
+    sessions = SqliteDatabase(config.sessions_db)
+    app.state.evaluations = EvaluationStore(sessions)
+    app.state.parses = TranscriptParseStore(sessions)
+    app.state.petitions = PetitionStore(sessions)
+    app.state.call_log = SqliteCallLogStore(sessions)
+
+    # The LLM availability gate (decision 8): the parameter wins; else the env
+    # key builds the production transport; else the LLM surface is disabled
+    # (both POST routes 409) while stores and polling keep working. Tests
+    # always inject a FakeTransport, so `make check` stays zero-network.
+    transport = llm_transport
+    if transport is None and os.environ.get("ANTHROPIC_API_KEY"):
+        transport = AnthropicTransport(build_client())
+    app.state.llm = (
+        None
+        if transport is None
+        else LlmServices(
+            transcript_engine=GenerationEngine(
+                "transcript_parser",
+                TranscriptProposal,
+                TRANSCRIPT_PARSER_CONFIG,
+                transport,
+                app.state.call_log,
+                app.state.clock,
+                app.state.ids,
+            ),
+            petition_engine=GenerationEngine(
+                "petition_writer",
+                PetitionDraft,
+                PETITION_WRITER_CONFIG,
+                transport,
+                app.state.call_log,
+                app.state.clock,
+                app.state.ids,
+            ),
+        )
+    )
 
     # 2. Session middleware.
     app.add_middleware(SidMiddleware, ids=app.state.ids, secure=config.secure_cookies)

@@ -1,0 +1,14 @@
+{
+  "parse_id": "parse_5c81ba07d94e3f62",
+  "sending_institution_id": 113,
+  "status": "failed",
+  "reason_code": "refusal",
+  "chips": [],
+  "unresolved": [
+    {
+      "proposed_code": "PHYS 4A",
+      "proposed_title": "Physics for Scientists and Engineers: Mechanics"
+    }
+  ],
+  "created_at": "2026-08-03T12:00:00+00:00"
+}

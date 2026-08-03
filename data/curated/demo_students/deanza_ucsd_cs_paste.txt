@@ -1,0 +1,24 @@
+DE ANZA COLLEGE
+UNOFFICIAL TRANSCRIPT
+
+Fall 2024
+COURSE     TITLE                                            UNITS  GRADE
+MATH 1A    Calculus I                                        5.00  A
+
+Winter 2025
+MATH 1B    Calculus II                                       5.00  A-
+
+Spring 2025
+MATH 1C    Calculus III                                      5.00  B+
+
+Fall 2025
+CIS 36B    Intermediate Problem Solving in Java              4.50  A
+
+Winter 2026
+CIS 22C    Data Abstraction and Structures                   4.50  A
+
+Spring 2026
+PHYS 4A    Physics for Scientists and Engineers: Mechanics   6.00  B
+
+GPA: 3.65
+TOTAL UNITS: 30.00

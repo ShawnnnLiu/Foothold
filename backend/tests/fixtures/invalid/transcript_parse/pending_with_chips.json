@@ -1,0 +1,17 @@
+{
+  "parse_id": "parse_5c81ba07d94e3f62",
+  "sending_institution_id": 113,
+  "status": "pending",
+  "reason_code": null,
+  "chips": [
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units_min": 5.0,
+      "units_max": 5.0,
+      "resolution": "exact"
+    }
+  ],
+  "unresolved": [],
+  "created_at": "2026-08-03T12:00:00+00:00"
+}

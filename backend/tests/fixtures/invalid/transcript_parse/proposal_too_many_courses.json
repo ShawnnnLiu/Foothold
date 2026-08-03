@@ -1,0 +1,370 @@
+{
+  "courses": [
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 0"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 1"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 2"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 3"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 4"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 5"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 6"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 7"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 8"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 9"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 10"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 11"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 12"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 13"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 14"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 15"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 16"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 17"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 18"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 19"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 20"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 21"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 22"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 23"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 24"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 25"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 26"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 27"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 28"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 29"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 30"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 31"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 32"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 33"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 34"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 35"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 36"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 37"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 38"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 39"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 40"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 41"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 42"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 43"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 44"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 45"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 46"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 47"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 48"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 49"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 50"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 51"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 52"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 53"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 54"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 55"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 56"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 57"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 58"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 59"
+    },
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units": 5.0,
+      "term": "Term 60"
+    }
+  ]
+}

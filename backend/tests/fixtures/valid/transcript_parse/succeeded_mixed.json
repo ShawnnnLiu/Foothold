@@ -1,0 +1,29 @@
+{
+  "parse_id": "parse_5c81ba07d94e3f62",
+  "sending_institution_id": 113,
+  "status": "succeeded",
+  "reason_code": null,
+  "chips": [
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus I",
+      "units_min": 5.0,
+      "units_max": 5.0,
+      "resolution": "exact"
+    },
+    {
+      "course_code": "CIS 22C",
+      "title": "Data Abstraction and Structures",
+      "units_min": 4.5,
+      "units_max": 4.5,
+      "resolution": "fuzzy_match"
+    }
+  ],
+  "unresolved": [
+    {
+      "proposed_code": "PHYS 4A",
+      "proposed_title": "Physics for Scientists and Engineers: Mechanics"
+    }
+  ],
+  "created_at": "2026-08-03T12:00:00+00:00"
+}
