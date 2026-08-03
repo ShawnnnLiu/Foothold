@@ -1,0 +1,160 @@
+{
+  "$defs": {
+    "LlmReasonCode": {
+      "enum": [
+        "auth_failed",
+        "rate_limited",
+        "call_failed",
+        "retry_limit_exceeded",
+        "refusal",
+        "truncated",
+        "malformed_output",
+        "schema_rejected",
+        "repair_limit_exceeded"
+      ],
+      "title": "LlmReasonCode",
+      "type": "string"
+    },
+    "TranscriptChip": {
+      "additionalProperties": false,
+      "description": "One resolved chip; every field comes from the `cc_courses` row.",
+      "properties": {
+        "course_code": {
+          "title": "Course Code",
+          "type": "string"
+        },
+        "resolution": {
+          "enum": [
+            "exact",
+            "fuzzy_match"
+          ],
+          "title": "Resolution",
+          "type": "string"
+        },
+        "title": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "units_max": {
+          "maximum": 20.0,
+          "title": "Units Max",
+          "type": "number"
+        },
+        "units_min": {
+          "exclusiveMinimum": 0,
+          "maximum": 20.0,
+          "title": "Units Min",
+          "type": "number"
+        }
+      },
+      "required": [
+        "course_code",
+        "title",
+        "units_min",
+        "units_max",
+        "resolution"
+      ],
+      "title": "TranscriptChip",
+      "type": "object"
+    },
+    "UnresolvedEntry": {
+      "additionalProperties": false,
+      "description": "One verbatim read the vocabulary could not resolve; never a chip.",
+      "properties": {
+        "proposed_code": {
+          "anyOf": [
+            {
+              "maxLength": 32,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proposed Code"
+        },
+        "proposed_title": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Proposed Title"
+        }
+      },
+      "title": "UnresolvedEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "The stored and polled transcript-parse artifact.",
+  "properties": {
+    "chips": {
+      "items": {
+        "$ref": "#/$defs/TranscriptChip"
+      },
+      "title": "Chips",
+      "type": "array"
+    },
+    "created_at": {
+      "format": "date-time",
+      "title": "Created At",
+      "type": "string"
+    },
+    "parse_id": {
+      "pattern": "^parse_[0-9a-f]{16}$",
+      "title": "Parse Id",
+      "type": "string"
+    },
+    "reason_code": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LlmReasonCode"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "sending_institution_id": {
+      "exclusiveMinimum": 0,
+      "title": "Sending Institution Id",
+      "type": "integer"
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "succeeded",
+        "failed"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "unresolved": {
+      "items": {
+        "$ref": "#/$defs/UnresolvedEntry"
+      },
+      "title": "Unresolved",
+      "type": "array"
+    }
+  },
+  "required": [
+    "parse_id",
+    "sending_institution_id",
+    "status",
+    "created_at"
+  ],
+  "title": "TranscriptParse",
+  "type": "object"
+}

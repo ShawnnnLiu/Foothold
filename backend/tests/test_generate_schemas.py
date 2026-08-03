@@ -17,6 +17,7 @@ EXPECTED_CONTRACTS = {
     "institution",
     "llm_call_log",
     "target_course",
+    "transcript_parse",
 }
 
 

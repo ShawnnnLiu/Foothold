@@ -21,6 +21,7 @@ from starmap.contracts.evaluation import Evaluation
 from starmap.contracts.institution import Institution
 from starmap.contracts.llm_call_log import LlmCallLogRecord
 from starmap.contracts.target_course import TargetCourse
+from starmap.contracts.transcript_parse import TranscriptParse
 
 # Nested models are not registered separately: `ReceivingCourse` is reachable
 # through `articulation`, and `Finding`, `Citation`, `StudentCourse`, and
@@ -41,6 +42,10 @@ CONTRACTS: dict[str, type[BaseModel]] = {
     "institution": Institution,
     "llm_call_log": LlmCallLogRecord,
     "target_course": TargetCourse,
+    # `TranscriptChip` and `UnresolvedEntry` are reachable through
+    # `transcript_parse`; the proposal models ship no generated schema because
+    # doc 02 locks the registry to exactly this name.
+    "transcript_parse": TranscriptParse,
 }
 
 DEFAULT_SCHEMAS_DIR = Path(__file__).resolve().parents[1] / "schemas"

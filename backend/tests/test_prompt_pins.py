@@ -16,6 +16,7 @@ from typing import NamedTuple
 import pytest
 
 from starmap.common.ids import sha256_hex
+from starmap.llm.transcript_parser import TRANSCRIPT_PARSER_SYSTEM
 
 
 class PromptPin(NamedTuple):
@@ -25,10 +26,15 @@ class PromptPin(NamedTuple):
     pinned_sha256: str
 
 
-# Seeded empty. One row per system-prompt constant, e.g.:
-#     PromptPin("TRANSCRIPT_PARSER_SYSTEM", TRANSCRIPT_PARSER_SYSTEM,
-#               "transcript-parser-v1", "<sha256>"),
-SYSTEM_PROMPT_PINS: tuple[PromptPin, ...] = ()
+# One row per system-prompt constant; the node increments each add theirs.
+SYSTEM_PROMPT_PINS: tuple[PromptPin, ...] = (
+    PromptPin(
+        "TRANSCRIPT_PARSER_SYSTEM",
+        TRANSCRIPT_PARSER_SYSTEM,
+        "transcript-parser-v1",
+        "63b51c1e7fac49bccbc0d425b9f7fc379fa36192b9e1f36e89f7615d3dba89b9",
+    ),
+)
 
 
 @pytest.mark.parametrize("pin", SYSTEM_PROMPT_PINS, ids=lambda pin: pin.constant_name)

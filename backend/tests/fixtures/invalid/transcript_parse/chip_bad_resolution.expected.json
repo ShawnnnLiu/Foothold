@@ -1,0 +1,6 @@
+{
+  "error_substrings": [
+    "resolution",
+    "Input should be 'exact' or 'fuzzy_match'"
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "courses": [
+    {
+      "course_code": "MATH 1A",
+      "title": "Calculus\u0007I",
+      "units": 5.0,
+      "term": "Fall 2024"
+    }
+  ]
+}
