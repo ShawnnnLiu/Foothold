@@ -38,6 +38,7 @@ The `TriageBucket` contract (`docs/specs/reason_codes.schema.md`) has four value
 | `still_owed` | none (chalk fill) | up-arrow | STILL NEEDED | "route ahead" style: outline-only tile, 2px dashed slate border, no hold color, echoing the elevation chart's dashed final step |
 
 Plain-language amendment (2026-08-03), user-requested: display copy avoids transfer-office jargon; internal identifiers (`TriageBucket` values, route names, component names) are unchanged.
+The binding rules and the full canonical-string table live in `docs/design/PLAIN_LANGUAGE.md`; this amendment records only the label decisions.
 
 - The `no_articulation` label is WON'T TRANSFER (was NO ARTICULATION).
 - The `still_owed` label is STILL NEEDED (was STILL OWED), with the row subtitle "LEFT TO TAKE FOR THIS MAJOR" (was "ROUTE AHEAD").
