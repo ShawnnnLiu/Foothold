@@ -31,12 +31,15 @@ const SIDEBAR_SHEEN_DELAYS = [0.6, 2.3, 1.1, 3.4, 1.9, 4.1];
 const THEATER_SWEEP_DURATIONS = [1.2, 1.15, 1.45, 1.25, 1.5, 1.3];
 const THEATER_SWEEP_DELAYS = [0.25, 0.62, 1.08, 1.55, 1.98, 2.45];
 
+// The landing variant is the marketing page's stat-band wall: the export's
+// 120x24 steps on 24px offsets with the same fixed sheen-loop constants, and
+// NEVER the chance events - the PRNG carve-out is the triage sidebar only.
 export default function WallChart({
   steps,
   variant,
 }: {
   steps: WallStep[];
-  variant: "sidebar" | "theater";
+  variant: "sidebar" | "theater" | "landing";
 }) {
   const wallRef = useRef<HTMLDivElement>(null);
 
@@ -123,7 +126,13 @@ export default function WallChart({
                   animationDuration: `0.35s, ${SIDEBAR_SHEEN_DURATIONS[i % SIDEBAR_SHEEN_DURATIONS.length]}s`,
                   animationDelay: `${(0.1 + 0.2 * i).toFixed(1)}s, ${SIDEBAR_SHEEN_DELAYS[i % SIDEBAR_SHEEN_DELAYS.length]}s`,
                 }
-              : {
+              : variant === "landing"
+                ? {
+                    marginLeft: 24 * i,
+                    animationDuration: `0s, ${SIDEBAR_SHEEN_DURATIONS[i % SIDEBAR_SHEEN_DURATIONS.length]}s`,
+                    animationDelay: `0s, ${SIDEBAR_SHEEN_DELAYS[i % SIDEBAR_SHEEN_DELAYS.length]}s`,
+                  }
+                : {
                   width: THEATER_WIDTHS[i % THEATER_WIDTHS.length],
                   height: THEATER_HEIGHTS[i % THEATER_HEIGHTS.length],
                   animationDuration: `0.45s, ${THEATER_SWEEP_DURATIONS[i % THEATER_SWEEP_DURATIONS.length]}s`,

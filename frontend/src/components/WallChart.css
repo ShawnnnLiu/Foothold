@@ -85,6 +85,25 @@
   animation-fill-mode: both;
 }
 
+/* The marketing landing's stat-band wall: the export's step geometry, chalk
+   borders like the sidebar (it also sits on slate). No chance events ever. */
+.wall--landing {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 5px;
+}
+
+.wall--landing .wall__step {
+  width: 120px;
+  height: 24px;
+  border-radius: 2px;
+  box-sizing: border-box;
+  transform-origin: left;
+  animation-name: fh-stepin;
+  animation-duration: 0s;
+  animation-fill-mode: both;
+}
+
 .wall--theater {
   display: flex;
   align-items: flex-end;
@@ -117,7 +136,8 @@
     var(--hold-teal);
 }
 
-.wall--sidebar .wall__step--secure {
+.wall--sidebar .wall__step--secure,
+.wall--landing .wall__step--secure {
   border-color: var(--chalk);
   background:
     linear-gradient(
@@ -149,7 +169,8 @@
     var(--chalk);
 }
 
-.wall--sidebar .wall__step--reach {
+.wall--sidebar .wall__step--reach,
+.wall--landing .wall__step--reach {
   background:
     linear-gradient(
         105deg,
@@ -168,7 +189,9 @@
    sidebar sheen loops forever; the theater sweep fires once. */
 @media (prefers-reduced-motion: no-preference) {
   .wall--sidebar .wall__step--secure,
-  .wall--sidebar .wall__step--reach {
+  .wall--sidebar .wall__step--reach,
+  .wall--landing .wall__step--secure,
+  .wall--landing .wall__step--reach {
     animation-name: fh-stepin, fh-wallsheen;
     animation-timing-function: ease, ease-in-out;
     animation-fill-mode: both, none;
@@ -189,6 +212,7 @@
   background: none;
 }
 
-.wall--sidebar .wall__step--owed {
+.wall--sidebar .wall__step--owed,
+.wall--landing .wall__step--owed {
   border-color: rgba(243, 241, 236, 0.8);
 }

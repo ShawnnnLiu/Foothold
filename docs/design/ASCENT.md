@@ -101,6 +101,19 @@ Third amendment (2026-08-03), user-requested at the pillar-animation parity pass
   This is the sole PRNG exception, carved out in the `CLAUDE.md` determinism axiom by explicit user decision: the randomness is presentation-only ambience, never layout, view-model content, or workflow state, and the loop is skipped under `prefers-reduced-motion`.
 - Foil buttons are unaffected: their sheen stays pointer-driven only, plus the Rainbow finish's fixed keyframe drift.
 
+## Marketing landing page (amendment, 2026-08-04)
+
+The landing screen is now the marketing page from `docs/design/triage-board/Foothold Landing.dc.html`; the route pickers (and the demo roll button) moved unchanged to the Picker screen, which every "Check my credits" placement opens.
+The export predates the plain-language pass, so its copy is superseded by `PLAIN_LANGUAGE.md` and the shipped code strings; layout, spacing, type, and color follow the export.
+
+- Landing-only surface exception: the landing page keeps the export's own surface language - diagonal clip-path bands, soft blur shadows, 14px card radii, white and off-white grounds, and pill-shaped buttons.
+  App screens keep the flat chalk/slate rules above; this exception does not extend past the landing page.
+- The landing CTA (one of the three foil buttons) renders in two placements on the page, the hero and the final CTA, in the export's pill shape.
+  The finish stays Gold with Prism lines and the pointer-driven sheen; the export's configurable Rose gold default is overridden by the fixed-Gold rule.
+- The stat-band wall copies the export's fixed per-step sheen-loop constants; the PRNG chance events remain the triage sidebar's sole carve-out and never run on the landing page.
+- The stat-band wall's within-reach steps use the shipped chalk-fill, amber-border treatment (frontend doc-00 rule 3), not the export's chrome gradient, matching every other wall.
+- The scroll fade-in and the hero's Evergreen gradient drift are fixed IntersectionObserver/CSS-keyframe behavior - deterministic, no PRNG - and are disabled under `prefers-reduced-motion`.
+
 ## Citations
 
 Every finding's citation (agreement key, articulation position, year) is always rendered, per the citation axiom in `CLAUDE.md`.

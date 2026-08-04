@@ -32,9 +32,14 @@ Change them only deliberately, and update this table plus the pinned tests when 
 
 | Surface | Copy | Lives in |
 | --- | --- | --- |
-| Landing tagline | "Foothold checks every course against the official transfer agreement between your two schools - and every verdict cites the exact line it came from." | `frontend/src/screens/Landing.tsx` |
-| Landing provenance | "Powered by ASSIST.org, California's official transfer database" | `frontend/src/screens/Landing.tsx` |
-| Landing CTA | "Check my credits →" | `frontend/src/screens/Landing.tsx` |
+| Landing tagline | "Foothold checks every course against the official transfer agreement between your two schools - and every verdict cites the exact line it came from." | `frontend/src/lib/landing.ts`, `frontend/src/screens/Picker.tsx` |
+| Landing provenance | "Powered by ASSIST.org, California's official transfer database" | `frontend/src/lib/landing.ts`, `frontend/src/screens/Picker.tsx` |
+| Landing CTA | "Check my credits →" | `frontend/src/lib/landing.ts`, `frontend/src/screens/Picker.tsx` |
+| Landing badge + footer tagline | "Course checks for California transfers" | `frontend/src/lib/landing.ts` |
+| Landing method headline + card foot | "The agreement decides - not the AI." | `frontend/src/lib/landing.ts` |
+| Landing receipt header lead | "The official agreement · {route}" | `frontend/src/lib/landing.ts` |
+| Landing wall caption suffixes | "{honest count} before the check." · "{honest count} - if you fight the flags." | `frontend/src/lib/landing.ts` |
+| Landing savings kicker | "Save money" | `frontend/src/lib/landing.ts` |
 | Entry CTA | "See what transfers →" | `frontend/src/screens/Entry.tsx` |
 | Board tabs | YOUR CREDITS · SAVE MONEY | `frontend/src/screens/Triage.tsx` |
 | Verdict labels | TRANSFERS CLEAN · AT RISK · WON'T TRANSFER · STILL NEEDED | `frontend/src/screens/Triage.tsx`, table in `ASCENT.md` |

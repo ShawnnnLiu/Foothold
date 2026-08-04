@@ -8,6 +8,9 @@ import "./FoilButton.css";
 // idle-flash loop is dropped entirely. Disabled renders the flat treatment.
 // Second amendment (2026-08-03): the landing demo button renders the Rainbow
 // finish; `finish` is fixed per call site, still never switched at runtime.
+// Landing amendment (2026-08-04): the marketing landing renders the landing
+// CTA as the export's pill shape (borderless, 999px radius, soft shadow),
+// still Gold with the pointer-driven sheen; app screens keep the tile shape.
 export default function FoilButton({
   children,
   onClick,
@@ -15,6 +18,7 @@ export default function FoilButton({
   frame = "slate",
   size = "md",
   finish = "gold",
+  shape = "tile",
   title,
 }: {
   children: string;
@@ -23,6 +27,7 @@ export default function FoilButton({
   frame?: "slate" | "chalk";
   size?: "lg" | "md" | "sm";
   finish?: "gold" | "rainbow";
+  shape?: "tile" | "pill";
   title?: string;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
@@ -66,7 +71,7 @@ export default function FoilButton({
   return (
     <button
       ref={ref}
-      className={`foil foil--${size} foil--${frame} foil--${finish}`}
+      className={`foil foil--${size} foil--${frame} foil--${finish} foil--${shape}`}
       onClick={onClick}
       disabled={disabled}
       title={title}

@@ -7,13 +7,15 @@ import type { DemoStart } from "./lib/demo";
 import type { RouteContext } from "./lib/route";
 import Entry from "./screens/Entry";
 import Landing from "./screens/Landing";
+import Picker from "./screens/Picker";
 import Theater from "./screens/Theater";
 import Triage from "./screens/Triage";
 
 // The doc-03 app shell: no router, a screen state machine exactly like the
-// prototype. Deep links are out of scope for v1; every visit starts at
-// landing.
-type Screen = "landing" | "entry" | "theater" | "triage";
+// prototype. Deep links are out of scope for v1; every visit starts at the
+// marketing landing page, and every "Check my credits" enters the picker
+// (the export's prototype link).
+type Screen = "landing" | "picker" | "entry" | "theater" | "triage";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("landing");
@@ -63,9 +65,12 @@ export default function App() {
   }, [route, chipState]);
 
   const showTriage = useCallback(() => setScreen("triage"), []);
-  const goLanding = () => setScreen("landing");
+  const goPicker = () => setScreen("picker");
   const goEntry = () => setScreen("entry");
 
+  if (screen === "picker") {
+    return <Picker onStart={startRoute} onDemo={startDemo} />;
+  }
   if (screen === "entry" && route) {
     return (
       <Entry
@@ -74,7 +79,7 @@ export default function App() {
         setChipState={setChipState}
         banner={entryError}
         onRetryBanner={evaluate}
-        onBack={goLanding}
+        onBack={goPicker}
         onEvaluate={evaluate}
       />
     );
@@ -88,9 +93,9 @@ export default function App() {
         route={route}
         evaluation={evaluation}
         onEditCourses={goEntry}
-        onChangeRoute={goLanding}
+        onChangeRoute={goPicker}
       />
     );
   }
-  return <Landing onStart={startRoute} onDemo={startDemo} />;
+  return <Landing onEnter={goPicker} />;
 }
