@@ -3,7 +3,13 @@ import { describe, expect, it } from "vitest";
 import type { Evaluation } from "./api";
 import boardFixture from "./__fixtures__/board.demo.json";
 import evaluationFixture from "./__fixtures__/evaluation.demo.json";
-import { buildTriageBoard, studentTitleMap, theaterLines, wallSteps } from "./evaluation";
+import {
+  buildTriageBoard,
+  distinctCourseCount,
+  studentTitleMap,
+  theaterLines,
+  wallSteps,
+} from "./evaluation";
 import type { TriageHeader } from "./evaluation";
 
 const demoEvaluation = evaluationFixture as unknown as Evaluation;
@@ -31,6 +37,28 @@ describe("buildTriageBoard", () => {
     expect(board.still_owed).toStrictEqual(
       demoEvaluation.findings.filter((finding) => finding.bucket === "still_owed"),
     );
+  });
+});
+
+describe("distinctCourseCount", () => {
+  it("counts a course once across its per-line and double-count findings", () => {
+    const first = demoEvaluation.findings.find((finding) => finding.bucket === "at_risk")
+      ?? demoEvaluation.findings[0]!;
+    const findings = [
+      { ...first, student_course_codes: ["KNES 11"] },
+      { ...first, student_course_codes: ["KNES 11"] },
+      { ...first, code: "double_count_risk" as const, student_course_codes: ["KNES 11"] },
+      { ...first, student_course_codes: ["KNES 20"] },
+    ];
+    expect(distinctCourseCount(findings)).toBe(2);
+  });
+
+  it("counts every code of a multi-course finding and none for an empty column", () => {
+    const first = demoEvaluation.findings[0]!;
+    expect(distinctCourseCount([{ ...first, student_course_codes: ["PHYS 4A", "PHYS 4B"] }])).toBe(
+      2,
+    );
+    expect(distinctCourseCount([])).toBe(0);
   });
 });
 

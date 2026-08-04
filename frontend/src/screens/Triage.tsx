@@ -10,7 +10,12 @@ import WallChart from "../components/WallChart";
 import Wordmark from "../components/Wordmark";
 import type { ArbitrageResponse, Evaluation } from "../lib/api";
 import { errorText, fetchArbitrage } from "../lib/client";
-import { buildTriageBoard, studentTitleMap, wallSteps } from "../lib/evaluation";
+import {
+  buildTriageBoard,
+  distinctCourseCount,
+  studentTitleMap,
+  wallSteps,
+} from "../lib/evaluation";
 import { countLine, formatDollars, formatUnits, wallCaption } from "../lib/format";
 import type { RouteContext } from "../lib/route";
 
@@ -198,7 +203,10 @@ export default function Triage({
               <HoldTile bucket="transfers_clean" size={30} frame="slate" shadow />
               <span className="triage__rowtitle">TRANSFERS CLEAN</span>
               <span className="triage__rowcount">
-                {countLine(board.columns.transfers_clean.length, board.header.clean_units)}
+                {countLine(
+                  distinctCourseCount(board.columns.transfers_clean),
+                  board.header.clean_units,
+                )}
               </span>
             </div>
             <div className="triage__stack">
@@ -222,7 +230,10 @@ export default function Triage({
               <HoldTile bucket="at_risk" size={30} frame="slate" shadow />
               <span className="triage__rowtitle">AT RISK</span>
               <span className="triage__rowcount">
-                {countLine(board.columns.at_risk.length, board.header.at_risk_units)}
+                {countLine(
+                  distinctCourseCount(board.columns.at_risk),
+                  board.header.at_risk_units,
+                )}
                 {board.header.at_risk_dollars !== null &&
                   ` · ${formatDollars(board.header.at_risk_dollars)} AT STAKE`}
               </span>
@@ -250,7 +261,7 @@ export default function Triage({
               <span className="triage__rowtitle">WON'T TRANSFER</span>
               <span className="triage__rowcount">
                 {countLine(
-                  board.columns.no_articulation.length,
+                  distinctCourseCount(board.columns.no_articulation),
                   board.header.no_articulation_units,
                 )}
                 {board.header.no_articulation_dollars !== null &&

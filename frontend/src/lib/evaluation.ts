@@ -66,6 +66,19 @@ export function buildTriageBoard(evaluation: Evaluation): TriageBoard {
   };
 }
 
+// A column's honest course count. Findings are per-agreement-line, so one
+// sending course matched by several lines (plus its double-count finding)
+// appears on several cards; the row header must still count it once.
+export function distinctCourseCount(findings: Finding[]): number {
+  const codes = new Set<string>();
+  for (const finding of findings) {
+    for (const code of finding.student_course_codes) {
+      codes.add(code);
+    }
+  }
+  return codes.size;
+}
+
 // The four evaluation-theater check lines, filled ONLY from the real response
 // (doc 03): resolved counts the courses the evaluator reasoned about, total
 // adds the unresolved findings, so the two always sum to what was submitted.
