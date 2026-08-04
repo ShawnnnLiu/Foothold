@@ -48,7 +48,7 @@ describe("citationLabel", () => {
   it("labels a major-agreement citation", () => {
     expect(
       citationLabel({ assist_key: MAJOR_KEY, position: 2, year_label: "2025-2026" }, MAJOR_KEY),
-    ).toBe("MAJOR AGREEMENT 2025-2026 - ARTICULATION #2");
+    ).toBe("MAJOR AGREEMENT 2025-2026 - AGREEMENT LINE #2");
   });
 
   it("labels a department-agreement citation", () => {
@@ -57,7 +57,7 @@ describe("citationLabel", () => {
         { assist_key: "76/113/to/7/Department/3276", position: 0, year_label: "2025-2026" },
         MAJOR_KEY,
       ),
-    ).toBe("DEPT. AGREEMENT 2025-2026 - ARTICULATION #0");
+    ).toBe("DEPT. AGREEMENT 2025-2026 - AGREEMENT LINE #0");
   });
 });
 

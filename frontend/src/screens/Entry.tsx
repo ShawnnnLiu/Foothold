@@ -173,7 +173,7 @@ export default function Entry({
           <span className="entry__count">{chipState.chips.length} COURSES ADDED</span>
           <div className="entry__cta">
             <FoilButton size="md" disabled={chipState.chips.length === 0} onClick={onEvaluate}>
-              Evaluate against ASSIST →
+              See what transfers →
             </FoilButton>
           </div>
         </div>

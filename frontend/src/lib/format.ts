@@ -38,7 +38,7 @@ export function countLine(count: number, units: number): string {
 // for future grouping); the branch itself is on the citation's own key.
 export function citationLabel(citation: Citation, _majorKey: string): string {
   const kind = citation.assist_key.includes("/Major/") ? "MAJOR AGREEMENT" : "DEPT. AGREEMENT";
-  return `${kind} ${citation.year_label} - ARTICULATION #${citation.position}`;
+  return `${kind} ${citation.year_label} - AGREEMENT LINE #${citation.position}`;
 }
 
 // The six locked reason tags; codes outside this map (transfers_clean,

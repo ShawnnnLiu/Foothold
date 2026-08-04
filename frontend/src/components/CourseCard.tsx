@@ -94,7 +94,7 @@ export default function CourseCard({
             <CitationTag citation={finding.citation} majorKey={majorKey} bucket={finding.bucket} />
           ) : (
             <span className={`citation citation--${finding.bucket}`}>
-              {finding.detail ?? "No published articulation applies this course to this major"}
+              {finding.detail ?? "No transfer match published for this course in this major"}
             </span>
           )}
         </div>

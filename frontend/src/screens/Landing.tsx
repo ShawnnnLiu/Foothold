@@ -119,8 +119,8 @@ export default function Landing({
       <div className="landing__head">
         <h1>Don't lose the credits you already earned.</h1>
         <p>
-          Pick your route. Foothold triages every course against the official ASSIST articulation
-          agreement - and every verdict cites the exact agreement line it came from.
+          Pick your route. Foothold checks every course against the official transfer agreement
+          between your two schools - and every verdict cites the exact line it came from.
         </p>
       </div>
       <div className="landing__pickers">
@@ -201,7 +201,8 @@ export default function Landing({
           <span className="landing__gaoref">(GAO-17-574)</span>
         </div>
         <div className="landing__scale">
-          Every California community college on day one
+          Powered by ASSIST.org, California's official transfer database · Every California
+          community college on day one
           {yearLabel ? ` · Agreement year ${yearLabel}` : ""}
         </div>
       </div>
