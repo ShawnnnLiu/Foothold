@@ -120,6 +120,43 @@
   text-shadow: 0 1px 0 rgba(255, 245, 255, 0.55);
 }
 
+/* The landing pill shape (2026-08-04 amendment): the export's borderless
+   999px-radius CTA with its soft blur shadow, sentence-case label, and the
+   same Gold gradient/sheen structure. Landing page only. */
+.foil--pill {
+  border: 0;
+  border-radius: 999px;
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 800;
+  box-shadow:
+    0 4px 14px rgba(10, 30, 26, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1px rgba(255, 244, 214, 0.5),
+    inset 0 -3px 5px rgba(80, 40, 0, 0.35);
+}
+
+.foil--pill.foil--md {
+  font-size: 15px;
+  padding: 14px 28px;
+}
+
+.foil--pill.foil--lg {
+  font-size: 15.5px;
+  padding: 15px 32px;
+  box-shadow:
+    0 4px 14px rgba(39, 43, 49, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1px rgba(255, 244, 214, 0.5),
+    inset 0 -3px 5px rgba(80, 40, 0, 0.35);
+}
+
+.foil--pill .foil__sheen,
+.foil--pill .foil__glare,
+.foil--pill .foil__tex {
+  border-radius: 999px;
+}
+
 .foil__sheen,
 .foil__glare,
 .foil__tex {
