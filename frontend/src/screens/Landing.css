@@ -19,6 +19,7 @@
 }
 
 .landing {
+  --fh-diag: 110px;
   background: #fff;
   color: var(--slate);
   overflow-x: hidden;
@@ -37,7 +38,7 @@
 
 .landing__hero {
   position: relative;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 110px), 0 100%);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--fh-diag)), 0 100%);
   padding-bottom: 230px;
 }
 
@@ -184,6 +185,7 @@
 
 .landing__ctas {
   display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   justify-content: center;
   margin-top: 30px;
@@ -233,6 +235,11 @@
 }
 
 .landing__mockroute {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-weight: 500;
   font-size: 10.5px;
   letter-spacing: 0.08em;
@@ -268,6 +275,12 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+/* Landing.tsx sets --fh-stagger to the row's 28px-per-index offset; keeping
+   the margin in CSS lets the narrow-viewport rules flatten it. */
+.landing__mockrow {
+  margin-left: var(--fh-stagger, 0px);
 }
 
 .landing__mockhead {
@@ -566,7 +579,7 @@
 
 .landing__band {
   background: #f7f5f0;
-  clip-path: polygon(0 110px, 100% 0, 100% calc(100% - 110px), 0 100%);
+  clip-path: polygon(0 var(--fh-diag), 100% 0, 100% calc(100% - var(--fh-diag)), 0 100%);
   padding: 170px 0 190px;
 }
 
@@ -693,7 +706,7 @@
 .landing__stakes {
   background: var(--slate);
   color: var(--chalk);
-  clip-path: polygon(0 110px, 100% 0, 100% calc(100% - 110px), 0 100%);
+  clip-path: polygon(0 var(--fh-diag), 100% 0, 100% calc(100% - var(--fh-diag)), 0 100%);
   padding: 180px 0 200px;
 }
 
@@ -800,7 +813,7 @@
 
 .landing__final {
   background: #f7f5f0;
-  clip-path: polygon(0 110px, 100% 0, 100% 100%, 0 100%);
+  clip-path: polygon(0 var(--fh-diag), 100% 0, 100% 100%, 0 100%);
   padding-top: 170px;
 }
 
@@ -882,4 +895,153 @@
 .landing__provenance {
   font-size: 11px;
   color: rgba(39, 43, 49, 0.4);
+}
+
+/* ============ Responsive ============
+
+   The export ships desktop-only; these max-width tiers scale the same design
+   down without touching desktop rendering. Copy always precedes its panel
+   once a feature grid collapses, matching the reading order of the two
+   sections that already lead with copy. */
+
+/* Tablet: two-column grids collapse. */
+@media (max-width: 960px) {
+  .landing__feature,
+  .landing__stakesgrid {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
+
+  .landing__feature--inband .landing__panel--card,
+  .landing__panel--stack {
+    order: 1;
+  }
+
+  .landing__body--dark {
+    max-width: none;
+  }
+}
+
+/* Phone: shallower diagonals, tighter rhythm, scaled display type. */
+@media (max-width: 720px) {
+  .landing {
+    --fh-diag: 56px;
+  }
+
+  .landing__navlink {
+    display: none;
+  }
+
+  .landing__herobody,
+  .landing__mockwrap,
+  .landing__proof,
+  .landing__feature,
+  .landing__feature--inband,
+  .landing__stakesgrid,
+  .landing__finalcopy,
+  .landing__footerrow {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+
+  .landing__herocopy {
+    margin-top: 48px;
+  }
+
+  .landing__hero {
+    padding-bottom: 150px;
+  }
+
+  .landing__mockwrap {
+    margin-top: -100px;
+  }
+
+  .landing__headline {
+    font-size: 44px;
+  }
+
+  .landing__tagline {
+    font-size: 16px;
+  }
+
+  .landing__proof {
+    padding-top: 56px;
+  }
+
+  .landing__feature {
+    padding-top: 72px;
+    padding-bottom: 72px;
+  }
+
+  .landing__feature--inband {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .landing__band {
+    padding: 110px 0 130px;
+  }
+
+  .landing__stakes {
+    padding: 120px 0 140px;
+  }
+
+  .landing__final {
+    padding-top: 110px;
+  }
+
+  .landing__h2 {
+    font-size: 30px;
+  }
+
+  .landing__h2--stat {
+    font-size: 26px;
+  }
+
+  .landing__h2--final {
+    font-size: 34px;
+  }
+
+  .landing__stat {
+    font-size: 88px;
+  }
+}
+
+/* Narrow phone: the mockup flattens to a single rail. */
+@media (max-width: 560px) {
+  .landing__mockrow {
+    margin-left: 0;
+  }
+
+  .landing__mockboard {
+    padding: 16px 14px 18px;
+  }
+
+  .landing__mockbar {
+    gap: 10px;
+    padding: 10px 14px;
+  }
+
+  .landing__mockgrid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing__mockcell:first-child {
+    border-right: 0;
+    border-bottom: var(--border);
+  }
+}
+
+@media (max-width: 440px) {
+  .landing__headline {
+    font-size: 36px;
+  }
+
+  .landing__stat {
+    font-size: 68px;
+  }
+
+  .landing__h2--final {
+    font-size: 30px;
+  }
 }

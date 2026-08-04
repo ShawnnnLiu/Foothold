@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type CSSProperties } from "react";
 
 import CitationTag from "../components/CitationTag";
 import FoilButton from "../components/FoilButton";
@@ -151,7 +151,11 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
           </div>
           <div className="landing__mockboard">
             {MOCKUP.rows.map((row, i) => (
-              <div key={row.bucket} className="landing__mockrow" style={{ marginLeft: 28 * i }}>
+              <div
+                key={row.bucket}
+                className="landing__mockrow"
+                style={{ "--fh-stagger": `${28 * i}px` } as CSSProperties}
+              >
                 <div className="landing__mockhead">
                   <HoldTile bucket={row.bucket} size={20} frame="slate" shadow />
                   <span className="landing__mocklabel">{row.label}</span>
