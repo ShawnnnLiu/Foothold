@@ -35,11 +35,12 @@ The `TriageBucket` contract (`docs/specs/reason_codes.schema.md`) has four value
 | `transfers_clean` | teal `#0E8A6D` | check | TRANSFERS CLEAN | filled tile, solid 2px slate border |
 | `at_risk` | amber `#D97706` | ! | AT RISK | filled tile, solid 2px slate border; the row juts out with an amber offset shadow |
 | `no_articulation` | red `#B3372E` | x | WON'T TRANSFER | filled tile, solid 2px slate border |
-| `still_owed` | none (chalk fill) | up-arrow | STILL OWED | "route ahead" style: outline-only tile, 2px dashed slate border, no hold color, echoing the elevation chart's dashed final step |
+| `still_owed` | none (chalk fill) | up-arrow | STILL NEEDED | "route ahead" style: outline-only tile, 2px dashed slate border, no hold color, echoing the elevation chart's dashed final step |
 
 Plain-language amendment (2026-08-03), user-requested: display copy avoids transfer-office jargon; internal identifiers (`TriageBucket` values, route names, component names) are unchanged.
 
 - The `no_articulation` label is WON'T TRANSFER (was NO ARTICULATION).
+- The `still_owed` label is STILL NEEDED (was STILL OWED), with the row subtitle "LEFT TO TAKE FOR THIS MAJOR" (was "ROUTE AHEAD").
 - The board tabs are YOUR CREDITS and SAVE MONEY (were TRIAGE BOARD and ARBITRAGE).
 - The evaluate CTA is "See what transfers" (was "Evaluate against ASSIST").
 - Citation tags read `AGREEMENT LINE #N` (was `ARTICULATION #N`).
