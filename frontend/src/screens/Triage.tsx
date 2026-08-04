@@ -134,7 +134,7 @@ export default function Triage({
               <div className="triage__totalunits">
                 {formatUnits(roundTenth(owed))} <span>UNITS</span>
               </div>
-              <div className="triage__totallabel">STILL OWED</div>
+              <div className="triage__totallabel">STILL NEEDED</div>
             </div>
           </div>
         </div>
@@ -276,9 +276,9 @@ export default function Triage({
           >
             <div className="triage__rowhead">
               <HoldTile bucket="still_owed" size={30} frame="slate" />
-              <span className="triage__rowtitle">STILL OWED</span>
+              <span className="triage__rowtitle">STILL NEEDED</span>
               <span className="triage__rowcount">
-                ROUTE AHEAD · {formatUnits(board.header.still_owed_units)} UNITS
+                LEFT TO TAKE FOR THIS MAJOR · {formatUnits(board.header.still_owed_units)} UNITS
               </span>
             </div>
             <div className="triage__stack">
