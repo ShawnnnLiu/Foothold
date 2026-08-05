@@ -32,8 +32,8 @@ SYSTEM_PROMPT_PINS: tuple[PromptPin, ...] = (
     PromptPin(
         "PETITION_WRITER_SYSTEM",
         PETITION_WRITER_SYSTEM,
-        "petition-writer-v1",
-        "edfa3abe661d0b80db2ed1824b0224c82ea39c5092c15b1467bd704eeb8696ce",
+        "petition-writer-v2",
+        "5d8a611a65fcefc9310b150ceef8d39af97cf6cd19039c82503202fe3dcc96e8",
     ),
     PromptPin(
         "TRANSCRIPT_PARSER_SYSTEM",

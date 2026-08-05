@@ -130,6 +130,12 @@ Hard rules:
 Return a JSON object with exactly one key, "letter_text", holding the complete letter.
 ```
 
+(Amended 2026-08-04: superseded by `petition-writer-v2` after the first live run.
+The v1 rule "mention its agreement key and year label once" per finding made the letter repeat the raw ASSIST key, a GUID path a counselor cannot act on from a first glance, in every body paragraph.
+v2 names the agreement in plain language in body paragraphs, demotes each distinct raw key to exactly one closing record reference, merges findings that share student courses into a single paragraph, and adds grounded persuasion rules: receiving course titles beside codes, advisements restated in plain language, one concrete request per paragraph, an offer of official course outlines of record, numerals for unit totals, and concision.
+The citation validator is unchanged; it never required a key per paragraph, only that any key-shaped token be in the bundle vocabulary.
+The authoritative v2 text is the `PETITION_WRITER_SYSTEM` constant in `llm/petition_writer.py`, pinned in `backend/tests/test_prompt_pins.py`.)
+
 User prompt, built by `build_user_prompt(bundle)`, locked template:
 
 ```

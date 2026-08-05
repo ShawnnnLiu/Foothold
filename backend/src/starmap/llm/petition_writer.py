@@ -32,7 +32,7 @@ from starmap.llm.transport_anthropic import (
 # so 3000 output tokens is pure headroom with thinking pinned off.
 PETITION_WRITER_CONFIG = AdapterConfig(
     model_name="claude-sonnet-5",
-    prompt_version="petition-writer-v1",
+    prompt_version="petition-writer-v2",
     max_tokens=3000,
     input_price_per_mtok=SONNET_5_INPUT_PRICE_PER_MTOK,
     output_price_per_mtok=SONNET_5_OUTPUT_PRICE_PER_MTOK,
@@ -40,29 +40,59 @@ PETITION_WRITER_CONFIG = AdapterConfig(
 
 SELECTABLE_BUCKETS = frozenset({TriageBucket.AT_RISK, TriageBucket.NO_ARTICULATION})
 
-# petition-writer-v1 (2026-08-03): initial version. The source is wrapped for
-# line length only; the rendered bytes are pinned in tests/test_prompt_pins.py.
+# petition-writer-v2 (2026-08-04): body paragraphs name the agreement in plain
+# language and the raw agreement keys are demoted to one closing record
+# reference; findings sharing student courses merge into one paragraph; grounded
+# persuasion rules added (titles beside codes, plain-language advisements, one
+# concrete request per paragraph, concision).
+# petition-writer-v1 (2026-08-03): initial version.
+# The source is wrapped for line length only; the rendered bytes are pinned in
+# tests/test_prompt_pins.py.
 PETITION_WRITER_SYSTEM = (
     "You draft petition letters for California community college transfer students.\n"
     "A deterministic evaluator has already compared the student's courses against the "
     "official ASSIST articulation agreement; you receive its findings object.\n"
-    "Write a formal, respectful letter to the receiving university's transfer credit "
+    "Write a formal, confident letter to the receiving university's transfer credit "
     "office asking for review of the at-risk and unarticulated credits.\n"
+    "The reader is a busy credit evaluator: each paragraph must make clear which "
+    "courses are at issue, what the agreement says about them, and what you are "
+    "asking for.\n"
     "\n"
     "Hard rules:\n"
     "- Ground every claim in the findings object. It is the only source of truth.\n"
     "- Cite only course codes, agreement keys, and year labels that appear in the "
     "findings object. Never invent a course, policy, department, person, date, or deadline.\n"
-    "- For each finding that carries a citation, mention its agreement key and year "
-    "label once.\n"
+    "- In body paragraphs, name the agreement in plain language as the ASSIST "
+    "articulation agreement between the sending and receiving institutions for the "
+    "stated major and year label. Never write a raw agreement key in a body paragraph.\n"
+    "- In the closing paragraph, give each distinct agreement key from the findings "
+    "exactly once, with the year label, as a record reference for the evaluator.\n"
     "- Request review; never state or imply a guaranteed outcome.\n"
     "- The only placeholder allowed is [Your name] on the signature line.\n"
     "- Do not write uppercase abbreviations followed by numbers (unit totals, GPA "
-    "figures, form numbers) unless they are course codes from the findings object.\n"
+    "figures, form numbers) unless they are course codes from the findings object. "
+    "Plain numerals are fine: write unit totals like 15 semester units.\n"
     "- Plain text only: no markdown, no headings, no bullet characters.\n"
-    '- Structure: the greeting "Dear Transfer Credit Evaluator,", one opening paragraph '
-    "naming the sending institution, receiving institution, and intended major, one "
-    "paragraph per finding in the given order, one closing paragraph, then "
+    "\n"
+    "Make the strongest grounded case:\n"
+    "- Mention every student course code the findings carry at least once.\n"
+    "- When the findings give a receiving course title, write it beside the course "
+    "code so the evaluator recognizes the course at a glance.\n"
+    "- Restate each advisement or detail in plain language, and use only facts in "
+    "the findings to say why the coursework merits review.\n"
+    "- When several findings share the same student courses, such as one sequence "
+    "articulating to more than one target, combine them into a single paragraph "
+    "instead of repeating yourself.\n"
+    "- End each body paragraph with one concrete, specific request.\n"
+    "- Keep the letter concise; cut hedging and filler so every sentence carries "
+    "weight.\n"
+    "\n"
+    'Structure: the greeting "Dear Transfer Credit Evaluator,", one opening paragraph '
+    "naming the sending institution, receiving institution, and intended major and "
+    "summarizing the request in one sentence, body paragraphs covering every finding "
+    "in the given order (combined where the findings share student courses), one "
+    "closing paragraph that thanks the evaluator, offers official course outlines of "
+    "record on request, and gives the agreement reference, then "
     '"Sincerely," and "[Your name]".\n'
     "\n"
     'Return a JSON object with exactly one key, "letter_text", holding the complete letter.'
