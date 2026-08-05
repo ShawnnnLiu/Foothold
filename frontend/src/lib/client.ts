@@ -9,6 +9,8 @@ import type {
   EvaluationRequestBody,
   InstitutionRow,
   MajorRow,
+  PetitionPollResponse,
+  PetitionRequestBody,
 } from "./api";
 
 export class ApiError extends Error {
@@ -71,4 +73,19 @@ export function fetchEvaluation(evaluationId: string): Promise<Evaluation> {
 
 export function fetchArbitrage(evaluationId: string): Promise<ArbitrageResponse> {
   return request(`/api/arbitrage?evaluation_id=${encodeURIComponent(evaluationId)}`);
+}
+
+export function createPetition(
+  evaluationId: string,
+  body: PetitionRequestBody,
+): Promise<{ petition_id: string }> {
+  return request(`/api/evaluations/${encodeURIComponent(evaluationId)}/petition`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+export function fetchPetition(petitionId: string): Promise<PetitionPollResponse> {
+  return request(`/api/petitions/${encodeURIComponent(petitionId)}`);
 }

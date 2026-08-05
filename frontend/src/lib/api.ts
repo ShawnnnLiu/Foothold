@@ -146,3 +146,38 @@ export interface EvaluationRequestBody {
   major_key: string;
   courses: { course_code: string }[];
 }
+
+// Doc-F5 locked petition shapes.
+
+export type PetitionStatus = "pending" | "succeeded" | "failed";
+
+// One validator-confirmed citation: this exact course code appears in the
+// letter and belongs to the finding at this position.
+export interface PetitionCited {
+  course_code: string;
+  finding_position: number;
+}
+
+// `GET /api/petitions/{petition_id}` poll body. Invariants a consumer may
+// rely on:
+// - `succeeded` with `fallback: true` is the deterministic template letter
+//   after repair exhaustion; `reason_code` says why the LLM draft was
+//   discarded.
+// - `cited` lists every course code the citation validator confirmed in the
+//   letter; no other course codes exist in `letter_text`, so exact string
+//   matching client-side cannot invent a citation.
+export interface PetitionPollResponse {
+  status: PetitionStatus;
+  reason_code: string | null;
+  fallback: boolean;
+  letter_text: string | null;
+  cited: PetitionCited[];
+}
+
+// `POST /api/evaluations/{evaluation_id}/petition` body: indexes into the
+// stored evaluation's `findings` array (deterministic order, so positions
+// are stable identifiers); each must reference an `at_risk` or
+// `no_articulation` finding.
+export interface PetitionRequestBody {
+  finding_positions: number[];
+}

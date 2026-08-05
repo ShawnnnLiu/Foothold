@@ -81,6 +81,7 @@ A deliberate, bounded exception to the flat-surface rules above, confirmed by th
 
 - Exactly three buttons render as gradient "foil": the landing CTA (Check my credits), the evaluate CTA (See what transfers), and the draft-petition CTA (Draft petition letter).
 - The finish is fixed to Gold (`#FDEBBE #EDAD3F #CE8412 #A96606 #EBB856`, ink `#38220A`) with the Prism lines texture; there is no runtime finish switching.
+  (Since the Chrome-CTA amendment in the marketing-landing section below, the landing CTA placements render Chrome instead; the app-screen foil buttons stay Gold.)
 - The sheen is pointer-driven only: every sheen parameter is a pure function of cursor position relative to the button.
   The prototype's PRNG idle-flash loop is dropped entirely, per the determinism axiom (reinstated for the wall pillars only by the third amendment below; foil buttons never flash idle).
 - Every other surface stays flat chalk/slate; this exception does not extend to new buttons.
@@ -109,7 +110,8 @@ The export predates the plain-language pass, so its copy is superseded by `PLAIN
 - Landing-only surface exception: the landing page keeps the export's own surface language - diagonal clip-path bands, soft blur shadows, 14px card radii, white and off-white grounds, and pill-shaped buttons.
   App screens keep the flat chalk/slate rules above; this exception does not extend past the landing page.
 - The landing CTA (one of the three foil buttons) renders in two placements on the page, the hero and the final CTA, in the export's pill shape.
-  The finish stays Gold with Prism lines and the pointer-driven sheen; the export's configurable Rose gold default is overridden by the fixed-Gold rule.
+  Chrome-CTA amendment (2026-08-04, user-requested): both landing placements render the Chrome finish (`#FFFFFF #DEE6EE #A9B7C7 #7E8EA0 #EAF0F6`, ink `#1B242E`) with the same Prism lines texture and pointer-driven sheen.
+  App-screen foil buttons stay Gold, finishes remain fixed per call site, and the export's configurable Rose gold default stays overridden.
 - The stat-band wall copies the export's fixed per-step sheen-loop constants; the PRNG chance events remain the triage sidebar's sole carve-out and never run on the landing page.
 - The stat-band wall's within-reach steps use the shipped chalk-fill, amber-border treatment (frontend doc-00 rule 3), not the export's chrome gradient, matching every other wall.
 - The scroll fade-in and the hero's Evergreen gradient drift are fixed IntersectionObserver/CSS-keyframe behavior - deterministic, no PRNG - and are disabled under `prefers-reduced-motion`.

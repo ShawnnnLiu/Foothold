@@ -5,6 +5,7 @@ import CourseCard from "../components/CourseCard";
 import ErrorBanner from "../components/ErrorBanner";
 import FoilButton from "../components/FoilButton";
 import HoldTile from "../components/HoldTile";
+import PetitionDrawer from "../components/PetitionDrawer";
 import { useCountUp, roundTenth } from "../components/useCountUp";
 import WallChart from "../components/WallChart";
 import Wordmark from "../components/Wordmark";
@@ -17,6 +18,7 @@ import {
   wallSteps,
 } from "../lib/evaluation";
 import { countLine, formatDollars, formatUnits, wallCaption } from "../lib/format";
+import { petitionItems } from "../lib/petition";
 import type { RouteContext } from "../lib/route";
 
 import "./Triage.css";
@@ -47,6 +49,11 @@ export default function Triage({
   const steps = wallSteps(board.header);
   const [captionTop, captionBottom] = wallCaption(board.header);
   const majorKey = evaluation.major_key;
+
+  // The petition drawer opens over the board; it only has work to do when
+  // the evaluation holds at least one petitionable finding.
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const petitionable = petitionItems(evaluation).length > 0;
 
   // The arbitrage tab fetches on first activation and caches in component
   // state for the session (doc 04); the server ranking is rendered as-is.
@@ -147,8 +154,11 @@ export default function Triage({
           <FoilButton
             size="sm"
             frame="chalk"
-            disabled
-            title="Petition drafting arrives with the letter writer"
+            disabled={!petitionable}
+            title={
+              petitionable ? undefined : "Every credit transfers clean - nothing to petition"
+            }
+            onClick={() => setDrawerOpen(true)}
           >
             Draft petition letter
           </FoilButton>
@@ -307,6 +317,10 @@ export default function Triage({
         </div>
         )}
       </div>
+
+      {drawerOpen && (
+        <PetitionDrawer evaluation={evaluation} onClose={() => setDrawerOpen(false)} />
+      )}
     </div>
   );
 }

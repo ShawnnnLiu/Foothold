@@ -1,0 +1,10 @@
+{
+  "status": "succeeded",
+  "reason_code": null,
+  "fallback": false,
+  "letter_text": "To the Office of Admissions, UC San Diego:\n\nI am writing to petition for transfer credit for MATH 1C (Calculus III, 5.0 units), which articulates to MATH 20C under the 2025-2026 De Anza College - UC San Diego articulation agreement, articulation #2. MATH 1D, completing the series, is in progress this term.\n\nI also request individual review of CIS 22B (Intermediate Programming Methodologies in C++, 4.5 units), which has no published articulation to UC San Diego for this major under the 2025-2026 agreement.\n\nTranscript and course syllabi are attached. Thank you for your review.\nSincerely,\n[Your name]",
+  "cited": [
+    { "course_code": "MATH 1C", "finding_position": 14 },
+    { "course_code": "CIS 22B", "finding_position": 18 }
+  ]
+}
