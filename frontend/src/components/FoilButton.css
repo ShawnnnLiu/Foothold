@@ -120,6 +120,34 @@
   text-shadow: 0 1px 0 rgba(255, 245, 255, 0.55);
 }
 
+/* The Chrome finish (Chrome-CTA amendment, 2026-08-04): the prototype's
+   Chrome FOILS row, reserved for the landing CTA placements. Same metallic
+   structure and pointer-driven sheen; cool ink and neutral insets. */
+.foil--chrome {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #dee6ee 16%,
+    #a9b7c7 48%,
+    #7e8ea0 80%,
+    #eaf0f6 100%
+  );
+  color: #1b242e;
+  box-shadow:
+    5px 5px 0 var(--slate),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(238, 244, 250, 0.55),
+    inset 0 -3px 5px rgba(27, 36, 46, 0.35);
+}
+
+.foil--chrome .foil__sheen {
+  opacity: 0.4;
+}
+
+.foil--chrome .foil__label {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
 /* The landing pill shape (2026-08-04 amendment): the export's borderless
    999px-radius CTA with its soft blur shadow, sentence-case label, and the
    same Gold gradient/sheen structure. Landing page only. */
@@ -155,6 +183,24 @@
 .foil--pill .foil__glare,
 .foil--pill .foil__tex {
   border-radius: 999px;
+}
+
+/* Pill + Chrome: the pill's soft blur shadow with the neutral chrome insets
+   (declared after the pill rules so the cool tints win the cascade). */
+.foil--pill.foil--chrome {
+  box-shadow:
+    0 4px 14px rgba(10, 30, 26, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(238, 244, 250, 0.55),
+    inset 0 -3px 5px rgba(27, 36, 46, 0.35);
+}
+
+.foil--pill.foil--lg.foil--chrome {
+  box-shadow:
+    0 4px 14px rgba(39, 43, 49, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(238, 244, 250, 0.55),
+    inset 0 -3px 5px rgba(27, 36, 46, 0.35);
 }
 
 .foil__sheen,

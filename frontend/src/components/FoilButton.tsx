@@ -9,8 +9,10 @@ import "./FoilButton.css";
 // Second amendment (2026-08-03): the landing demo button renders the Rainbow
 // finish; `finish` is fixed per call site, still never switched at runtime.
 // Landing amendment (2026-08-04): the marketing landing renders the landing
-// CTA as the export's pill shape (borderless, 999px radius, soft shadow),
-// still Gold with the pointer-driven sheen; app screens keep the tile shape.
+// CTA as the export's pill shape (borderless, 999px radius, soft shadow)
+// with the pointer-driven sheen; app screens keep the tile shape.
+// Chrome-CTA amendment (2026-08-04): the landing CTA placements render the
+// Chrome finish; app-screen foil buttons stay Gold.
 export default function FoilButton({
   children,
   onClick,
@@ -26,7 +28,7 @@ export default function FoilButton({
   disabled?: boolean;
   frame?: "slate" | "chalk";
   size?: "lg" | "md" | "sm";
-  finish?: "gold" | "rainbow";
+  finish?: "gold" | "rainbow" | "chrome";
   shape?: "tile" | "pill";
   title?: string;
 }) {

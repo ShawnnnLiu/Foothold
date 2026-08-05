@@ -124,7 +124,7 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
             <h1 className="landing__headline">{HERO.headline}</h1>
             <p className="landing__tagline">{HERO.tagline}</p>
             <div className="landing__ctas">
-              <FoilButton size="md" shape="pill" onClick={onEnter}>
+              <FoilButton size="md" shape="pill" finish="chrome" onClick={onEnter}>
                 {HERO.cta}
               </FoilButton>
               <a className="landing__ghost" href="#method">
@@ -386,7 +386,7 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
           <h2 className="landing__h2 landing__h2--final">{FINAL_CTA.headline}</h2>
           <p className="landing__body landing__body--final">{FINAL_CTA.body}</p>
           <div className="landing__finalcta">
-            <FoilButton size="lg" shape="pill" onClick={onEnter}>
+            <FoilButton size="lg" shape="pill" finish="chrome" onClick={onEnter}>
               {FINAL_CTA.cta}
             </FoilButton>
           </div>
