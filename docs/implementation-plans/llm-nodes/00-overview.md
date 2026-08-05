@@ -69,7 +69,7 @@ These are decided once, here, and are not relitigated by executors.
    | | `PETITION_WRITER_CONFIG` | `TRANSCRIPT_PARSER_CONFIG` |
    | --- | --- | --- |
    | `model_name` | `"claude-sonnet-5"` | `"claude-sonnet-5"` |
-   | `prompt_version` | `"petition-writer-v1"` | `"transcript-parser-v1"` |
+   | `prompt_version` | `"petition-writer-v2"` (v1 at landing; bumped 2026-08-04 with the prompt amendment recorded in doc 01) | `"transcript-parser-v1"` |
    | `max_tokens` | `3000` | `8000` |
    | prices | the two `SONNET_5_*_PRICE_PER_MTOK` constants imported from `llm/transport_anthropic.py` | same |
    | everything else | `AdapterConfig` defaults (retries 2, repairs 2, timeout 300, backoff 1.0) | same |

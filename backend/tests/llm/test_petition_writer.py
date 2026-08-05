@@ -78,7 +78,7 @@ INVENTED_KEY_LETTER = VALID_LETTER + "\n\nSee agreement 999/999/to/999/Major/fab
 # goes unaddressed while every cited token stays inside the allowed vocabulary.
 UNADDRESSED_LETTER = render_template_letter(bundle_for([1, 2, 3, 4, 5, 6]))
 
-LAYER2_PINNED_SHA256 = "fee8307eade3242ad67745f25af39e0cd76fa2c0e54275f11110231d47038ea7"
+LAYER2_PINNED_SHA256 = "fd7971a14c9567ccf6cd38fac2e54b3c4856cef6594721864841ad301e2a985d"
 
 
 def run_node(harness: Harness, transport: FakeTransport) -> Petition:
