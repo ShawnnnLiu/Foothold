@@ -13,6 +13,30 @@ export const POST_DEBOUNCE_MS = 400;
 export const POLL_INTERVAL_MS = 1000;
 export const POLL_MAX_ATTEMPTS = 30;
 
+// Live-typing reveal of the arrived letter (2026-08-04 amendment): fixed
+// literal tick constants, so the reveal is a pure function of elapsed ticks.
+// ~500 chars/s lands a typical letter in a few seconds.
+export const TYPE_TICK_MS = 16;
+export const TYPE_CHARS_PER_TICK = 8;
+
+// Drafting-wait legibility (2026-08-20 amendment): the LLM draft takes on the
+// order of ten seconds, and the bare skeleton read as "nothing happening".
+// The card names the wait up front and stages the status line as a pure
+// function of the completed poll count (counted, never wall-clock). The
+// stages name the real pipeline: draft, then the citation validator (whose
+// repair loop owns the long tail).
+export const DRAFTING_HINT = "Drafting usually takes about ten seconds.";
+
+export function draftingStatusLine(polls: number): string {
+  if (polls < 3) {
+    return "Reading your findings against the agreement…";
+  }
+  if (polls < 9) {
+    return "Drafting the letter…";
+  }
+  return "Validating every citation…";
+}
+
 export interface PetitionItem {
   // Index into `evaluation.findings`, the wire identifier the POST carries.
   position: number;
@@ -85,6 +109,27 @@ export function letterParagraphs(letterText: string | null): string[] {
     .split(/\r?\n\s*\r?\n/)
     .map((paragraph) => paragraph.trim())
     .filter((paragraph) => paragraph.length > 0);
+}
+
+// The typed-so-far view of the letter: the first `budget` characters across
+// the paragraph sequence (paragraph breaks are free). Pure and order-stable;
+// `budget >= totalLetterChars` returns the full list unchanged, so the final
+// frame is byte-identical to the untyped render.
+export function typedParagraphs(paragraphs: string[], budget: number): string[] {
+  const out: string[] = [];
+  let remaining = budget;
+  for (const paragraph of paragraphs) {
+    if (remaining <= 0) {
+      break;
+    }
+    out.push(paragraph.length <= remaining ? paragraph : paragraph.slice(0, remaining));
+    remaining -= paragraph.length;
+  }
+  return out;
+}
+
+export function totalLetterChars(paragraphs: string[]): number {
+  return paragraphs.reduce((total, paragraph) => total + paragraph.length, 0);
 }
 
 export interface LetterSegment {

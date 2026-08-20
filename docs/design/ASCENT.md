@@ -102,6 +102,28 @@ Third amendment (2026-08-03), user-requested at the pillar-animation parity pass
   This is the sole PRNG exception, carved out in the `CLAUDE.md` determinism axiom by explicit user decision: the randomness is presentation-only ambience, never layout, view-model content, or workflow state, and the loop is skipped under `prefers-reduced-motion`.
 - Foil buttons are unaffected: their sheen stays pointer-driven only, plus the Rainbow finish's fixed keyframe drift.
 
+Fourth amendment (2026-08-04), user-requested: the theater wall's at-risk blocks fill white (`#FFFFFF`) instead of chalk.
+The theater sits on the chalk page ground, where a chalk fill disappears and the blocks read as empty amber outlines; white keeps them reading as filled pillars, matching how the slate-backed sidebar and landing walls (which keep the chalk fill) appear.
+The amber border and the holographic sheen layer are unchanged.
+
+## Petition letter live typing (amendment, 2026-08-04)
+
+User-requested, because the LLM draft wait is long: when the drafted letter arrives, the petition card types it on instead of popping it in whole.
+
+- The reveal is a pure function of elapsed ticks over fixed literal constants (`TYPE_TICK_MS`, `TYPE_CHARS_PER_TICK` in `lib/petition.ts`); no PRNG.
+- It is presentation only: the full validated letter is already in state, the copy button copies `letter_text` verbatim at any time, and the final frame is byte-identical to the untyped render.
+- A blinking caret rides the end of the typed text while the reveal runs.
+- Under `prefers-reduced-motion` the reveal is skipped and the letter renders whole.
+
+## Petition drafting wait (amendment, 2026-08-20)
+
+User-requested, because the ~10 s LLM draft read as "nothing happening": the letter card's drafting state now explains itself instead of showing bare skeleton bars.
+
+- A staged status line sits above the skeleton, a pure function of the completed poll count (`draftingStatusLine` in `lib/petition.ts`; counted polls, never wall-clock): reading the findings, drafting the letter, then validating citations (the repair loop owns the long tail).
+- A fixed hint below the skeleton names the expected wait (`DRAFTING_HINT`).
+- The skeleton bones pulse on a fixed CSS keyframe cycle with fixed per-bone delays - time-based, no PRNG - and the pulse is disabled under `prefers-reduced-motion`.
+- The considered-and-deferred alternative (prefetching the draft when the triage board loads) is recorded in `docs/design/PETITION_PREFETCH.md`.
+
 ## Marketing landing page (amendment, 2026-08-04)
 
 The landing screen is now the marketing page from `docs/design/triage-board/Foothold Landing.dc.html`; the route pickers (and the demo roll button) moved unchanged to the Picker screen, which every "Check my credits" placement opens.

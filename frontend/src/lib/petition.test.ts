@@ -4,13 +4,17 @@ import type { Evaluation, PetitionPollResponse } from "./api";
 import evaluationFixture from "./__fixtures__/evaluation.demo.json";
 import petitionFixture from "./__fixtures__/petition.demo.json";
 import {
+  POLL_MAX_ATTEMPTS,
   citedHolds,
   defaultSelection,
+  draftingStatusLine,
   letterParagraphs,
   paragraphSegments,
   petitionItems,
   selectionLine,
   toggleSelection,
+  totalLetterChars,
+  typedParagraphs,
 } from "./petition";
 
 const demoEvaluation = evaluationFixture as unknown as Evaluation;
@@ -162,5 +166,48 @@ describe("paragraphSegments", () => {
       { text: "MATH 1C", hold: "red" },
       { text: " now", hold: null },
     ]);
+  });
+});
+
+describe("typedParagraphs", () => {
+  const paragraphs = ["Dear Committee,", "Please review CHEM 2A.", "Sincerely,\nA Student"];
+
+  it("reveals nothing at budget zero and everything at the exact total", () => {
+    expect(typedParagraphs(paragraphs, 0)).toStrictEqual([]);
+    expect(typedParagraphs(paragraphs, totalLetterChars(paragraphs))).toStrictEqual(paragraphs);
+  });
+
+  it("clips mid-paragraph and drops the paragraphs past the budget", () => {
+    expect(typedParagraphs(paragraphs, 20)).toStrictEqual(["Dear Committee,", "Pleas"]);
+  });
+
+  it("keeps a paragraph boundary exact: the full paragraph, nothing of the next", () => {
+    expect(typedParagraphs(paragraphs, 15)).toStrictEqual(["Dear Committee,"]);
+  });
+
+  it("returns the full list unchanged for any budget past the total", () => {
+    expect(typedParagraphs(paragraphs, 10_000)).toStrictEqual(paragraphs);
+    expect(typedParagraphs([], 10_000)).toStrictEqual([]);
+  });
+});
+
+describe("draftingStatusLine", () => {
+  it("stages by completed poll count with exact boundaries", () => {
+    expect(draftingStatusLine(0)).toBe("Reading your findings against the agreement…");
+    expect(draftingStatusLine(2)).toBe("Reading your findings against the agreement…");
+    expect(draftingStatusLine(3)).toBe("Drafting the letter…");
+    expect(draftingStatusLine(8)).toBe("Drafting the letter…");
+    expect(draftingStatusLine(9)).toBe("Validating every citation…");
+  });
+
+  it("stays on the last stage through the poll cap", () => {
+    expect(draftingStatusLine(POLL_MAX_ATTEMPTS - 1)).toBe("Validating every citation…");
+  });
+});
+
+describe("totalLetterChars", () => {
+  it("sums paragraph lengths without counting the breaks", () => {
+    expect(totalLetterChars([])).toBe(0);
+    expect(totalLetterChars(["ab", "cde"])).toBe(5);
   });
 });
