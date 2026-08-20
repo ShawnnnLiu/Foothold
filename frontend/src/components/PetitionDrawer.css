@@ -206,6 +206,24 @@
   color: rgba(39, 43, 49, 0.6);
 }
 
+/* The live-typing caret rides the end of the last typed paragraph; typing
+   never runs under reduced motion, so the caret never shows there. */
+@keyframes petition-caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.petition__caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--slate);
+  animation: petition-caret 0.8s steps(1) infinite;
+}
+
 .petition__cite {
   font-weight: 700;
   box-shadow: inset 0 -6px 0 rgba(217, 119, 6, 0.4);
@@ -215,21 +233,64 @@
   box-shadow: inset 0 -6px 0 rgba(179, 55, 46, 0.3);
 }
 
-/* Deterministic three-line skeleton (doc F5: never spinner-only). */
+/* Deterministic three-line skeleton (doc F5: never spinner-only), wrapped in
+   the 2026-08-20 drafting-wait treatment: staged status line above, fixed
+   wait hint below, and a time-based (never PRNG) pulse on the bones. */
+.petition__drafting {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.petition__draftingline {
+  font-weight: 800;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(39, 43, 49, 0.7);
+}
+
+.petition__draftinghint {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: rgba(39, 43, 49, 0.55);
+}
+
 .petition__skeleton {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
+@keyframes petition-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
 .petition__bone {
   height: 12px;
   border-radius: 3px;
   background: rgba(39, 43, 49, 0.12);
+  animation: petition-pulse 1.4s ease-in-out infinite;
+}
+
+.petition__bone:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.petition__bone:nth-child(3) {
+  animation-delay: 0.4s;
 }
 
 .petition__bone--short {
   width: 60%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .petition__bone {
+    animation: none;
+  }
 }
 
 .petition__failed {

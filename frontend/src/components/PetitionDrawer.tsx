@@ -5,17 +5,24 @@ import { createPetition, errorText, fetchPetition } from "../lib/client";
 import { studentTitleMap } from "../lib/evaluation";
 import { REASON_TAGS } from "../lib/format";
 import {
+  DRAFTING_HINT,
   POLL_INTERVAL_MS,
   POLL_MAX_ATTEMPTS,
   POST_DEBOUNCE_MS,
+  TYPE_CHARS_PER_TICK,
+  TYPE_TICK_MS,
   citedHolds,
   defaultSelection,
+  draftingStatusLine,
   letterParagraphs,
   paragraphSegments,
   petitionItems,
   selectionLine,
   toggleSelection,
+  totalLetterChars,
+  typedParagraphs,
 } from "../lib/petition";
+import { prefersReducedMotion } from "./motion";
 
 import "./PetitionDrawer.css";
 
@@ -25,7 +32,7 @@ import "./PetitionDrawer.css";
 // LLM failure (HTTP 200, status "failed").
 type LetterState =
   | { kind: "empty" }
-  | { kind: "drafting" }
+  | { kind: "drafting"; polls: number }
   | { kind: "letter"; result: PetitionPollResponse }
   | { kind: "failed"; reasonCode: string | null }
   | { kind: "error"; message: string };
@@ -52,6 +59,7 @@ export default function PetitionDrawer({
   const [attempt, setAttempt] = useState(0);
   const [state, setState] = useState<LetterState>({ kind: "empty" });
   const [copied, setCopied] = useState(false);
+  const [typedChars, setTypedChars] = useState(0);
 
   // Stale-response guard: every selection change or retry bumps the
   // generation; in-flight loops from older generations drop their results.
@@ -63,7 +71,7 @@ export default function PetitionDrawer({
       setState({ kind: "empty" });
       return;
     }
-    setState({ kind: "drafting" });
+    setState({ kind: "drafting", polls: 0 });
     const positions = [...selected];
     const draft = async () => {
       try {
@@ -87,6 +95,8 @@ export default function PetitionDrawer({
             setState({ kind: "failed", reasonCode: result.reason_code });
             return;
           }
+          // Still pending: advance the staged status line by completed polls.
+          setState({ kind: "drafting", polls: polls + 1 });
         }
         setState({
           kind: "error",
@@ -111,9 +121,36 @@ export default function PetitionDrawer({
     };
   }, []);
 
+  // Live-typing reveal: an arrived letter types on at the fixed tick
+  // constants (presentation only - the full letter is already in state and
+  // the copy button copies it verbatim). Reduced motion shows it whole.
+  useEffect(() => {
+    if (state.kind !== "letter") {
+      return;
+    }
+    const total = totalLetterChars(letterParagraphs(state.result.letter_text));
+    if (prefersReducedMotion()) {
+      setTypedChars(total);
+      return;
+    }
+    setTypedChars(0);
+    const timer = window.setInterval(() => {
+      setTypedChars((n) => {
+        const next = n + TYPE_CHARS_PER_TICK;
+        if (next >= total) {
+          window.clearInterval(timer);
+        }
+        return next;
+      });
+    }, TYPE_TICK_MS);
+    return () => window.clearInterval(timer);
+  }, [state]);
+
   const letter = state.kind === "letter" ? state.result : null;
   const holds = letter === null ? {} : citedHolds(letter.cited, evaluation);
-  const paragraphs = letter === null ? [] : letterParagraphs(letter.letter_text);
+  const fullParagraphs = letter === null ? [] : letterParagraphs(letter.letter_text);
+  const typing = letter !== null && typedChars < totalLetterChars(fullParagraphs);
+  const paragraphs = typing ? typedParagraphs(fullParagraphs, typedChars) : fullParagraphs;
 
   const copyLetter = () => {
     if (letter?.letter_text == null) {
@@ -179,10 +216,14 @@ export default function PetitionDrawer({
             </p>
           )}
           {state.kind === "drafting" && (
-            <div className="petition__skeleton" aria-label="Drafting the letter">
-              <div className="petition__bone" />
-              <div className="petition__bone" />
-              <div className="petition__bone petition__bone--short" />
+            <div className="petition__drafting" role="status">
+              <div className="petition__draftingline">{draftingStatusLine(state.polls)}</div>
+              <div className="petition__skeleton" aria-label="Drafting the letter">
+                <div className="petition__bone" />
+                <div className="petition__bone" />
+                <div className="petition__bone petition__bone--short" />
+              </div>
+              <div className="petition__draftinghint">{DRAFTING_HINT}</div>
             </div>
           )}
           {state.kind === "failed" && (
@@ -215,6 +256,9 @@ export default function PetitionDrawer({
                       {segment.text}
                     </span>
                   ),
+                )}
+                {typing && i === paragraphs.length - 1 && (
+                  <span className="petition__caret" aria-hidden="true" />
                 )}
               </p>
             ))}

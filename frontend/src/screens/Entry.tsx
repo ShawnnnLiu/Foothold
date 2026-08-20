@@ -116,8 +116,12 @@ export default function Entry({
       <div className="entry__bar">
         <Wordmark size="sm" frame="slate" onClick={onBack} />
         <div className="entry__context">
-          {route.sending.name} → {route.receiving.name} - {route.major.label} ·{" "}
-          {route.major.year_label}
+          <span className="entry__contextname">{route.sending.name}</span>
+          <span className="entry__contextarrow">→</span>
+          <span className="entry__contextname">{route.receiving.name}</span>
+          <span className="entry__contextmeta">
+            {route.major.label} · {route.major.year_label}
+          </span>
         </div>
         <div className="entry__back" onClick={onBack}>
           ← CHANGE ROUTE

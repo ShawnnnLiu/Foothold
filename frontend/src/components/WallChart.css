@@ -150,10 +150,13 @@
     var(--hold-teal);
 }
 
-/* Reach: the doc-00 rule-3 translation, chalk fill with a 2px amber border
-   (the prototype's chrome gradient never ships). The holographic sheen layer
-   copies the prototype verbatim: .65/.35/.35 in the theater, .6/.3/.3 on the
-   sidebar wall. */
+/* Reach: the doc-00 rule-3 translation, white/chalk fill with a 2px amber
+   border (the prototype's chrome gradient never ships). The holographic sheen
+   layer copies the prototype verbatim: .65/.35/.35 in the theater, .6/.3/.3
+   on the sidebar wall. This base rule is the theater's: it sits on the chalk
+   page ground, where a chalk fill disappears, so the fill is white (fourth
+   ASCENT.md wall amendment, 2026-08-04); the slate-backed sidebar and
+   landing walls override to chalk below, which reads white there. */
 .wall__step--reach {
   border: 2px solid var(--hold-amber);
   background:
@@ -166,7 +169,7 @@
         rgba(255, 255, 255, 0) 70%
       )
       no-repeat -150% 0 / 250% 100%,
-    var(--chalk);
+    #fff;
 }
 
 .wall--sidebar .wall__step--reach,
