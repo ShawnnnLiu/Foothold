@@ -98,8 +98,12 @@ These are decided once, here, and are not relitigated by executors.
    `selection_key = ",".join(str(p) for p in sorted(finding_positions))`, stored on the petition row.
    Amended 2026-08-20 (attach semantics; originally doc 05's 409): a POST whose `(sid, evaluation_id, selection_key)` matches a `pending` row younger than `PENDING_TTL_SECONDS = 120` returns 202 with the EXISTING `petition_id` instead of starting a duplicate job; an older pending row is treated as abandoned and a new job starts.
    The original 409 (`PetitionPendingError`, reason code `petition_pending`) fired on a normal UX path: the drawer rebuilds the letter on every checkbox change, so toggling back to a selection whose draft was still in flight, or reopening the drawer within the TTL, surfaced an error card instead of the letter.
-   Attaching keeps the spend guard (no duplicate LLM call) while making the POST idempotent for a live selection; completed petitions are still never deduped, so every accepted POST for a non-pending selection is a fresh LLM call.
+   Attaching keeps the spend guard (no duplicate LLM call) while making the POST idempotent for a live selection.
    120 seconds is four times the client poll cap, so a live job is never falsely abandoned.
+   Amended again 2026-08-21 (succeeded-letter reuse): a POST whose key matches a `succeeded` row with `fallback: false` also returns 202 with that row's `petition_id`, with no TTL - the evaluation is frozen once created, so the letter's inputs cannot change, and the drawer's rebuild-as-you-check UX makes repeat selections the common path.
+   The latest matching succeeded row wins, deterministically.
+   Fallback letters (`fallback: true`) and `failed` rows are never reused, so Retry can still attempt a fresh LLM draft after either outcome.
+   The only fresh-spend paths left for a repeated selection are therefore: no prior row, an abandoned pending row, a failed row, or a fallback letter.
 7. One `sessions.db` connection.
    `create_app` currently constructs `SqliteDatabase(config.sessions_db)` inline for `EvaluationStore`; N3 hoists it to a single shared instance passed to `EvaluationStore`, both job stores, and `SqliteCallLogStore`, so all four share one lock and one WAL file.
    Each store keeps its own `ensure_schema` component triple; `sessions.db` remains the only mutable database.

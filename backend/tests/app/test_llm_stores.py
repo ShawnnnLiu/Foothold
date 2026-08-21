@@ -172,12 +172,12 @@ def test_petition_duplicate_insert_raises(petitions: PetitionStore) -> None:
 # --- the pending-TTL rule ----------------------------------------------------
 
 
-def test_pending_petition_id_inside_the_ttl(petitions: PetitionStore) -> None:
+def test_reusable_pending_row_inside_the_ttl(petitions: PetitionStore) -> None:
     petitions.put(SID, pending_petition())
 
     just_before_expiry = NOW + timedelta(seconds=PENDING_TTL_SECONDS - 1)
     assert (
-        petitions.pending_petition_id(SID, EVALUATION_ID, KEY, now=just_before_expiry)
+        petitions.reusable_petition_id(SID, EVALUATION_ID, KEY, now=just_before_expiry)
         == PETITION_ID
     )
 
@@ -186,21 +186,95 @@ def test_pending_row_at_the_ttl_is_abandoned(petitions: PetitionStore) -> None:
     petitions.put(SID, pending_petition())
 
     at_expiry = NOW + timedelta(seconds=PENDING_TTL_SECONDS)
-    assert petitions.pending_petition_id(SID, EVALUATION_ID, KEY, now=at_expiry) is None
+    assert petitions.reusable_petition_id(SID, EVALUATION_ID, KEY, now=at_expiry) is None
 
 
-def test_pending_petition_id_is_none_once_finished(petitions: PetitionStore) -> None:
+def test_failed_row_is_never_reused(petitions: PetitionStore) -> None:
     petitions.put(SID, pending_petition())
     petitions.finish(finished_petition())
 
-    assert petitions.pending_petition_id(SID, EVALUATION_ID, KEY, now=NOW) is None
+    assert petitions.reusable_petition_id(SID, EVALUATION_ID, KEY, now=NOW) is None
 
 
-def test_pending_petition_id_is_scoped_to_sid_evaluation_and_selection(
+def test_reusable_petition_id_is_scoped_to_sid_evaluation_and_selection(
     petitions: PetitionStore,
 ) -> None:
     petitions.put(SID, pending_petition())
 
-    assert petitions.pending_petition_id(OTHER_SID, EVALUATION_ID, KEY, now=NOW) is None
-    assert petitions.pending_petition_id(SID, "eval_ffffffffffffffff", KEY, now=NOW) is None
-    assert petitions.pending_petition_id(SID, EVALUATION_ID, selection_key([1, 3]), now=NOW) is None
+    assert petitions.reusable_petition_id(OTHER_SID, EVALUATION_ID, KEY, now=NOW) is None
+    assert petitions.reusable_petition_id(SID, "eval_ffffffffffffffff", KEY, now=NOW) is None
+    other_key = selection_key([1, 3])
+    assert petitions.reusable_petition_id(SID, EVALUATION_ID, other_key, now=NOW) is None
+
+
+# --- succeeded-letter reuse (decision 6, 2026-08-21 amendment) ----------------
+
+
+def succeeded_petition(
+    petition_id: str = PETITION_ID,
+    created_at: datetime = NOW,
+    fallback: bool = False,
+) -> Petition:
+    return Petition(
+        petition_id=petition_id,
+        evaluation_id=EVALUATION_ID,
+        finding_positions=POSITIONS,
+        status="succeeded",
+        fallback=fallback,
+        reason_code=LlmReasonCode.REPAIR_LIMIT_EXCEEDED if fallback else None,
+        letter_text="x" * 200,
+        created_at=created_at,
+    )
+
+
+def pending_petition_with_id(petition_id: str, created_at: datetime = NOW) -> Petition:
+    return Petition(
+        petition_id=petition_id,
+        evaluation_id=EVALUATION_ID,
+        finding_positions=POSITIONS,
+        status="pending",
+        created_at=created_at,
+    )
+
+
+def test_succeeded_letter_is_reused_with_no_ttl(petitions: PetitionStore) -> None:
+    petitions.put(SID, pending_petition())
+    petitions.finish(succeeded_petition())
+
+    long_after_the_pending_ttl = NOW + timedelta(days=30)
+    assert (
+        petitions.reusable_petition_id(SID, EVALUATION_ID, KEY, now=long_after_the_pending_ttl)
+        == PETITION_ID
+    )
+
+
+def test_fallback_letter_is_never_reused(petitions: PetitionStore) -> None:
+    petitions.put(SID, pending_petition())
+    petitions.finish(succeeded_petition(fallback=True))
+
+    assert petitions.reusable_petition_id(SID, EVALUATION_ID, KEY, now=NOW) is None
+
+
+def test_succeeded_letter_wins_over_an_abandoned_pending_row(
+    petitions: PetitionStore,
+) -> None:
+    petitions.put(SID, pending_petition())
+    later = NOW + timedelta(seconds=PENDING_TTL_SECONDS + 1)
+    petitions.put(SID, pending_petition_with_id("pet_0000000000000002", created_at=later))
+    petitions.finish(succeeded_petition(petition_id="pet_0000000000000002", created_at=later))
+
+    assert (
+        petitions.reusable_petition_id(SID, EVALUATION_ID, KEY, now=later) == "pet_0000000000000002"
+    )
+
+
+def test_latest_succeeded_letter_wins(petitions: PetitionStore) -> None:
+    petitions.put(SID, pending_petition())
+    petitions.finish(succeeded_petition())
+    later = NOW + timedelta(seconds=1)
+    petitions.put(SID, pending_petition_with_id("pet_0000000000000002", created_at=later))
+    petitions.finish(succeeded_petition(petition_id="pet_0000000000000002", created_at=later))
+
+    assert (
+        petitions.reusable_petition_id(SID, EVALUATION_ID, KEY, now=later) == "pet_0000000000000002"
+    )

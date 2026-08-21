@@ -6,8 +6,9 @@ Binding references: doc 05 "Locked wire contracts", the HTTP policy in `CLAUDE.m
 Internal fallback commit boundary (per `AGENTS.md`): if increment N2 was cut or the session runs long, the petition seam alone (stores, the two petition routes, wiring, tests) is a legal standalone commit; the parse routes then land in a follow-up split.
 
 > Amendment 2026-08-20 (decision 6 amendment in `00-overview.md`): the `petition_pending` 409 is retired.
-> A POST matching a live pending selection now returns 202 with the existing `petition_id` (attach semantics), so `PetitionPendingError` is removed from `errors.py` and `PetitionStore.pending_exists` is replaced by `pending_petition_id(...) -> str | None`.
-> The sections below record the original N3 plan as executed; where they mention the 409, the amendment wins.
+> A POST matching a live pending selection now returns 202 with the existing `petition_id` (attach semantics), so `PetitionPendingError` is removed from `errors.py`.
+> Amendment 2026-08-21 (second decision 6 amendment): the attach also covers finished letters - a `succeeded` row with `fallback: false` is reused with no TTL, so `PetitionStore.pending_exists` is replaced by `reusable_petition_id(...) -> str | None` (latest succeeded non-fallback row first, else the live pending row).
+> The sections below record the original N3 plan as executed; where they mention the 409 or fresh-call-per-POST, the amendments win.
 
 ## Files
 

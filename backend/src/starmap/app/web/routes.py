@@ -387,8 +387,8 @@ def create_petition(
     background_tasks: BackgroundTasks,
 ) -> Response | dict[str, str]:
     """The locked precondition order: 404, then 422, then the 409 LLM gate,
-    then the pending-attach (202 with the existing id, decision 6 as amended
-    2026-08-20)."""
+    then the reuse check (202 with the existing id, decision 6 as amended
+    2026-08-20 and 2026-08-21)."""
     state = request.app.state
     evaluation: Evaluation | None = state.evaluations.get(request.state.sid, evaluation_id)
     if evaluation is None:
@@ -417,14 +417,14 @@ def create_petition(
     if state.llm is None:
         raise LlmUnavailableError()
     key = selection_key(body.finding_positions)
-    pending_id = state.petitions.pending_petition_id(
+    existing_id = state.petitions.reusable_petition_id(
         request.state.sid, evaluation.evaluation_id, key, now=state.clock.now()
     )
-    if pending_id is not None:
-        # Attach: the same selection already has a live job (e.g. the drawer
-        # toggled back to it mid-draft), so hand back its id instead of
-        # spending a duplicate LLM call or erroring.
-        return {"petition_id": pending_id}
+    if existing_id is not None:
+        # Attach: the same selection already has a live job or a finished
+        # non-fallback letter (e.g. the drawer toggled back to it), so hand
+        # back its id instead of spending a duplicate LLM call.
+        return {"petition_id": existing_id}
     sending_name, receiving_name, major_label = _prompt_names(state, evaluation)
     positions = sorted(body.finding_positions)
     petition_id = state.ids.new_id("pet")

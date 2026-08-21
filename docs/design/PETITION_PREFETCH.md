@@ -24,10 +24,9 @@ The user's course state is frozen once an evaluation exists, so the default-sele
 
 These are load-bearing; a naive frontend prefetch breaks on the first one.
 
-- `POST /evaluations/{id}/petition` **attaches** while a petition for the same `(sid, evaluation_id, selection_key)` is still pending: it returns 202 with the existing `petition_id` instead of starting a duplicate job (amended 2026-08-20; it originally returned 409 `petition_pending`, which broke rapid checkbox toggling in the drawer).
-  A prefetch cache can therefore re-POST safely while a job is live, but caching the `petition_id` still matters for the completed case below.
-- Completed petitions are **never deduped**: every accepted POST is a fresh LLM call with fresh cost.
-  Without a frontend cache the prefetch doubles spend instead of hiding latency.
+- `POST /evaluations/{id}/petition` **attaches** whenever a petition for the same `(sid, evaluation_id, selection_key)` is reusable: it returns 202 with the existing `petition_id` instead of starting a duplicate job (amended 2026-08-20 and 2026-08-21; it originally returned 409 `petition_pending` while pending and spent a fresh LLM call once finished).
+  Reusable means a live pending row (within the 120 s TTL) or any `succeeded` row with `fallback: false` (no TTL); failed rows and fallback letters always start fresh so Retry works.
+  A prefetch could therefore just re-POST: the server dedupes both the in-flight and the completed case, so a frontend cache module is no longer required for spend safety (the speculative-spend objection above, drafts for drawers never opened, still stands).
 - The selection key is the ascending-sorted positions list (`toggleSelection` keeps payloads sorted for exactly this reason), so the cache key is stable across UI event ordering.
 
 ## Sketch, if it is ever built
