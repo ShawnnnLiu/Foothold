@@ -24,8 +24,8 @@ The user's course state is frozen once an evaluation exists, so the default-sele
 
 These are load-bearing; a naive frontend prefetch breaks on the first one.
 
-- `POST /evaluations/{id}/petition` returns **409** while a petition for the same `(sid, evaluation_id, selection_key)` is still pending (`PetitionPendingError` in `app/web/routes.py`).
-  The drawer therefore must **attach to the in-flight poll by the cached `petition_id`**, never re-POST, or the "user clicks before the background call finishes" case 409s.
+- `POST /evaluations/{id}/petition` **attaches** while a petition for the same `(sid, evaluation_id, selection_key)` is still pending: it returns 202 with the existing `petition_id` instead of starting a duplicate job (amended 2026-08-20; it originally returned 409 `petition_pending`, which broke rapid checkbox toggling in the drawer).
+  A prefetch cache can therefore re-POST safely while a job is live, but caching the `petition_id` still matters for the completed case below.
 - Completed petitions are **never deduped**: every accepted POST is a fresh LLM call with fresh cost.
   Without a frontend cache the prefetch doubles spend instead of hiding latency.
 - The selection key is the ascending-sorted positions list (`toggleSelection` keeps payloads sorted for exactly this reason), so the cache key is stable across UI event ordering.

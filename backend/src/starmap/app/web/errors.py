@@ -36,16 +36,6 @@ class LlmUnavailableError(StarmapError):
         )
 
 
-class PetitionPendingError(StarmapError):
-    """A live pending petition already covers this exact selection."""
-
-    def __init__(self, evaluation_id: str) -> None:
-        super().__init__(
-            f"a petition for this selection on {evaluation_id} is already pending",
-            reason_code="petition_pending",
-        )
-
-
 # `StarmapError` subclasses carrying a precondition semantic (doc 01): the
 # request was well-formed but the world it names does not exist, so 409.
 # The free-form `reason_code` strings follow the `unknown_agreement` precedent.
@@ -54,7 +44,6 @@ PRECONDITION_ERRORS: tuple[type[StarmapError], ...] = (
     Fts5UnavailableError,
     UnknownAgreementError,
     LlmUnavailableError,
-    PetitionPendingError,
 )
 
 

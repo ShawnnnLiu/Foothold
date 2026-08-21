@@ -17,7 +17,7 @@ from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from starmap.app.web.bundles import load_bundle
-from starmap.app.web.errors import LlmUnavailableError, PetitionPendingError, error_body
+from starmap.app.web.errors import LlmUnavailableError, error_body
 from starmap.app.web.store import selection_key
 from starmap.contracts.dedup import find_duplicates
 from starmap.contracts.evaluation import Evaluation
@@ -386,7 +386,9 @@ def create_petition(
     body: PetitionRequestBody,
     background_tasks: BackgroundTasks,
 ) -> Response | dict[str, str]:
-    """The locked precondition order: 404, then 422, then the two 409s."""
+    """The locked precondition order: 404, then 422, then the 409 LLM gate,
+    then the pending-attach (202 with the existing id, decision 6 as amended
+    2026-08-20)."""
     state = request.app.state
     evaluation: Evaluation | None = state.evaluations.get(request.state.sid, evaluation_id)
     if evaluation is None:
@@ -415,10 +417,14 @@ def create_petition(
     if state.llm is None:
         raise LlmUnavailableError()
     key = selection_key(body.finding_positions)
-    if state.petitions.pending_exists(
+    pending_id = state.petitions.pending_petition_id(
         request.state.sid, evaluation.evaluation_id, key, now=state.clock.now()
-    ):
-        raise PetitionPendingError(evaluation.evaluation_id)
+    )
+    if pending_id is not None:
+        # Attach: the same selection already has a live job (e.g. the drawer
+        # toggled back to it mid-draft), so hand back its id instead of
+        # spending a duplicate LLM call or erroring.
+        return {"petition_id": pending_id}
     sending_name, receiving_name, major_label = _prompt_names(state, evaluation)
     positions = sorted(body.finding_positions)
     petition_id = state.ids.new_id("pet")

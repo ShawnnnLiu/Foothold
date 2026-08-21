@@ -236,7 +236,11 @@ def test_petition_422s_reject_bad_positions(app_config: AppConfig) -> None:
     assert post_petition(client, evaluation_id, [clean]).status_code == 422
 
 
-def test_petition_409_while_the_same_selection_is_pending(app_config: AppConfig) -> None:
+def test_petition_post_attaches_while_the_same_selection_is_pending(
+    app_config: AppConfig,
+) -> None:
+    """Decision 6 as amended 2026-08-20: a live pending selection is attached
+    to (202 with the existing id), never duplicated and never a 409."""
     app = llm_app(app_config, [])
     client = TestClient(app)
     evaluation = create_evaluation(client)
@@ -258,8 +262,13 @@ def test_petition_409_while_the_same_selection_is_pending(app_config: AppConfig)
 
     response = post_petition(client, evaluation["evaluation_id"], positions)
 
-    assert response.status_code == 409
-    assert response.json()["reason_code"] == "petition_pending"
+    assert response.status_code == 202
+    assert response.json() == {"petition_id": "pet_0000000000000000"}
+    # The empty FakeTransport script proves no duplicate job ran: attaching
+    # never consumes an LLM call, and the planted row stays pending.
+    polled = client.get("/api/petitions/pet_0000000000000000")
+    assert polled.status_code == 200
+    assert polled.json()["status"] == "pending"
 
 
 def test_petition_run_writes_call_log_rows_under_its_id(app_config: AppConfig) -> None:

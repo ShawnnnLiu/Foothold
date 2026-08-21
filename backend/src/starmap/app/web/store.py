@@ -185,12 +185,16 @@ class PetitionStore:
             return None
         return Petition.model_validate_json(row[0])
 
-    def pending_exists(self, sid: str, evaluation_id: str, key: str, *, now: datetime) -> bool:
-        """True when this selection already has a live pending job (decision 6).
+    def pending_petition_id(
+        self, sid: str, evaluation_id: str, key: str, *, now: datetime
+    ) -> str | None:
+        """The live pending job already covering this selection, or None
+        (decision 6, as amended 2026-08-20).
 
-        A pending row younger than `PENDING_TTL_SECONDS` blocks a duplicate;
-        an older one is treated as abandoned. Payload parsing stays inside one
-        `read()` block: the matching key holds at most a handful of rows.
+        A pending row younger than `PENDING_TTL_SECONDS` is returned so the
+        POST route can attach to it instead of starting a duplicate; an older
+        one is treated as abandoned. Payload parsing stays inside one `read()`
+        block: the matching key holds at most a handful of rows.
         """
         with self._db.read() as cursor:
             cursor.execute(
@@ -203,5 +207,5 @@ class PetitionStore:
                 if petition.status != "pending":
                     continue
                 if (now - petition.created_at).total_seconds() < PENDING_TTL_SECONDS:
-                    return True
-        return False
+                    return petition.petition_id
+        return None

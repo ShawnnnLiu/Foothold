@@ -94,9 +94,11 @@ These are decided once, here, and are not relitigated by executors.
    The shared-`SqliteDatabase` `RLock` (TR 4.3) serializes the background writer against request readers.
    A process death mid-job leaves a `pending` row forever; the client's 30-second poll cap (doc 05) bounds the user-facing wait, and the pending-duplicate check (decision 6) stops a stuck row from blocking retries.
    No job queue, no worker process, no new dependency: one Fly.io machine, two demo-scale nodes.
-6. Pending-duplicate suppression (petitions only, per doc 05's 409).
+6. Pending-duplicate suppression (petitions only).
    `selection_key = ",".join(str(p) for p in sorted(finding_positions))`, stored on the petition row.
-   A POST whose `(sid, evaluation_id, selection_key)` matches a `pending` row younger than `PENDING_TTL_SECONDS = 120` gets 409; an older pending row is treated as abandoned and a new job starts.
+   Amended 2026-08-20 (attach semantics; originally doc 05's 409): a POST whose `(sid, evaluation_id, selection_key)` matches a `pending` row younger than `PENDING_TTL_SECONDS = 120` returns 202 with the EXISTING `petition_id` instead of starting a duplicate job; an older pending row is treated as abandoned and a new job starts.
+   The original 409 (`PetitionPendingError`, reason code `petition_pending`) fired on a normal UX path: the drawer rebuilds the letter on every checkbox change, so toggling back to a selection whose draft was still in flight, or reopening the drawer within the TTL, surfaced an error card instead of the letter.
+   Attaching keeps the spend guard (no duplicate LLM call) while making the POST idempotent for a live selection; completed petitions are still never deduped, so every accepted POST for a non-pending selection is a fresh LLM call.
    120 seconds is four times the client poll cap, so a live job is never falsely abandoned.
 7. One `sessions.db` connection.
    `create_app` currently constructs `SqliteDatabase(config.sessions_db)` inline for `EvaluationStore`; N3 hoists it to a single shared instance passed to `EvaluationStore`, both job stores, and `SqliteCallLogStore`, so all four share one lock and one WAL file.

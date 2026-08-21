@@ -172,32 +172,35 @@ def test_petition_duplicate_insert_raises(petitions: PetitionStore) -> None:
 # --- the pending-TTL rule ----------------------------------------------------
 
 
-def test_pending_exists_inside_the_ttl(petitions: PetitionStore) -> None:
+def test_pending_petition_id_inside_the_ttl(petitions: PetitionStore) -> None:
     petitions.put(SID, pending_petition())
 
     just_before_expiry = NOW + timedelta(seconds=PENDING_TTL_SECONDS - 1)
-    assert petitions.pending_exists(SID, EVALUATION_ID, KEY, now=just_before_expiry)
+    assert (
+        petitions.pending_petition_id(SID, EVALUATION_ID, KEY, now=just_before_expiry)
+        == PETITION_ID
+    )
 
 
 def test_pending_row_at_the_ttl_is_abandoned(petitions: PetitionStore) -> None:
     petitions.put(SID, pending_petition())
 
     at_expiry = NOW + timedelta(seconds=PENDING_TTL_SECONDS)
-    assert not petitions.pending_exists(SID, EVALUATION_ID, KEY, now=at_expiry)
+    assert petitions.pending_petition_id(SID, EVALUATION_ID, KEY, now=at_expiry) is None
 
 
-def test_pending_exists_is_false_once_finished(petitions: PetitionStore) -> None:
+def test_pending_petition_id_is_none_once_finished(petitions: PetitionStore) -> None:
     petitions.put(SID, pending_petition())
     petitions.finish(finished_petition())
 
-    assert not petitions.pending_exists(SID, EVALUATION_ID, KEY, now=NOW)
+    assert petitions.pending_petition_id(SID, EVALUATION_ID, KEY, now=NOW) is None
 
 
-def test_pending_exists_is_scoped_to_sid_evaluation_and_selection(
+def test_pending_petition_id_is_scoped_to_sid_evaluation_and_selection(
     petitions: PetitionStore,
 ) -> None:
     petitions.put(SID, pending_petition())
 
-    assert not petitions.pending_exists(OTHER_SID, EVALUATION_ID, KEY, now=NOW)
-    assert not petitions.pending_exists(SID, "eval_ffffffffffffffff", KEY, now=NOW)
-    assert not petitions.pending_exists(SID, EVALUATION_ID, selection_key([1, 3]), now=NOW)
+    assert petitions.pending_petition_id(OTHER_SID, EVALUATION_ID, KEY, now=NOW) is None
+    assert petitions.pending_petition_id(SID, "eval_ffffffffffffffff", KEY, now=NOW) is None
+    assert petitions.pending_petition_id(SID, EVALUATION_ID, selection_key([1, 3]), now=NOW) is None

@@ -13,7 +13,8 @@ If the schedule forces cuts, this whole increment is cut-line 1 for the frontend
 
 - Body `{"finding_positions": [int]}`: indexes into the stored evaluation's `findings` array (the order is deterministic and stable, so positions are stable identifiers); min 1, each position must exist and reference an `at_risk` or `no_articulation` finding, else 422.
 - Returns 202 `{"petition_id": "pet_..."}`; the job runs server-side against the stored findings only.
-- 409 when the evaluation id is unknown to this session (uniform 404 semantics from doc 01 apply first) or a petition for the same selection is already pending.
+- 409 when the evaluation id is unknown to this session (uniform 404 semantics from doc 01 apply first).
+  (Amended 2026-08-20: a POST for a selection whose petition is still pending no longer 409s; it returns 202 with the existing `petition_id`, per the decision 6 amendment in `../llm-nodes/00-overview.md`.)
 
 ### `GET /api/petitions/{petition_id}`
 
