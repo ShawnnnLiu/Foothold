@@ -185,13 +185,25 @@ class PetitionStore:
             return None
         return Petition.model_validate_json(row[0])
 
-    def pending_exists(self, sid: str, evaluation_id: str, key: str, *, now: datetime) -> bool:
-        """True when this selection already has a live pending job (decision 6).
+    def reusable_petition_id(
+        self, sid: str, evaluation_id: str, key: str, *, now: datetime
+    ) -> str | None:
+        """The petition already covering this selection, or None (decision 6,
+        as amended 2026-08-20 and 2026-08-21).
 
-        A pending row younger than `PENDING_TTL_SECONDS` blocks a duplicate;
-        an older one is treated as abandoned. Payload parsing stays inside one
-        `read()` block: the matching key holds at most a handful of rows.
+        A succeeded non-fallback row is reusable forever: the evaluation is
+        frozen once created, so the letter's inputs cannot change, and reusing
+        it spends no duplicate LLM call. The latest such row wins so repeated
+        calls attach deterministically. Fallback letters are excluded so a
+        retry can still attempt a real LLM draft, and failed rows so a retry
+        starts fresh. With no succeeded letter, a pending row younger than
+        `PENDING_TTL_SECONDS` is returned so the POST route attaches to the
+        live job; an older one is treated as abandoned. Payload parsing stays
+        inside one `read()` block: the matching key holds at most a handful
+        of rows.
         """
+        best_succeeded: Petition | None = None
+        pending_id: str | None = None
         with self._db.read() as cursor:
             cursor.execute(
                 "SELECT payload FROM petitions "
@@ -200,8 +212,14 @@ class PetitionStore:
             )
             for (payload,) in cursor.fetchall():
                 petition = Petition.model_validate_json(payload)
-                if petition.status != "pending":
-                    continue
-                if (now - petition.created_at).total_seconds() < PENDING_TTL_SECONDS:
-                    return True
-        return False
+                if petition.status == "succeeded" and not petition.fallback:
+                    if best_succeeded is None or petition.created_at > best_succeeded.created_at:
+                        best_succeeded = petition
+                elif (
+                    petition.status == "pending"
+                    and (now - petition.created_at).total_seconds() < PENDING_TTL_SECONDS
+                ):
+                    pending_id = petition.petition_id
+        if best_succeeded is not None:
+            return best_succeeded.petition_id
+        return pending_id

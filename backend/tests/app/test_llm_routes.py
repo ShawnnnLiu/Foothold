@@ -236,7 +236,11 @@ def test_petition_422s_reject_bad_positions(app_config: AppConfig) -> None:
     assert post_petition(client, evaluation_id, [clean]).status_code == 422
 
 
-def test_petition_409_while_the_same_selection_is_pending(app_config: AppConfig) -> None:
+def test_petition_post_attaches_while_the_same_selection_is_pending(
+    app_config: AppConfig,
+) -> None:
+    """Decision 6 as amended 2026-08-20: a live pending selection is attached
+    to (202 with the existing id), never duplicated and never a 409."""
     app = llm_app(app_config, [])
     client = TestClient(app)
     evaluation = create_evaluation(client)
@@ -258,8 +262,69 @@ def test_petition_409_while_the_same_selection_is_pending(app_config: AppConfig)
 
     response = post_petition(client, evaluation["evaluation_id"], positions)
 
-    assert response.status_code == 409
-    assert response.json()["reason_code"] == "petition_pending"
+    assert response.status_code == 202
+    assert response.json() == {"petition_id": "pet_0000000000000000"}
+    # The empty FakeTransport script proves no duplicate job ran: attaching
+    # never consumes an LLM call, and the planted row stays pending.
+    polled = client.get("/api/petitions/pet_0000000000000000")
+    assert polled.status_code == 200
+    assert polled.json()["status"] == "pending"
+
+
+def test_petition_post_reuses_the_succeeded_letter(app_config: AppConfig) -> None:
+    """The 2026-08-21 decision 6 amendment: re-selecting a combination whose
+    letter already exists replays it instead of spending a fresh LLM call."""
+    letter = demo_letter(app_config)
+    app = llm_app(app_config, [success({"letter_text": letter})])
+    client = TestClient(app)
+    evaluation = create_evaluation(client)
+    positions = selectable_positions(evaluation)
+
+    first = post_petition(client, evaluation["evaluation_id"], positions)
+    assert first.status_code == 202
+    petition_id = first.json()["petition_id"]
+    # TestClient ran the background job synchronously, so the row is now
+    # succeeded; the script is exhausted, proving the repeat spends nothing.
+    repeat = post_petition(client, evaluation["evaluation_id"], positions)
+    assert repeat.status_code == 202
+    assert repeat.json() == {"petition_id": petition_id}
+    polled = client.get(f"/api/petitions/{petition_id}")
+    assert polled.json()["status"] == "succeeded"
+    assert polled.json()["letter_text"] == letter
+
+
+def test_petition_post_never_reuses_a_fallback_letter(app_config: AppConfig) -> None:
+    """A template letter after repair exhaustion must not pin the selection:
+    the next POST gets a fresh LLM attempt."""
+    letter = demo_letter(app_config)
+    app = llm_app(app_config, [success({"letter_text": letter})])
+    client = TestClient(app)
+    evaluation = create_evaluation(client)
+    positions = selectable_positions(evaluation)
+    sid = client.cookies.get("sid")
+    assert sid is not None
+    app.state.petitions.put(
+        sid,
+        Petition(
+            petition_id="pet_0000000000000000",
+            evaluation_id=evaluation["evaluation_id"],
+            finding_positions=sorted(positions),
+            status="succeeded",
+            fallback=True,
+            reason_code=LlmReasonCode.REPAIR_LIMIT_EXCEEDED,
+            letter_text=letter,
+            created_at=datetime.now(UTC),
+        ),
+    )
+
+    response = post_petition(client, evaluation["evaluation_id"], positions)
+
+    assert response.status_code == 202
+    fresh_id = response.json()["petition_id"]
+    assert fresh_id != "pet_0000000000000000"
+    polled = client.get(f"/api/petitions/{fresh_id}")
+    assert polled.json()["status"] == "succeeded"
+    assert polled.json()["fallback"] is False
 
 
 def test_petition_run_writes_call_log_rows_under_its_id(app_config: AppConfig) -> None:
