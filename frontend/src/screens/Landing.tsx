@@ -8,6 +8,7 @@ import WallChart from "../components/WallChart";
 import {
   BADGE,
   CITATIONS_SECTION,
+  DEMO_SECTION,
   FINAL_CTA,
   FOOTER,
   HERO,
@@ -219,6 +220,25 @@ export default function Landing({ onEnter }: { onEnter: () => void }) {
           ))}
         </div>
       </div>
+
+      <section id="demo" className="landing__demo">
+        <div data-fade>
+          <div className="landing__kicker">{DEMO_SECTION.kicker}</div>
+          <h2 className="landing__h2">{DEMO_SECTION.headline}</h2>
+          <p className="landing__body landing__body--demo">{DEMO_SECTION.body}</p>
+        </div>
+        <div className="landing__videoframe" data-fade>
+          <iframe
+            className="landing__video"
+            src={DEMO_SECTION.embedUrl}
+            title={DEMO_SECTION.embedTitle}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            referrerPolicy="strict-origin-when-cross-origin"
+          />
+        </div>
+      </section>
 
       <section id="citations" className="landing__feature">
         <div data-fade>

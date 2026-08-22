@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   BADGE,
   CITATIONS_SECTION,
+  DEMO_SECTION,
+  DEMO_VIDEO_ID,
   FINAL_CTA,
   FOOTER,
   HERO,
@@ -27,6 +29,7 @@ const DISPLAY_SURFACES: unknown[] = [
   HERO,
   MOCKUP,
   PROOF,
+  DEMO_SECTION,
   CITATIONS_SECTION,
   METHOD_SECTION,
   PETITIONS_SECTION,
@@ -39,7 +42,14 @@ const DISPLAY_SURFACES: unknown[] = [
 
 // Internal identifiers ride along in the content model but are not display
 // copy (PLAIN_LANGUAGE.md: a label and its identifier may disagree).
-const IDENTIFIER_KEYS = new Set(["bucket", "reasonCode", "kind", "href", "assist_key"]);
+const IDENTIFIER_KEYS = new Set([
+  "bucket",
+  "reasonCode",
+  "kind",
+  "href",
+  "assist_key",
+  "embedUrl",
+]);
 
 function collectStrings(value: unknown, out: string[] = []): string[] {
   if (typeof value === "string") {
@@ -100,6 +110,13 @@ describe("canonical strings (PLAIN_LANGUAGE.md)", () => {
       "Flagged 6 fine-print conditions",
       "Verdicts locked - agreement year 2025-2026",
     ]);
+  });
+
+  it("pins the demo video to the privacy-enhanced player", () => {
+    expect(DEMO_SECTION.embedUrl).toBe(
+      `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0`,
+    );
+    expect(DEMO_VIDEO_ID).toBe("Jop91D81H2c");
   });
 
   it("captions the wall with the honest count plus the coined suffixes", () => {
