@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Foothold demo video - resolution bookend</title>
+<!--
+  Video production asset only. Not part of the product build.
+  The reversal of countdown-calendar.html: opens frame-matched to that file's
+  final frame (dim, red stamp, money line), then unwinds it.
+  Where the cold open accelerates into panic, this decelerates into calm.
+
+  Open in Chrome, go fullscreen, press SPACE to play, R to reset.
+  Optional: ?speed=0.8 slows everything down, ?speed=1.25 speeds it up.
+  All timings are fixed constants, so every take is identical.
+
+  EDIT BEFORE RECORDING: set LINK_LABEL (bottom of the script) to the real demo URL.
+-->
+<link rel="stylesheet" href="fonts.css" />
+<style>
+  :root {
+    --chalk: #F3F1EC;
+    --slate: #272B31;
+    --slate-deep: #16191d;
+    --hold-teal: #0E8A6D;
+    --hold-teal-bright: #1CAE8C;
+    --hold-amber: #D97706;
+    --hold-red: #B3372E;
+    --radius: 4px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--slate);
+    color: var(--chalk);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    overflow: hidden;
+    cursor: none;
+  }
+
+  .stage {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 72px;
+    padding: 48px;
+  }
+
+  /* ---------- left column: the card + the number slot ---------- */
+
+  /* Fixed width (not max-width): must be geometry-identical to the cold open. */
+  .left {
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+    width: 460px;
+  }
+
+  .denial {
+    position: relative;
+    background: var(--chalk);
+    color: var(--slate);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    box-shadow: 6px 6px 0 var(--slate-deep);
+    padding: 22px 26px 24px;
+  }
+
+  .denial__overline {
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    opacity: 0.55;
+    margin-bottom: 10px;
+  }
+
+  .denial__row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(39, 43, 49, 0.14);
+    transition: opacity 0.8s ease;
+  }
+
+  .denial__row.faded { opacity: 0.35; }
+
+  .denial__code {
+    font-weight: 800;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .denial__title {
+    flex: 1;
+    font-weight: 400;
+    font-size: 13px;
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .denial__grade {
+    position: relative;
+    font-weight: 800;
+    font-size: 15px;
+    padding: 0 4px;
+  }
+
+  .denial__grade svg {
+    position: absolute;
+    inset: -5px -7px;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .denial__grade ellipse {
+    fill: none;
+    stroke: var(--hold-teal);
+    stroke-width: 3.4;
+    stroke-linecap: round;
+  }
+
+  /* verdict mark: red x glyph that pops out, teal check that draws in */
+
+  .denial__x {
+    position: relative;
+    color: var(--hold-red);
+    font-weight: 900;
+    font-size: 15px;
+    width: 17px;
+    text-align: center;
+  }
+
+  .denial__x .x-glyph {
+    display: inline-block;
+    transition: transform 0.22s ease-in, opacity 0.22s ease-in;
+  }
+
+  .denial__x.approved .x-glyph {
+    transform: scale(0.2) rotate(-30deg);
+    opacity: 0;
+  }
+
+  .denial__x svg.check {
+    position: absolute;
+    inset: -4px;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .check line {
+    stroke: var(--hold-teal);
+    stroke-width: 3.4;
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+
+  .denial__x.approved .check line { animation: draw 0.22s ease-out forwards 0.18s; }
+  .denial__x.approved .check line:nth-child(2) { animation-delay: 0.32s; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  /* verdict pills, stacked in one grid slot so the swap holds layout */
+
+  .verdict-slot {
+    display: inline-grid;
+    margin-top: 14px;
+  }
+
+  .verdict-slot > span { grid-area: 1 / 1; justify-self: start; }
+
+  .denial__verdict {
+    display: inline-block;
+    background: var(--hold-red);
+    color: var(--chalk);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+    transition: transform 0.3s ease-in, opacity 0.3s ease-in;
+  }
+
+  .denial__verdict.out {
+    transform: rotate(2deg) translateY(6px);
+    opacity: 0;
+  }
+
+  .denial__verdict--approved {
+    background: var(--hold-teal);
+    opacity: 0;
+    transform: rotate(-2deg) scale(1.6);
+  }
+
+  .denial__verdict--approved.on {
+    animation: pillslam 0.32s cubic-bezier(0.18, 1.3, 0.3, 1) forwards;
+  }
+
+  @keyframes pillslam {
+    from { opacity: 0; transform: rotate(-2deg) scale(1.6); }
+    to   { opacity: 1; transform: rotate(-2deg) scale(1); }
+  }
+
+  /* fine print, two lines stacked in one slot */
+
+  .fine-slot {
+    display: grid;
+    margin-top: 14px;
+    border-top: 1px solid rgba(39, 43, 49, 0.25);
+    padding-top: 10px;
+  }
+
+  .fine-slot > div { grid-area: 1 / 1; }
+
+  .denial__fine {
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 0.65;
+    transition: opacity 0.5s ease;
+  }
+
+  .denial__fine.out { opacity: 0; }
+
+  .denial__fine--next {
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.7s ease 0.4s;
+  }
+
+  .denial__fine--next.on { opacity: 0.85; }
+  .denial__fine--next strong { font-weight: 800; color: var(--hold-teal); }
+
+  /* the postmark that lands on the card */
+
+  .postmark {
+    position: absolute;
+    top: -20px;
+    right: -24px;
+    z-index: 5;
+    background: var(--hold-teal);
+    color: var(--chalk);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    box-shadow: 4px 4px 0 var(--slate-deep);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    padding: 6px 11px;
+    white-space: nowrap;
+    transform: rotate(6deg);
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .postmark.on {
+    visibility: visible;
+    animation: postslam 0.3s cubic-bezier(0.18, 1.3, 0.3, 1) forwards;
+  }
+
+  @keyframes postslam {
+    from { opacity: 0; transform: rotate(6deg) scale(1.8); }
+    to   { opacity: 1; transform: rotate(6deg) scale(1); }
+  }
+
+  /* number slot: days-left counter at rest, money after the flip */
+
+  .numslot {
+    display: grid;
+    user-select: none;
+  }
+
+  .numslot > div { grid-area: 1 / 1; }
+
+  .counter { transition: opacity 0.6s ease; }
+  .counter.out { opacity: 0; }
+
+  .counter__label {
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.22em;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+
+  .counter__num {
+    font-weight: 900;
+    font-size: 176px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: #d4574c;
+    display: inline-block;
+  }
+
+  .counter__unit {
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.18em;
+    opacity: 0.7;
+    margin-left: 10px;
+  }
+
+  .money {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .money.on {
+    visibility: visible;
+    animation: rise 0.5s ease-out forwards;
+  }
+
+  .money__num {
+    font-weight: 900;
+    /* Sized so "$15,686" + "SAVED" stay on one line inside the 460px column,
+       mirroring the cold open's "20 DAYS" lockup. */
+    font-size: 82px;
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--hold-teal-bright);
+    display: inline-block;
+  }
+
+  .money.on .money__num { animation: tick 0.4s ease-out 1 0.1s; }
+  @keyframes tick {
+    0% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  /* ---------- right column: the calendar, its job already done ---------- */
+
+  .calendar {
+    background: var(--chalk);
+    color: var(--slate);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    box-shadow: 8px 8px 0 var(--slate-deep);
+    padding: 26px 30px 30px;
+    transition: opacity 1s ease;
+  }
+
+  .calendar.ghost { opacity: 0.16; }
+
+  .calendar__month {
+    font-weight: 900;
+    font-size: 30px;
+    letter-spacing: 0.16em;
+    margin-bottom: 16px;
+  }
+
+  .calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 76px);
+    grid-auto-rows: 76px;
+    gap: 4px;
+  }
+
+  .dow {
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    opacity: 0.45;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+  }
+
+  .day {
+    position: relative;
+    border: 1px solid rgba(39, 43, 49, 0.22);
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: 20px;
+    padding: 6px 0 0 10px;
+  }
+
+  .day--blank { border-color: transparent; }
+
+  .day__num { position: relative; z-index: 1; }
+  .day.crossed .day__num { opacity: 0.38; }
+
+  .day svg.cross {
+    position: absolute;
+    inset: 8px;
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .cross path {
+    fill: none;
+    stroke: var(--slate);
+    stroke-linecap: round;
+    opacity: 0;
+  }
+
+  .day.crossed .cross path { opacity: 0.85; }
+
+  .day--deadline .day__num { font-weight: 800; }
+
+  .day--deadline .ring {
+    position: absolute;
+    inset: -6px;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .ring ellipse {
+    fill: none;
+    stroke: var(--hold-red);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    transform: rotate(-4deg);
+    transform-origin: center;
+  }
+
+  .deadline-tag {
+    position: absolute;
+    top: -34px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    background: var(--hold-red);
+    color: var(--chalk);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    padding: 4px 9px;
+    white-space: nowrap;
+  }
+
+  /* ---------- the inherited finale state (dim + red stamp), which falls ---------- */
+
+  .dim {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: var(--slate-deep);
+    opacity: 0;
+    transition: opacity 0.9s ease;
+    pointer-events: none;
+  }
+  .dim.on { opacity: 0.45; }
+
+  .stamp {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .stamp.hold { visibility: visible; }
+
+  .stamp__tile {
+    background: var(--hold-red);
+    color: var(--chalk);
+    border: 3px solid var(--slate-deep);
+    border-radius: var(--radius);
+    box-shadow: 10px 10px 0 var(--slate-deep);
+    font-weight: 900;
+    font-size: 88px;
+    letter-spacing: 0.06em;
+    padding: 26px 54px 30px;
+    transform: rotate(-3deg);
+  }
+
+  .stamp__sub {
+    background: var(--chalk);
+    color: var(--slate);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    box-shadow: 5px 5px 0 var(--slate-deep);
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: 0.14em;
+    padding: 10px 22px 12px;
+  }
+
+  .stamp.fall .stamp__tile { animation: fall 0.8s cubic-bezier(0.5, 0, 0.9, 0.4) forwards; }
+  .stamp.fall .stamp__sub  { animation: fall 0.8s cubic-bezier(0.5, 0, 0.9, 0.4) forwards 0.09s; }
+  @keyframes fall {
+    from { transform: rotate(-3deg) translateY(0); }
+    to   { transform: rotate(-16deg) translateY(140vh); }
+  }
+
+  /* ---------- final screen: the scale claim + the link card ---------- */
+
+  .final {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    background: var(--slate);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1s ease;
+    pointer-events: none;
+  }
+
+  .final.on {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .final__line {
+    font-weight: 900;
+    font-size: 46px;
+    letter-spacing: 0.04em;
+    opacity: 0;
+  }
+
+  .final__line em {
+    font-style: normal;
+    color: var(--hold-teal-bright);
+  }
+
+  .final__line.on { animation: rise 0.55s ease-out forwards; }
+
+  .final__card {
+    margin-top: 34px;
+    background: var(--chalk);
+    color: var(--slate);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    box-shadow: 8px 8px 0 var(--slate-deep);
+    padding: 30px 46px 32px;
+    text-align: center;
+    opacity: 0;
+  }
+
+  .final__card.on { animation: rise 0.55s ease-out forwards; }
+
+  .final__brand {
+    font-weight: 900;
+    font-size: 40px;
+    letter-spacing: 0.2em;
+    margin-right: -0.2em; /* optically recenters the tracked-out wordmark */
+  }
+
+  .final__tag {
+    margin-top: 8px;
+    font-weight: 500;
+    font-size: 16px;
+    opacity: 0.75;
+  }
+
+  .final__link {
+    display: inline-block;
+    margin-top: 18px;
+    background: var(--hold-teal);
+    color: var(--chalk);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.08em;
+    padding: 8px 18px;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- operator hint ---------- */
+
+  .hint {
+    position: fixed;
+    bottom: 26px;
+    z-index: 50;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(22, 25, 29, 0.85);
+    color: var(--chalk);
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    padding: 8px 18px;
+    opacity: 0.85;
+    transition: opacity 0.3s ease;
+  }
+  .hint.off { opacity: 0; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="left">
+      <div class="denial">
+        <div class="postmark" id="postmark">SUBMITTED SEP 24 &middot; 1 DAY EARLY</div>
+        <div class="denial__overline">TRANSFER CREDIT EVALUATION</div>
+        <div class="denial__row" id="row22a">
+          <span class="denial__code">CIS 22A</span>
+          <span class="denial__title">C++ Programming</span>
+          <span class="denial__grade">A<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="52" rx="46" ry="40" transform="rotate(-5 50 50)"/></svg></span>
+          <span class="denial__x"><span class="x-glyph">&#10005;</span></span>
+        </div>
+        <div class="denial__row" id="row22b">
+          <span class="denial__code">CIS 22B</span>
+          <span class="denial__title">Intermediate C++</span>
+          <span class="denial__grade">A<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="48" cy="50" rx="47" ry="38" transform="rotate(4 50 50)"/></svg></span>
+          <span class="denial__x"><span class="x-glyph">&#10005;</span></span>
+        </div>
+        <div class="denial__row">
+          <span class="denial__code">CIS 21JA</span>
+          <span class="denial__title">x86 Assembly Language</span>
+          <span class="denial__grade">A<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="51" cy="49" rx="45" ry="41" transform="rotate(-8 50 50)"/></svg></span>
+          <span class="denial__x" id="mark21ja"><span class="x-glyph">&#10005;</span><svg class="check" viewBox="0 0 24 24" preserveAspectRatio="none"><line x1="3.6" y1="13.8" x2="9.2" y2="19.4" pathLength="1"/><line x1="9.2" y1="19.4" x2="20.8" y2="4.6" pathLength="1"/></svg></span>
+        </div>
+        <div class="denial__row">
+          <span class="denial__code">CIS 21JB</span>
+          <span class="denial__title">Advanced x86 Assembly</span>
+          <span class="denial__grade">A<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="49" cy="51" rx="46" ry="39" transform="rotate(7 50 50)"/></svg></span>
+          <span class="denial__x" id="mark21jb"><span class="x-glyph">&#10005;</span><svg class="check" viewBox="0 0 24 24" preserveAspectRatio="none"><line x1="4.4" y1="13.2" x2="9.8" y2="19.8" pathLength="1"/><line x1="9.8" y1="19.8" x2="20.2" y2="5.2" pathLength="1"/></svg></span>
+        </div>
+        <div class="verdict-slot">
+          <span class="denial__verdict" id="pillDenied">NOT ACCEPTED &middot; 18 UNITS</span>
+          <span class="denial__verdict denial__verdict--approved" id="pillApproved">APPROVED ON APPEAL &middot; 9 UNITS</span>
+        </div>
+        <div class="fine-slot">
+          <div class="denial__fine" id="fineOld">Appeals must be received in writing by September&nbsp;25.</div>
+          <!-- Must stay one line at 460px so the card height matches the cold open's. -->
+          <div class="denial__fine denial__fine--next" id="fineNew">The other 9 units? A <strong>$342</strong> fix, if caught before transfer.</div>
+        </div>
+      </div>
+      <div class="numslot">
+        <div class="counter" id="counter">
+          <div class="counter__label">DAYS LEFT TO APPEAL</div>
+          <span class="counter__num">1</span><span class="counter__unit">DAY</span>
+        </div>
+        <div class="money" id="money">
+          <div class="counter__label">THE EXTRA QUARTER</div>
+          <span class="money__num">$15,686</span><span class="counter__unit">SAVED</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="calendar" id="calendar">
+      <div class="calendar__month">SEPTEMBER</div>
+      <div class="calendar__grid" id="grid"></div>
+    </div>
+  </div>
+
+  <div class="dim" id="dim"></div>
+
+  <div class="stamp" id="stamp">
+    <div class="stamp__tile">1 DAY LEFT</div>
+    <div class="stamp__sub">$15,686 ON THE LINE</div>
+  </div>
+
+  <div class="final" id="final">
+    <div class="final__line" id="line1"><em>116</em> COMMUNITY COLLEGES.</div>
+    <div class="final__line" id="line2"><em>~80,000</em> TRANSFER STUDENTS A YEAR.</div>
+    <div class="final__card" id="linkCard">
+      <div class="final__brand">FOOTHOLD</div>
+      <div class="final__tag">Don&rsquo;t lose the credits you already earned.</div>
+      <div class="final__link" id="linkPill"></div>
+    </div>
+  </div>
+
+  <div class="hint" id="hint">SPACE&nbsp;&nbsp;play&nbsp;&nbsp;&middot;&nbsp;&nbsp;R&nbsp;&nbsp;reset&nbsp;&nbsp;&middot;&nbsp;&nbsp;?speed=0.8&nbsp;&nbsp;slower</div>
+
+<script>
+  // Must mirror countdown-calendar.html so the opening frame matches its final frame.
+  var DAYS_IN_MONTH = 30;
+  var FIRST_WEEKDAY = 2;          // 0 = Sunday
+  var DEADLINE = 25;
+  var LAST_CROSS = DEADLINE - 1;  // the cold open crossed through the 24th
+
+  // The deployed demo URL, exactly as it should read on screen.
+  var LINK_LABEL = "foothold-transfer.com";
+
+  var SPEED = parseFloat(new URLSearchParams(location.search).get("speed") || "1");
+  if (!(SPEED > 0)) SPEED = 1;
+
+  var grid = document.getElementById("grid");
+  var calendar = document.getElementById("calendar");
+  var counter = document.getElementById("counter");
+  var money = document.getElementById("money");
+  var dim = document.getElementById("dim");
+  var stamp = document.getElementById("stamp");
+  var postmark = document.getElementById("postmark");
+  var mark21ja = document.getElementById("mark21ja");
+  var mark21jb = document.getElementById("mark21jb");
+  var row22a = document.getElementById("row22a");
+  var row22b = document.getElementById("row22b");
+  var pillDenied = document.getElementById("pillDenied");
+  var pillApproved = document.getElementById("pillApproved");
+  var fineOld = document.getElementById("fineOld");
+  var fineNew = document.getElementById("fineNew");
+  var finalScreen = document.getElementById("final");
+  var line1 = document.getElementById("line1");
+  var line2 = document.getElementById("line2");
+  var linkCard = document.getElementById("linkCard");
+  var hint = document.getElementById("hint");
+
+  document.getElementById("linkPill").textContent = LINK_LABEL;
+
+  var timers = [];
+  var running = false;
+  var hintTimer = null;
+
+  function armHint() {
+    clearTimeout(hintTimer);
+    hint.classList.remove("off");
+    hintTimer = setTimeout(function () { hint.classList.add("off"); }, 5000);
+  }
+
+  function crossSvg(day) {
+    // Deterministic per-day jitter so the X marks read hand-drawn but every take is identical.
+    // Keep this function byte-identical to the one in countdown-calendar.html.
+    var j = function (k, span) { return (((day * 53 + k * 17) % 100) / 100 - 0.5) * span; };
+    var NS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("class", "cross");
+    svg.setAttribute("viewBox", "0 0 100 100");
+    svg.setAttribute("preserveAspectRatio", "none");
+    // Each stroke is a bowed quadratic curve that overshoots the cell edges,
+    // with its own pen weight: a fast, careless strike rather than a ruled line.
+    var stroke = function (x1, y1, x2, y2, seed) {
+      var dx = x2 - x1, dy = y2 - y1;
+      var len = Math.sqrt(dx * dx + dy * dy);
+      var bow = j(seed, 30);
+      var cx = (x1 + x2) / 2 - (dy / len) * bow;
+      var cy = (y1 + y2) / 2 + (dx / len) * bow;
+      var p = document.createElementNS(NS, "path");
+      p.setAttribute("d", "M" + x1.toFixed(1) + " " + y1.toFixed(1) +
+        " Q" + cx.toFixed(1) + " " + cy.toFixed(1) +
+        " " + x2.toFixed(1) + " " + y2.toFixed(1));
+      p.setAttribute("pathLength", "1");
+      p.style.strokeWidth = (4.2 + j(seed + 1, 2.6)).toFixed(2);
+      return p;
+    };
+    svg.appendChild(stroke(1 + j(1, 18), 3 + j(2, 18), 99 + j(3, 18), 97 + j(4, 18), 11));
+    svg.appendChild(stroke(98 + j(5, 18), 2 + j(6, 18), 2 + j(7, 18), 98 + j(8, 18), 27));
+    return svg;
+  }
+
+  function buildGrid() {
+    grid.innerHTML = "";
+    ["S", "M", "T", "W", "T", "F", "S"].forEach(function (d) {
+      var el = document.createElement("div");
+      el.className = "dow";
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+    for (var b = 0; b < FIRST_WEEKDAY; b++) {
+      var blank = document.createElement("div");
+      blank.className = "day day--blank";
+      grid.appendChild(blank);
+    }
+    for (var day = 1; day <= DAYS_IN_MONTH; day++) {
+      var cell = document.createElement("div");
+      cell.className = "day" + (day <= LAST_CROSS ? " crossed" : "");
+      var num = document.createElement("span");
+      num.className = "day__num";
+      num.textContent = day;
+      cell.appendChild(num);
+      cell.appendChild(crossSvg(day));
+      if (day === DEADLINE) {
+        cell.classList.add("day--deadline");
+        var ring = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        ring.setAttribute("class", "ring");
+        ring.setAttribute("viewBox", "0 0 100 100");
+        ring.setAttribute("preserveAspectRatio", "none");
+        var e = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+        e.setAttribute("cx", "34"); e.setAttribute("cy", "33");
+        e.setAttribute("rx", "34"); e.setAttribute("ry", "28");
+        ring.appendChild(e);
+        cell.appendChild(ring);
+        var tag = document.createElement("div");
+        tag.className = "deadline-tag";
+        tag.textContent = "APPEAL DUE";
+        cell.appendChild(tag);
+      }
+      grid.appendChild(cell);
+    }
+  }
+
+  function reset() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    running = false;
+    buildGrid();
+    calendar.classList.remove("ghost");
+    dim.classList.add("on");
+    stamp.classList.add("hold");
+    stamp.classList.remove("fall");
+    postmark.classList.remove("on");
+    counter.classList.remove("out");
+    money.classList.remove("on");
+    mark21ja.classList.remove("approved");
+    mark21jb.classList.remove("approved");
+    row22a.classList.remove("faded");
+    row22b.classList.remove("faded");
+    pillDenied.classList.remove("out");
+    pillApproved.classList.remove("on");
+    fineOld.classList.remove("out");
+    fineNew.classList.remove("on");
+    finalScreen.classList.remove("on");
+    line1.classList.remove("on");
+    line2.classList.remove("on");
+    linkCard.classList.remove("on");
+    armHint();
+  }
+
+  function at(ms, fn) { timers.push(setTimeout(fn, ms / SPEED)); }
+
+  function play() {
+    if (running) return;
+    running = true;
+    clearTimeout(hintTimer);
+    hint.classList.add("off");
+
+    // The reversal decelerates: gaps between beats widen as calm returns.
+    at(900, function () {            // the panic object is displaced by the action she took
+      stamp.classList.add("fall");
+      dim.classList.remove("on");
+      calendar.classList.add("ghost");
+      counter.classList.add("out");
+    });
+    at(1300, function () { postmark.classList.add("on"); });
+    at(2700, function () { mark21ja.classList.add("approved"); });
+    at(3800, function () { mark21jb.classList.add("approved"); });
+    at(5200, function () { pillDenied.classList.add("out"); });
+    at(5500, function () { pillApproved.classList.add("on"); });
+    at(6900, function () {
+      row22a.classList.add("faded");
+      row22b.classList.add("faded");
+      fineOld.classList.add("out");
+      fineNew.classList.add("on");
+    });
+    at(8500, function () { money.classList.add("on"); });
+
+    // Hand-off to the close: scale claim, then the link card. Hold for the VO.
+    at(12800, function () { finalScreen.classList.add("on"); });
+    at(13900, function () { line1.classList.add("on"); });
+    at(14700, function () { line2.classList.add("on"); });
+    at(16000, function () { linkCard.classList.add("on"); });
+  }
+
+  document.addEventListener("keydown", function (ev) {
+    if (ev.code === "Space") { ev.preventDefault(); play(); }
+    if (ev.key === "r" || ev.key === "R") reset();
+  });
+
+  reset();
+</script>
+</body>
+</html>

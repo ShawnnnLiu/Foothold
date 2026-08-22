@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Foothold demo video - countdown cold open</title>
+<!--
+  Video production asset only. Not part of the product build.
+  Open in Chrome, go fullscreen, press SPACE to play, R to reset.
+  Optional: ?speed=0.8 slows everything down, ?speed=1.25 speeds it up.
+  Optional: ?mute=1 disables the stamp sounds for silent takes.
+  All timings are fixed constants and the audio is synthesized from a fixed
+  seed, so every take is identical in both picture and sound.
+-->
+<link rel="stylesheet" href="fonts.css" />
+<style>
+  :root {
+    --chalk: #F3F1EC;
+    --slate: #272B31;
+    --slate-deep: #16191d;
+    --hold-teal: #0E8A6D;
+    --hold-amber: #D97706;
+    --hold-red: #B3372E;
+    --radius: 4px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--slate);
+    color: var(--chalk);
+    font-family: "Archivo", "Helvetica Neue", Arial, sans-serif;
+    overflow: hidden;
+    cursor: none;
+  }
+
+  body.shake { animation: shake 0.22s linear 1; }
+  @keyframes shake {
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(-5px, 3px); }
+    50%  { transform: translate(4px, -3px); }
+    75%  { transform: translate(-2px, 2px); }
+    100% { transform: translate(0, 0); }
+  }
+
+  .stage {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 72px;
+    padding: 48px;
+  }
+
+  /* ---------- left column: the denial + the counter ---------- */
+
+  /* Fixed width (not max-width) so this frame is geometry-identical to
+     countdown-resolution.html, which opens on this file's final frame. */
+  .left {
+    display: flex;
+    flex-direction: column;
+    gap: 44px;
+    width: 460px;
+  }
+
+  .denial {
+    background: var(--chalk);
+    color: var(--slate);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    box-shadow: 6px 6px 0 var(--slate-deep);
+    padding: 22px 26px 24px;
+  }
+
+  .denial__overline {
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    opacity: 0.55;
+    margin-bottom: 10px;
+  }
+
+  .denial__row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(39, 43, 49, 0.14);
+  }
+
+  .denial__code {
+    font-weight: 800;
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .denial__title {
+    flex: 1;
+    font-weight: 400;
+    font-size: 13px;
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* The grade is the emotional payload of the card ("A" next to a red denial):
+     bold, full opacity, ringed in teal like a teacher's mark. */
+  .denial__grade {
+    position: relative;
+    font-weight: 800;
+    font-size: 15px;
+    padding: 0 4px;
+  }
+
+  .denial__grade svg {
+    position: absolute;
+    inset: -5px -7px;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .denial__grade ellipse {
+    fill: none;
+    stroke: var(--hold-teal);
+    stroke-width: 3.4;
+    stroke-linecap: round;
+  }
+
+  .denial__x {
+    color: var(--hold-red);
+    font-weight: 900;
+    font-size: 15px;
+  }
+
+  .denial__verdict {
+    display: inline-block;
+    margin-top: 14px;
+    background: var(--hold-red);
+    color: var(--chalk);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    padding: 6px 12px;
+  }
+
+  .denial__fine {
+    margin-top: 14px;
+    font-size: 13px;
+    font-weight: 400;
+    opacity: 0.65;
+    border-top: 1px solid rgba(39, 43, 49, 0.25);
+    padding-top: 10px;
+  }
+
+  .counter { user-select: none; }
+
+  .counter__label {
+    font-weight: 800;
+    font-size: 16px;
+    letter-spacing: 0.22em;
+    opacity: 0.7;
+    margin-bottom: 4px;
+  }
+
+  .counter__num {
+    font-weight: 900;
+    font-size: 176px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--chalk);
+    transition: color 0.35s ease;
+    display: inline-block;
+  }
+
+  .counter__num.tick { animation: tick 0.28s ease-out 1; }
+  @keyframes tick {
+    0% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  .counter--amber .counter__num { color: var(--hold-amber); }
+  .counter--red .counter__num { color: #d4574c; }
+
+  .counter__unit {
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: 0.18em;
+    opacity: 0.7;
+    margin-left: 10px;
+  }
+
+  /* ---------- right column: the calendar ---------- */
+
+  .calendar {
+    background: var(--chalk);
+    color: var(--slate);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    box-shadow: 8px 8px 0 var(--slate-deep);
+    padding: 26px 30px 30px;
+  }
+
+  .calendar__month {
+    font-weight: 900;
+    font-size: 30px;
+    letter-spacing: 0.16em;
+    margin-bottom: 16px;
+  }
+
+  .calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(7, 76px);
+    grid-auto-rows: 76px;
+    gap: 4px;
+  }
+
+  .dow {
+    font-weight: 800;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    opacity: 0.45;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 26px;
+  }
+
+  .day {
+    position: relative;
+    border: 1px solid rgba(39, 43, 49, 0.22);
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: 20px;
+    padding: 6px 0 0 10px;
+  }
+
+  .day--blank { border-color: transparent; }
+
+  .day__num { position: relative; z-index: 1; transition: opacity 0.3s ease; }
+  .day.crossed .day__num { opacity: 0.38; }
+
+  .day svg.cross {
+    position: absolute;
+    inset: 8px;
+    width: calc(100% - 16px);
+    height: calc(100% - 16px);
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .cross path {
+    fill: none;
+    stroke: var(--slate);
+    stroke-linecap: round;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    opacity: 0.85;
+  }
+
+  .day.crossed .cross path { animation: draw 0.16s ease-out forwards; }
+  .day.crossed .cross path:nth-child(2) { animation-delay: 0.11s; }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  /* deadline cell */
+  .day--deadline .day__num { font-weight: 800; }
+
+  .day--deadline .ring {
+    position: absolute;
+    inset: -6px;
+    overflow: visible;
+    pointer-events: none;
+  }
+
+  .ring ellipse {
+    fill: none;
+    stroke: var(--hold-red);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    transform: rotate(-4deg);
+    transform-origin: center;
+  }
+
+  .deadline-tag {
+    position: absolute;
+    top: -34px;
+    left: 50%;
+    transform: translateX(-50%) rotate(-2deg);
+    background: var(--hold-red);
+    color: var(--chalk);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    padding: 4px 9px;
+    white-space: nowrap;
+  }
+
+  /* ---------- finale ---------- */
+
+  .dim {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: var(--slate-deep);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .dim.on { opacity: 0.45; }
+
+  .stamp {
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 26px;
+    pointer-events: none;
+    visibility: hidden;
+  }
+  .stamp.on { visibility: visible; }
+
+  .stamp__tile {
+    background: var(--hold-red);
+    color: var(--chalk);
+    border: 3px solid var(--slate-deep);
+    border-radius: var(--radius);
+    box-shadow: 10px 10px 0 var(--slate-deep);
+    font-weight: 900;
+    font-size: 88px;
+    letter-spacing: 0.06em;
+    padding: 26px 54px 30px;
+    transform: rotate(-3deg);
+  }
+
+  .stamp.on .stamp__tile { animation: slam 0.3s cubic-bezier(0.18, 1.3, 0.3, 1) both; }
+  @keyframes slam {
+    from { transform: rotate(-3deg) scale(1.9); opacity: 0; }
+    to   { transform: rotate(-3deg) scale(1); opacity: 1; }
+  }
+
+  .stamp__sub {
+    background: var(--chalk);
+    color: var(--slate);
+    border: 2px solid var(--slate-deep);
+    border-radius: var(--radius);
+    box-shadow: 5px 5px 0 var(--slate-deep);
+    font-weight: 800;
+    font-size: 26px;
+    letter-spacing: 0.14em;
+    padding: 10px 22px 12px;
+    opacity: 0;
+  }
+
+  .stamp__sub.on { animation: rise 0.4s ease-out forwards; }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---------- operator hint (never recorded: fades on start) ---------- */
+
+  .hint {
+    position: fixed;
+    bottom: 26px;
+    z-index: 30;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(22, 25, 29, 0.85);
+    color: var(--chalk);
+    border-radius: 999px;
+    font-weight: 500;
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    padding: 8px 18px;
+    opacity: 0.85;
+    transition: opacity 0.3s ease;
+  }
+  .hint.off { opacity: 0; }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <div class="left">
+      <div class="denial">
+        <div class="denial__overline">TRANSFER CREDIT EVALUATION</div>
+        <div class="denial__row">
+          <span class="denial__code">CIS 22A</span>
+          <span class="denial__title">C++ Programming</span>
+          <span class="denial__grade">A<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="50" cy="52" rx="46" ry="40" transform="rotate(-5 50 50)"/></svg></span>
+          <span class="denial__x">&#10005;</span>
+        </div>
+        <div class="denial__row">
+          <span class="denial__code">CIS 22B</span>
+          <span class="denial__title">Intermediate C++</span>
+          <span class="denial__grade">A<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="48" cy="50" rx="47" ry="38" transform="rotate(4 50 50)"/></svg></span>
+          <span class="denial__x">&#10005;</span>
+        </div>
+        <div class="denial__row">
+          <span class="denial__code">CIS 21JA</span>
+          <span class="denial__title">x86 Assembly Language</span>
+          <span class="denial__grade">A<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="51" cy="49" rx="45" ry="41" transform="rotate(-8 50 50)"/></svg></span>
+          <span class="denial__x">&#10005;</span>
+        </div>
+        <div class="denial__row">
+          <span class="denial__code">CIS 21JB</span>
+          <span class="denial__title">Advanced x86 Assembly</span>
+          <span class="denial__grade">A<svg viewBox="0 0 100 100" preserveAspectRatio="none"><ellipse cx="49" cy="51" rx="46" ry="39" transform="rotate(7 50 50)"/></svg></span>
+          <span class="denial__x">&#10005;</span>
+        </div>
+        <div class="denial__verdict">NOT ACCEPTED &middot; 18 UNITS</div>
+        <div class="denial__fine">Appeals must be received in writing by September&nbsp;25.</div>
+      </div>
+      <div class="counter" id="counter">
+        <div class="counter__label">DAYS LEFT TO APPEAL</div>
+        <span class="counter__num" id="counterNum">21</span><span class="counter__unit" id="counterUnit">DAYS</span>
+      </div>
+    </div>
+
+    <div class="calendar">
+      <div class="calendar__month">SEPTEMBER</div>
+      <div class="calendar__grid" id="grid"></div>
+    </div>
+  </div>
+
+  <div class="dim" id="dim"></div>
+
+  <div class="stamp" id="stamp">
+    <div class="stamp__tile">1 DAY LEFT</div>
+    <div class="stamp__sub" id="stampSub">$15,686 ON THE LINE</div>
+  </div>
+
+  <div class="hint" id="hint">SPACE&nbsp;&nbsp;play&nbsp;&nbsp;&middot;&nbsp;&nbsp;R&nbsp;&nbsp;reset&nbsp;&nbsp;&middot;&nbsp;&nbsp;?speed=0.8&nbsp;&nbsp;slower</div>
+
+<script>
+  // September 2026: 30 days, the 1st falls on a Tuesday.
+  // Deadline on Friday the 25th (real appeal deadlines fall on business days).
+  var DAYS_IN_MONTH = 30;
+  var FIRST_WEEKDAY = 2;          // 0 = Sunday
+  var DEADLINE = 25;
+  var PRE_CROSSED_THROUGH = 5;    // days already gone when the scene opens
+  var FIRST_CROSS = 6;            // first day crossed on camera
+  var LAST_CROSS = DEADLINE - 1;  // the clock stops at 1 day left, never 0
+
+  var SPEED = parseFloat(new URLSearchParams(location.search).get("speed") || "1");
+  if (!(SPEED > 0)) SPEED = 1;
+  var MUTED = new URLSearchParams(location.search).get("mute") === "1";
+
+  var grid = document.getElementById("grid");
+  var counter = document.getElementById("counter");
+  var counterNum = document.getElementById("counterNum");
+  var counterUnit = document.getElementById("counterUnit");
+  var dim = document.getElementById("dim");
+  var stamp = document.getElementById("stamp");
+  var stampSub = document.getElementById("stampSub");
+  var hint = document.getElementById("hint");
+
+  var dayCells = {};
+  var timers = [];
+  var running = false;
+  var hintTimer = null;
+
+  // ---------- stamp sound (synthesized, no audio assets) ----------
+  // A short felt-pad "thwack" (lowpass-filtered noise burst) over a sine
+  // thump with a fast pitch drop. The noise buffer comes from a seeded LCG,
+  // not Math.random, so takes are identical in sound as well as picture.
+  var audioCtx = null;
+  var master = null;
+  var noiseBuffer = null;
+
+  function ensureAudio() {
+    if (MUTED) return;
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      master = audioCtx.createGain();
+      master.gain.value = 0.8;
+      master.connect(audioCtx.destination);
+      var len = Math.floor(audioCtx.sampleRate * 0.1);
+      noiseBuffer = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+      var data = noiseBuffer.getChannelData(0);
+      var seed = 1234567;
+      for (var i = 0; i < len; i++) {
+        seed = (seed * 48271) % 2147483647;
+        data[i] = (seed / 2147483647) * 2 - 1;
+      }
+    }
+    if (audioCtx.state === "suspended") audioCtx.resume();
+  }
+
+  function stampThud(day) {
+    if (!audioCtx || MUTED) return;
+    // Same per-day jitter formula as crossSvg, so each X keeps one voice.
+    var j = function (k, span) { return (((day * 53 + k * 17) % 100) / 100 - 0.5) * span; };
+    var t0 = audioCtx.currentTime;
+
+    var noise = audioCtx.createBufferSource();
+    noise.buffer = noiseBuffer;
+    var lp = audioCtx.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 820 + j(3, 240);
+    var ng = audioCtx.createGain();
+    ng.gain.setValueAtTime(0.5, t0);
+    ng.gain.exponentialRampToValueAtTime(0.001, t0 + 0.07);
+    noise.connect(lp); lp.connect(ng); ng.connect(master);
+    noise.start(t0); noise.stop(t0 + 0.08);
+
+    var osc = audioCtx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(170 + j(5, 40), t0);
+    osc.frequency.exponentialRampToValueAtTime(52, t0 + 0.1);
+    var og = audioCtx.createGain();
+    og.gain.setValueAtTime(0.9, t0);
+    og.gain.exponentialRampToValueAtTime(0.001, t0 + 0.13);
+    osc.connect(og); og.connect(master);
+    osc.start(t0); osc.stop(t0 + 0.14);
+  }
+
+  // Operator hint fades on its own after 5s (real time, not speed-scaled),
+  // so idle head frames are clean even before SPACE is pressed.
+  function armHint() {
+    clearTimeout(hintTimer);
+    hint.classList.remove("off");
+    hintTimer = setTimeout(function () { hint.classList.add("off"); }, 5000);
+  }
+
+  function crossSvg(day) {
+    // Deterministic per-day jitter so the X marks read hand-drawn but every take is identical.
+    // Keep this function byte-identical to the one in countdown-resolution.html.
+    var j = function (k, span) { return (((day * 53 + k * 17) % 100) / 100 - 0.5) * span; };
+    var NS = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("class", "cross");
+    svg.setAttribute("viewBox", "0 0 100 100");
+    svg.setAttribute("preserveAspectRatio", "none");
+    // Each stroke is a bowed quadratic curve that overshoots the cell edges,
+    // with its own pen weight: a fast, careless strike rather than a ruled line.
+    var stroke = function (x1, y1, x2, y2, seed) {
+      var dx = x2 - x1, dy = y2 - y1;
+      var len = Math.sqrt(dx * dx + dy * dy);
+      var bow = j(seed, 30);
+      var cx = (x1 + x2) / 2 - (dy / len) * bow;
+      var cy = (y1 + y2) / 2 + (dx / len) * bow;
+      var p = document.createElementNS(NS, "path");
+      p.setAttribute("d", "M" + x1.toFixed(1) + " " + y1.toFixed(1) +
+        " Q" + cx.toFixed(1) + " " + cy.toFixed(1) +
+        " " + x2.toFixed(1) + " " + y2.toFixed(1));
+      p.setAttribute("pathLength", "1");
+      p.style.strokeWidth = (4.2 + j(seed + 1, 2.6)).toFixed(2);
+      return p;
+    };
+    svg.appendChild(stroke(1 + j(1, 18), 3 + j(2, 18), 99 + j(3, 18), 97 + j(4, 18), 11));
+    svg.appendChild(stroke(98 + j(5, 18), 2 + j(6, 18), 2 + j(7, 18), 98 + j(8, 18), 27));
+    return svg;
+  }
+
+  function buildGrid() {
+    grid.innerHTML = "";
+    dayCells = {};
+    ["S", "M", "T", "W", "T", "F", "S"].forEach(function (d) {
+      var el = document.createElement("div");
+      el.className = "dow";
+      el.textContent = d;
+      grid.appendChild(el);
+    });
+    for (var b = 0; b < FIRST_WEEKDAY; b++) {
+      var blank = document.createElement("div");
+      blank.className = "day day--blank";
+      grid.appendChild(blank);
+    }
+    for (var day = 1; day <= DAYS_IN_MONTH; day++) {
+      var cell = document.createElement("div");
+      cell.className = "day";
+      var num = document.createElement("span");
+      num.className = "day__num";
+      num.textContent = day;
+      cell.appendChild(num);
+      cell.appendChild(crossSvg(day));
+      if (day === DEADLINE) {
+        cell.classList.add("day--deadline");
+        var ring = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        ring.setAttribute("class", "ring");
+        ring.setAttribute("viewBox", "0 0 100 100");
+        ring.setAttribute("preserveAspectRatio", "none");
+        var e = document.createElementNS("http://www.w3.org/2000/svg", "ellipse");
+        e.setAttribute("cx", "34"); e.setAttribute("cy", "33");
+        e.setAttribute("rx", "34"); e.setAttribute("ry", "28");
+        ring.appendChild(e);
+        cell.appendChild(ring);
+        var tag = document.createElement("div");
+        tag.className = "deadline-tag";
+        tag.textContent = "APPEAL DUE";
+        cell.appendChild(tag);
+      }
+      grid.appendChild(cell);
+      dayCells[day] = cell;
+    }
+  }
+
+  function setCounter(daysLeft) {
+    counterNum.textContent = daysLeft;
+    counterUnit.textContent = daysLeft === 1 ? "DAY" : "DAYS";
+    counterNum.classList.remove("tick");
+    void counterNum.offsetWidth; // restart the pop animation
+    counterNum.classList.add("tick");
+    // Wider color windows so the escalation reads as phases, not flickers,
+    // even at the accelerated crossing pace near the end.
+    counter.classList.toggle("counter--amber", daysLeft <= 10 && daysLeft > 5);
+    counter.classList.toggle("counter--red", daysLeft <= 5);
+  }
+
+  function reset() {
+    timers.forEach(clearTimeout);
+    timers = [];
+    running = false;
+    buildGrid();
+    for (var d = 1; d <= PRE_CROSSED_THROUGH; d++) dayCells[d].classList.add("crossed");
+    counterNum.textContent = DEADLINE - PRE_CROSSED_THROUGH;
+    counterUnit.textContent = "DAYS";
+    counter.classList.remove("counter--amber", "counter--red");
+    counterNum.classList.remove("tick");
+    dim.classList.remove("on");
+    stamp.classList.remove("on");
+    stampSub.classList.remove("on");
+    armHint();
+  }
+
+  function play() {
+    if (running) return;
+    running = true;
+    clearTimeout(hintTimer);
+    hint.classList.add("off");
+    ensureAudio(); // created here: SPACE is the user gesture Chrome requires
+
+    var t = 900 / SPEED; // breath before the first cross
+    var total = LAST_CROSS - FIRST_CROSS; // index of the final cross
+
+    for (var i = 0; i <= total; i++) {
+      (function (i) {
+        var day = FIRST_CROSS + i;
+        timers.push(setTimeout(function () {
+          dayCells[day].classList.add("crossed");
+          stampThud(day);
+        }, t));
+        timers.push(setTimeout(function () {
+          setCounter(DEADLINE - day);
+        }, t + 170 / SPEED));
+      })(i);
+      // Slow start, accelerating toward the deadline.
+      t += (950 - 650 * Math.pow(i / total, 1.6)) / SPEED;
+    }
+
+    // Finale: dim, slam, shake, then the money line. The calendar never reaches zero.
+    timers.push(setTimeout(function () { dim.classList.add("on"); }, t + 500 / SPEED));
+    timers.push(setTimeout(function () {
+      stamp.classList.add("on");
+      document.body.classList.add("shake");
+      timers.push(setTimeout(function () { document.body.classList.remove("shake"); }, 260));
+    }, t + 700 / SPEED));
+    timers.push(setTimeout(function () { stampSub.classList.add("on"); }, t + 1500 / SPEED));
+  }
+
+  document.addEventListener("keydown", function (ev) {
+    if (ev.code === "Space") { ev.preventDefault(); play(); }
+    if (ev.key === "r" || ev.key === "R") reset();
+  });
+
+  reset();
+</script>
+</body>
+</html>

@@ -20,6 +20,7 @@ const DEMO_MAJOR_CITATION = (position: number): Citation => ({
 });
 
 export const NAV_LINKS = [
+  { label: "Demo", href: "#demo" },
   { label: "Method", href: "#method" },
   { label: "Petitions", href: "#petitions" },
   { label: "Savings", href: "#savings" },
@@ -126,6 +127,21 @@ export const PROOF = {
     "Pasadena City",
     "Ohlone College",
   ],
+} as const;
+
+// The contest demo video, embedded through YouTube's privacy-enhanced
+// player (no cookies until playback starts). embedUrl is an identifier,
+// not display copy; embedTitle is the iframe's accessible name.
+export const DEMO_VIDEO_ID = "Jop91D81H2c";
+
+export const DEMO_SECTION = {
+  kicker: "Two-minute demo",
+  headline: "Watch a real check, start to finish.",
+  body:
+    "Route picked, courses entered, every verdict cited, and a petition letter drafted - " +
+    "the whole flow, exactly as you'll use it.",
+  embedUrl: `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0`,
+  embedTitle: "Foothold demo video",
 } as const;
 
 export const CITATIONS_SECTION = {

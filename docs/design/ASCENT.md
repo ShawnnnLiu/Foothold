@@ -138,6 +138,14 @@ The export predates the plain-language pass, so its copy is superseded by `PLAIN
 - The stat-band wall's within-reach steps use the shipped chalk-fill, amber-border treatment (frontend doc-00 rule 3), not the export's chrome gradient, matching every other wall.
 - The scroll fade-in and the hero's Evergreen gradient drift are fixed IntersectionObserver/CSS-keyframe behavior - deterministic, no PRNG - and are disabled under `prefers-reduced-motion`.
 
+Demo video amendment (2026-08-21), user-requested:
+
+- A "Two-minute demo" section sits between the social-proof strip and the Citations feature, embedding the contest demo video through YouTube's privacy-enhanced `youtube-nocookie.com` player in the mockup's frame treatment (14px radius, soft blur shadow, slate ground while the lazy iframe loads).
+  A "Demo" nav link precedes Method; the footer inherits it through the shared link list.
+- Considered and rejected the same day: segmented scrolling (each wheel gesture landing exactly on the next section top).
+  Built, then removed at the user's direction - the per-gesture animation buffer made scrolling feel laggy.
+  The page scrolls natively.
+
 ## Citations
 
 Every finding's citation (agreement key, articulation position, year) is always rendered, per the citation axiom in `CLAUDE.md`.
