@@ -138,8 +138,9 @@ export const DEMO_SECTION = {
   kicker: "Two-minute demo",
   headline: "Watch a real check, start to finish.",
   body:
-    "Route picked, courses entered, every verdict cited, and a petition letter drafted - " +
-    "the whole flow, exactly as you'll use it.",
+    "You watch a route get picked, courses go in, and every verdict come back with the " +
+    "line it stands on. The flags turn into a petition letter near the end, which is the " +
+    "part worth staying for.",
   embedUrl: `https://www.youtube-nocookie.com/embed/${DEMO_VIDEO_ID}?rel=0`,
   embedTitle: "Foothold demo video",
 } as const;
@@ -148,8 +149,9 @@ export const CITATIONS_SECTION = {
   kicker: "Citations",
   headline: "Every verdict shows its receipt.",
   body:
-    "No black box. Each card cites the agreement year and the exact agreement line it came " +
-    "from, so you - and your counselor - can check Foothold's work against the source.",
+    "Each card names the agreement year and the exact line its verdict came from. Take it " +
+    "to your counselor. And if Foothold ever gets one wrong, the citation is how you catch " +
+    "it.",
   link: "See a verdict card →",
   card: {
     code: "MATH 22",
@@ -174,9 +176,10 @@ export const METHOD_SECTION = {
   kicker: "Method",
   headline: "The agreement decides - not the AI.",
   body:
-    "Foothold checks your courses against the official transfer agreement, line by line. " +
-    "Language models help read messy transcripts; they never rule on your credits. Every " +
-    "outcome is reproducible from the source agreement.",
+    "Foothold checks your courses against the official transfer agreement for your route, " +
+    "line by line. An AI helps read a messy pasted transcript, and that is all it is " +
+    "allowed to do. The verdicts come from the agreement itself, so the same check gives " +
+    "the same answer every time.",
   // The evaluation theater's four check lines (lib/evaluation.ts
   // theaterLines) with the demo route's counts; the third is the amber flag.
   steps: [
@@ -192,15 +195,14 @@ export const PETITIONS_SECTION = {
   kicker: "Petitions",
   headline: "Flags become appeals in one click.",
   body:
-    "Check the flags you want to fight and Foothold drafts a petition letter grounded in the " +
-    "agreement - every claim cited to its agreement line, ready to send to the admissions " +
-    "office.",
+    "Check off the flags worth fighting and Foothold drafts the petition letter. Every " +
+    "claim in it cites its agreement line, so the admissions office can look each one up.",
   link: "Draft a letter →",
   flags: [
     { code: "MATH 1B", title: "Calculus II", reasonCode: "advisement_note" },
     { code: "MATH 22", title: "Discrete Mathematics", reasonCode: "stale_year" },
   ] as { code: string; title: string; reasonCode: EvaluationFindingCode }[],
-  draftHeader: `Draft - grounded in the ${DEMO_YEAR} agreement`,
+  draftHeader: `Draft - cited to the ${DEMO_YEAR} agreement`,
   copyButton: "Copy letter",
 } as const;
 
@@ -240,8 +242,9 @@ export const STAKES_SECTION = {
   stat: "43%",
   headline: "of credits are lost by the average transfer student.",
   body:
-    "U.S. Government Accountability Office, GAO-17-574. At California tuition rates, that's " +
-    "semesters of work - and thousands of dollars - evaporating in the transfer.",
+    "That figure comes from the U.S. Government Accountability Office, report GAO-17-574, " +
+    "and it has been sitting there since 2017. At California tuition rates it means whole " +
+    "semesters of work, paid for twice.",
   wallTitle: "THE WALL - YOUR ROUTE, UNIT BY UNIT",
   captionTop: `${STAKES_CAPTION[0]} before the check.`,
   captionBottom: `${STAKES_CAPTION[1]} - if you fight the flags.`,
@@ -263,8 +266,9 @@ export const SAVINGS_SECTION = {
   kicker: "Save money",
   headline: "Finish the route for less.",
   body:
-    "Foothold finds courses still open at your community college that count toward your " +
-    "target degree - ranked by tuition saved, each with its citation.",
+    "Foothold also runs the check in reverse: courses still open at your community college " +
+    "that count toward the degree you're aiming at, ranked by the tuition they'd save you. " +
+    "Each one carries its citation, like everything else here.",
   cards: [
     {
       rank: "#1",
@@ -291,8 +295,8 @@ export const SAVINGS_SECTION = {
 export const FINAL_CTA = {
   headline: "Know before you apply.",
   body:
-    "Pick your route, paste your transcript, and see every verdict - with its receipt - in " +
-    "under a minute.",
+    "Pick your route, paste your transcript, and every verdict comes back with its " +
+    "receipt. Under a minute, usually.",
   cta: "Check my credits →",
   finePrint: `Free · Every California community college · Agreement year ${DEMO_YEAR}`,
 } as const;
