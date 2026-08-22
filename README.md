@@ -2,9 +2,9 @@
 
 **Foothold reads the transfer rules so students don't lose the credits they already paid for.**
 
-Live app: **[foothold-transfer.com](https://foothold-transfer.com)** · Demo video: _link goes here before submission_
+Live app: **[foothold-transfer.com](https://foothold-transfer.com)** · Demo video: **[watch on YouTube](https://www.youtube.com/watch?v=Jop91D81H2c)**
 
-Built solo for the [Stellic Pathfinders challenge](https://www.stellic.com/pathfinders), category **Overcoming Obstacles**.
+Built solo by [Xiangjian (Shawn) Liu](https://shawnnnliu.github.io/) for the [Stellic Pathfinders challenge](https://www.stellic.com/pathfinders), category **Overcoming Obstacles**.
 Every line in this repository was written inside the submission window (Jul 20 - Aug 21, 2026).
 
 ## The problem
