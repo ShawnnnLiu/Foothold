@@ -1,6 +1,10 @@
-# Foothold on Fly.io (plan "Deployment"): a single always-on machine so the
-# demo never cold-starts, sessions.db on the /data volume, ANTHROPIC_API_KEY
-# as the only secret (set via `fly secrets set`, never here).
+# Foothold on Fly.io (plan "Deployment"): a single machine that Fly suspends
+# when idle and resumes on the next request (post-contest cost cut, 2026-09-23;
+# resume is ~1s and sessions.db survives it), sessions.db on the /data volume,
+# ANTHROPIC_API_KEY as the only secret (set via `fly secrets set`, never here).
+# ONE machine is load-bearing: sessions.db is per-machine, so a second
+# machine (fly deploy's HA default) round-robins sessions into 404s.
+# Deploy with `make deploy` (fly deploy --ha=false), never bare `fly deploy`.
 app = "foothold"
 primary_region = "sjc"
 
@@ -15,9 +19,9 @@ primary_region = "sjc"
 [http_service]
   internal_port = 8000
   force_https = true
-  auto_stop_machines = "off"
+  auto_stop_machines = "suspend"
   auto_start_machines = true
-  min_machines_running = 1
+  min_machines_running = 0
 
   [[http_service.checks]]
     interval = "30s"
@@ -28,4 +32,4 @@ primary_region = "sjc"
 
 [[vm]]
   size = "shared-cpu-1x"
-  memory = "1gb"
+  memory = "256mb"
