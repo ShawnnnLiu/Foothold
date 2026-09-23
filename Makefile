@@ -1,4 +1,4 @@
-.PHONY: test lint typecheck schema-check fixtures-check check build-data build-check unpack-data run
+.PHONY: test lint typecheck schema-check fixtures-check check build-data build-check unpack-data run deploy
 
 # The dev server over the committed artifacts (`make unpack-data` first).
 run:
@@ -44,3 +44,10 @@ build-check:
 # 2 GB raw ASSIST cache.
 unpack-data:
 	cd backend && uv run python scripts/build_articulation.py --unpack
+
+# ALWAYS deploy through this target, never bare `fly deploy`: the bare
+# command's HA default creates a second machine with its own volume clone,
+# and per-machine sessions.db copies break every session-scoped lookup with
+# round-robin 404s (incident 2026-08-22).
+deploy:
+	fly deploy --ha=false
